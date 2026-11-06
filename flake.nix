@@ -35,6 +35,7 @@
             export APP_ROOT="${vocab}/share/simple-vocabulary"
             export WEB_DIR="$APP_ROOT/web"
             export DICT_PATH="$APP_ROOT/data/spa-deu.json"
+            export CONJ_PATH="$APP_ROOT/data/spa-conj.json"
             exec ${vocab}/bin/server "$@"
           ''}";
         };
@@ -59,6 +60,7 @@
             export APP_ROOT="$PWD"
             export WEB_DIR="$PWD/web"
             export DICT_PATH="$PWD/data/spa-deu.json"
+            export CONJ_PATH="$PWD/data/spa-conj.json"
             export PORT="''${PORT:-8080}"
             echo "simple-vocabulary dev shell"
             echo "  go run ./cmd/server          # http://localhost:$PORT"

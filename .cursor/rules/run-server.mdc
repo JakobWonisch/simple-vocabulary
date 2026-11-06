@@ -1,0 +1,10 @@
+---
+description: The user runs the app server; never start one
+alwaysApply: true
+---
+
+# Server
+
+Do not start, restart, or stop the app server. The user always runs it themselves (`go run ./cmd/server`, usually http://localhost:8080).
+
+For a browser check, use the server they already have running. If none is up, ask them to start it. Do not launch `go run`, `nix develop`, a static file server, or any other substitute.

@@ -8,12 +8,14 @@ import (
 
 	"github.com/jakob/simple-vocabulary/internal/ai"
 	"github.com/jakob/simple-vocabulary/internal/api"
+	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
 )
 
 func main() {
 	root := findRoot()
 	dictPath := envOr("DICT_PATH", filepath.Join(root, "data", "spa-deu.json"))
+	conjPath := envOr("CONJ_PATH", filepath.Join(root, "data", "spa-conj.json"))
 	webDir := envOr("WEB_DIR", filepath.Join(root, "web"))
 
 	dict, err := dictionary.LoadJSON(dictPath)
@@ -21,6 +23,12 @@ func main() {
 		log.Fatalf("load dictionary: %v", err)
 	}
 	log.Printf("dictionary loaded: %d entries (%s→%s)", dict.Size(), dict.SourceLang, dict.TargetLang)
+
+	conj, err := conjugation.LoadJSON(conjPath)
+	if err != nil {
+		log.Fatalf("load conjugations: %v", err)
+	}
+	log.Printf("conjugations loaded: %d verbs", conj.Size())
 
 	var provider ai.Provider
 	if or, err := ai.NewOpenRouterFromEnv(); err != nil {
@@ -31,6 +39,7 @@ func main() {
 	}
 
 	srv := api.New(dict, provider, webDir)
+	srv.Conj = conj
 	addr := api.AddrFromEnv()
 	log.Printf("listening on %s (web: %s)", addr, webDir)
 	if err := http.ListenAndServe(addr, srv.Handler()); err != nil {

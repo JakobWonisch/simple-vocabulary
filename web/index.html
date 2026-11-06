@@ -14,6 +14,24 @@
   <header class="top">
     <a class="brand" href="#/" data-link>Simple Vocabulary</a>
     <div class="top-actions" id="top-actions">
+      <button type="button" class="icon-btn" id="info-btn" aria-label="Info" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-pop">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v6" />
+          <path d="M12 8h.01" />
+        </svg>
+      </button>
+      <div class="settings-pop info-pop" id="info-pop" role="dialog" aria-labelledby="info-title" hidden>
+        <p class="settings-title" id="info-title">Info</p>
+        <p>Auf dieser Seite kannst du spanische Vokabeln und Konjugationen lernen. Um interessante Wörter zu finden verwenden wir ein KI Modell. Die endgültigen Wörter und Definitionen kommen aus einem herkömmlichen Wörterbuch.</p>
+        <h2>Sammlungen</h2>
+        <p>Um eine neue Sammlung zu erstellen, nennst du ein Thema. Eine KI schlägt spanische Wörter vor, und übernommen werden nur die, die im eingebauten Wörterbuch stehen. Die deutschen Bedeutungen kommen aus diesem Wörterbuch.</p>
+        <h2>Lernen</h2>
+        <p>Wörter werden zufällig ausgewählt. Ein Wort, das du gerade gesehen hast, kommt danach mit höherer Wahrscheinlichkeit wieder, um es gleich zu festigen. Je öfter du ein Wort gesehen hast, desto seltener wird es wiederholt.</p>
+        <h2>Vokabeln und Konjugation</h2>
+        <p>Vokabeln sind Karteikarten: ein Wort, dann die Übersetzung. Die Richtung (Deutsch zu Spanisch oder Spanisch zu Deutsch) stellst du in den Einstellungen auf der Übungsseite ein.</p>
+        <p>Konjugation sammelt Verben zum Thema. Du übst die Formen zu Modus und Zeit, in fester oder zufälliger Reihenfolge.</p>
+       </div>
       <button type="button" class="icon-btn" id="settings-btn" aria-label="Einstellungen" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-pop">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3" />
@@ -22,7 +40,7 @@
       </button>
       <div class="settings-pop" id="settings-pop" role="dialog" aria-labelledby="settings-title" hidden>
         <p class="settings-title" id="settings-title">Einstellungen</p>
-        <fieldset>
+        <fieldset id="settings-direction" hidden>
           <legend>Fragerichtung</legend>
           <label>
             <input type="radio" name="direction" value="es-de" />
@@ -33,43 +51,96 @@
             <span class="dir-option">DE<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>ES</span>
           </label>
         </fieldset>
+        <fieldset id="settings-conj" hidden>
+          <legend>Konjugation</legend>
+          <label class="settings-field">
+            <span>Modus</span>
+            <select id="conj-mode">
+              <option value="ind">Indikativ</option>
+              <option value="sbjv">Subjuntivo</option>
+              <option value="imp">Imperativ</option>
+              <option value="ger">Gerundium</option>
+            </select>
+          </label>
+          <label class="settings-field" id="settings-tense">
+            <span>Zeit</span>
+            <select id="conj-tense"></select>
+          </label>
+          <fieldset class="order-set">
+            <legend>Reihenfolge</legend>
+            <label>
+              <input type="radio" name="conj-order" value="default" checked />
+              <span>Standard</span>
+            </label>
+            <label>
+              <input type="radio" name="conj-order" value="random" />
+              <span>Zufällig</span>
+            </label>
+          </fieldset>
+        </fieldset>
+        <div class="settings-io">
+          <button type="button" class="btn ghost" id="btn-export">Exportieren</button>
+          <label class="btn ghost file-btn">
+            Importieren
+            <input type="file" id="btn-import" accept="application/json,.json" hidden />
+          </label>
+        </div>
       </div>
     </div>
+    <p class="snackbar" id="snackbar" role="status" aria-live="polite" hidden></p>
   </header>
 
   <main id="app"></main>
 
   <template id="tpl-home">
     <section class="view home">
-      <div class="home-head">
-        <h1>Deine Sammlungen</h1>
-        <p class="lede">Lokale Karteikarten mit verteilter Wiederholung. Jederzeit exportierbar.</p>
+      <div class="home-tabs" role="tablist" aria-label="Sammlungsart">
+        <button type="button" class="home-tab" id="tab-vocab" role="tab" aria-selected="true" aria-controls="panel-vocab">Vokabeln</button>
+        <button type="button" class="home-tab" id="tab-conj" role="tab" aria-selected="false" aria-controls="panel-conj" tabindex="-1">Konjugation</button>
       </div>
-      <div class="toolbar">
-        <a class="btn primary" href="#/new" data-link>Neue Sammlung</a>
-        <button type="button" class="btn ghost" id="btn-export">Exportieren</button>
-        <label class="btn ghost file-btn">
-          Importieren
-          <input type="file" id="btn-import" accept="application/json,.json" hidden />
-        </label>
+      <div class="home-panel" id="panel-vocab" role="tabpanel" aria-labelledby="tab-vocab">
+        <div class="set-scroll">
+          <ul class="set-list" id="set-list-vocab"></ul>
+          <p class="empty" id="empty-vocab" hidden>Noch keine Vokabelsammlungen — erstelle eine zu einem Thema.</p>
+        </div>
+        <div class="home-dock">
+          <a class="btn primary" href="#/new?kind=vocab" data-link>Neue Sammlung</a>
+        </div>
       </div>
-      <ul class="set-list" id="set-list"></ul>
-      <p class="empty" id="empty-sets" hidden>Noch keine Sammlungen — erstelle eine zu einem Thema.</p>
+      <div class="home-panel" id="panel-conj" role="tabpanel" aria-labelledby="tab-conj" hidden>
+        <div class="set-scroll">
+          <ul class="set-list" id="set-list-conj"></ul>
+          <p class="empty" id="empty-conj" hidden>Noch keine Konjugationssammlungen — erstelle eine zu einem Thema.</p>
+        </div>
+        <div class="home-dock">
+          <a class="btn primary" href="#/new?kind=conjugation" data-link>Neue Sammlung</a>
+        </div>
+      </div>
     </section>
   </template>
 
   <template id="tpl-new">
     <section class="view create">
       <a class="back" href="#/" data-link>← Sammlungen</a>
-      <h1>Neue Vokabelsammlung</h1>
-      <p class="lede">Beschreibe ein Thema. Wir erzeugen etwa 50 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.</p>
+      <h1>Neue Sammlung</h1>
+      <p class="lede" id="create-lede">Beschreibe ein Thema. Wir erzeugen etwa 50 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.</p>
       <form id="create-form" class="create-form">
+        <div class="kind-switch" role="radiogroup" aria-label="Art der Sammlung">
+          <label class="kind-option">
+            <input type="radio" name="kind" value="vocab" checked />
+            <span>Vokabeln</span>
+          </label>
+          <label class="kind-option">
+            <input type="radio" name="kind" value="conjugation" />
+            <span>Konjugation</span>
+          </label>
+        </div>
         <label class="field">
           <span>Thema</span>
           <input name="topic" type="text" required maxlength="200" placeholder="z. B. Essen im Restaurant bestellen" autocomplete="off" />
         </label>
         <label class="field inline">
-          <span>Wortanzahl</span>
+          <span id="create-count-label">Wortanzahl</span>
           <input name="count" type="number" min="10" max="100" value="50" />
         </label>
         <button type="submit" class="btn primary" id="create-submit">Sammlung erzeugen</button>
@@ -82,47 +153,104 @@
     <section class="view study">
       <div class="study-bar">
         <a class="back" href="#/" data-link>← Sammlungen</a>
-        <span class="progress" id="study-progress"></span>
+        <div class="study-meta">
+          <h1 class="set-title" id="study-title"></h1>
+          <span class="progress" id="study-progress"></span>
+        </div>
       </div>
-      <h1 class="set-title" id="study-title"></h1>
       <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-live="polite">
         <div class="card-tools">
+          <div class="dict-menu" id="card-dict-menu">
+            <button type="button" class="card-tool dict-lookup" id="card-dict" hidden aria-label="Im Wörterbuch nachschlagen" aria-haspopup="menu" aria-expanded="false" aria-controls="card-dict-pop">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.8.3-1.2.9-1.2 1.6" />
+                <path d="M12 17h.01" />
+              </svg>
+            </button>
+            <div class="dict-pop" id="card-dict-pop" role="menu" hidden>
+              <a role="menuitem" id="card-dict-pons" target="_blank" rel="noopener noreferrer">Eintrag auf PONS anzeigen</a>
+              <a role="menuitem" id="card-dict-leo" target="_blank" rel="noopener noreferrer">Eintrag auf LEO anzeigen</a>
+            </div>
+          </div>
           <button type="button" class="card-tool flip-back" id="card-flip-back" hidden aria-label="Zurück zur Frage">
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               <path d="M3 3v5h5" />
             </svg>
           </button>
-          <button type="button" class="card-tool remove-card" id="card-remove" hidden aria-label="Wort aus der Sammlung entfernen">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="M19 6l-1 14H6L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-            </svg>
-          </button>
         </div>
         <span class="face" id="card-question">
           <span class="prompt-lang" id="card-prompt-lang"></span>
-          <span class="prompt" id="card-prompt"></span>
+          <span class="word-line" id="card-prompt-line">
+            <span class="prompt" id="card-prompt"></span>
+            <button type="button" class="card-tool remove-card" id="card-remove" hidden aria-label="Wort aus der Sammlung entfernen">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+          </span>
         </span>
         <span class="face" id="card-answer-wrap" hidden>
           <span class="answer-lang" id="card-answer-lang"></span>
-          <span class="answer" id="card-answer"></span>
+          <span class="word-line" id="card-answer-line">
+            <span class="answer" id="card-answer"></span>
+          </span>
+          <span class="answer-alts" id="card-answer-alts" hidden>
+            <span class="answer-alts-label" id="card-answer-alts-label"></span>
+            <ul id="card-answer-alts-list"></ul>
+          </span>
         </span>
         <span class="hint" id="card-hint">Antippen zum Aufdecken</span>
       </div>
       <div class="action-dock" id="action-dock">
         <button type="button" class="btn primary show-answer" id="show-answer">Antwort zeigen</button>
-        <div class="grade-row" id="grade-row" hidden>
-          <button type="button" class="btn grade again" data-grade="again" aria-keyshortcuts="1">Nochmal<kbd>1</kbd></button>
-          <button type="button" class="btn grade hard" data-grade="hard" aria-keyshortcuts="2">Schwer<kbd>2</kbd></button>
-          <button type="button" class="btn grade good" data-grade="good" aria-keyshortcuts="3">Gut<kbd>3</kbd></button>
-          <button type="button" class="btn grade easy" data-grade="easy" aria-keyshortcuts="4">Einfach<kbd>4</kbd></button>
-        </div>
+        <button type="button" class="btn primary show-answer" id="next-card" hidden>Weiter</button>
       </div>
       <p class="status" id="study-status"></p>
+    </section>
+  </template>
+
+  <template id="tpl-conj">
+    <section class="view study conj-study">
+      <div class="study-bar">
+        <a class="back" href="#/" data-link>← Sammlungen</a>
+        <div class="study-meta">
+          <h1 class="set-title" id="conj-title"></h1>
+          <span class="progress" id="conj-progress"></span>
+        </div>
+      </div>
+      <div class="conj-head">
+        <p class="conj-focus" id="conj-focus"></p>
+        <button type="button" class="card-tool remove-card" id="conj-remove" hidden aria-label="Verb aus der Sammlung entfernen">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+          </svg>
+        </button>
+      </div>
+      <div class="conj-meanings" id="conj-meanings">
+        <p class="conj-gloss" id="conj-gloss"></p>
+        <div class="answer-alts" id="conj-alts" hidden>
+          <span class="answer-alts-label" id="conj-alts-label"></span>
+          <ul id="conj-alts-list"></ul>
+        </div>
+      </div>
+      <p class="conj-now" id="conj-now"></p>
+      <div class="conj-stack" id="conj-stack"></div>
+      <p class="hint" id="conj-hint">Karte antippen, oder unten der Reihe nach aufdecken</p>
+      <div class="action-dock" id="conj-dock">
+        <button type="button" class="btn primary show-answer" id="conj-reveal">Aufdecken</button>
+        <button type="button" class="btn primary show-answer" id="conj-next" hidden>Weiter</button>
+      </div>
+      <p class="status" id="conj-status"></p>
     </section>
   </template>
 

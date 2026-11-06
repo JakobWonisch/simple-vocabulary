@@ -19,6 +19,7 @@ USER app
 ENV PORT=8080 \
     WEB_DIR=/app/web \
     DICT_PATH=/app/data/spa-deu.json \
+    CONJ_PATH=/app/data/spa-conj.json \
     APP_ROOT=/app
 EXPOSE 8080
 CMD ["/app/server"]

@@ -7,8 +7,8 @@ Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`loc
 - Vocabulary sets stored locally
 - Topic → ~50 words via OpenRouter (free models supported)
 - Translations + articles (`el`/`la`, `der`/`die`/`das`) from the integrated dictionary
-- Flashcards: tap to reveal, tap again (or grade) to advance
-- SM-2-style spaced repetition
+- Flashcards: tap to reveal, tap again to advance
+- Semi-random order: unseen words are equal, then a word stays quiet for a per-level number of turns and becomes steadily more likely
 - Direction toggle: Spanish→German / German→Spanish
 - Export / import JSON for other devices
 

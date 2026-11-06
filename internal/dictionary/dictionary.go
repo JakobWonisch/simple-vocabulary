@@ -17,14 +17,17 @@ type Entry struct {
 	TargetGender string   `json:"targetGender,omitempty"`
 }
 
+const maxCardTranslations = 3
+
 // Card is a flashcard-ready pair with articles.
 type Card struct {
-	Source         string `json:"source"`
-	SourceArticle  string `json:"sourceArticle,omitempty"`
-	Target         string `json:"target"`
-	TargetArticle  string `json:"targetArticle,omitempty"`
-	POS            string `json:"pos,omitempty"`
-	FoundInDict    bool   `json:"foundInDict"`
+	Source        string   `json:"source"`
+	SourceArticle string   `json:"sourceArticle,omitempty"`
+	Target        string   `json:"target"`
+	TargetArticle string   `json:"targetArticle,omitempty"`
+	Translations  []string `json:"translations,omitempty"`
+	POS           string   `json:"pos,omitempty"`
+	FoundInDict   bool     `json:"foundInDict"`
 }
 
 type fileShape struct {
@@ -106,9 +109,10 @@ func (d *Dictionary) LookupReverse(lemma string) (Entry, bool) {
 	return e, ok
 }
 
-// EnrichWords builds cards from Spanish lemmas using the dictionary.
-// unknownTranslations may supply German glosses for lemmas missing from the dict.
-func (d *Dictionary) EnrichWords(lemmas []string, unknownTranslations map[string]string) []Card {
+// EnrichWords builds cards from lemmas that exist in the dictionary.
+// Lemmas with no dictionary entry are omitted. Translations always come from
+// the dictionary entry, never from an external suggestion.
+func (d *Dictionary) EnrichWords(lemmas []string) []Card {
 	cards := make([]Card, 0, len(lemmas))
 	seen := map[string]struct{}{}
 	for _, lemma := range lemmas {
@@ -116,35 +120,31 @@ func (d *Dictionary) EnrichWords(lemmas []string, unknownTranslations map[string
 		if lemma == "" {
 			continue
 		}
-		key := normalizeKey(lemma)
+		e, ok := d.Lookup(lemma)
+		if !ok || len(e.Translations) == 0 {
+			continue
+		}
+		key := normalizeKey(e.Lemma)
+		if key == "" {
+			key = normalizeKey(lemma)
+		}
 		if _, ok := seen[key]; ok {
 			continue
 		}
 		seen[key] = struct{}{}
 
-		if e, ok := d.Lookup(lemma); ok && len(e.Translations) > 0 {
-			cards = append(cards, Card{
-				Source:        displayLemma(e.Lemma, lemma),
-				SourceArticle: Article("es", e.Gender, e.POS),
-				Target:        e.Translations[0],
-				TargetArticle: Article("de", e.TargetGender, e.POS),
-				POS:           e.POS,
-				FoundInDict:   true,
-			})
-			continue
-		}
-
-		fallback, hasFallback := unknownTranslations[lemma]
-		if !hasFallback {
-			fallback, hasFallback = unknownTranslations[key]
-		}
-		if !hasFallback || strings.TrimSpace(fallback) == "" {
+		translations := topTranslations(e.Translations, maxCardTranslations)
+		if len(translations) == 0 {
 			continue
 		}
 		cards = append(cards, Card{
-			Source:      lemma,
-			Target:      strings.TrimSpace(fallback),
-			FoundInDict: false,
+			Source:        displayLemma(e.Lemma, lemma),
+			SourceArticle: Article("es", e.Gender, e.POS),
+			Target:        translations[0],
+			TargetArticle: Article("de", e.TargetGender, e.POS),
+			Translations:  translations,
+			POS:           e.POS,
+			FoundInDict:   true,
 		})
 	}
 	return cards
@@ -211,6 +211,27 @@ func stripDiacritics(s string) string {
 		}
 	}
 	return b.String()
+}
+
+func topTranslations(in []string, n int) []string {
+	out := make([]string, 0, n)
+	seen := map[string]struct{}{}
+	for _, item := range in {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		key := strings.ToLower(item)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, item)
+		if len(out) == n {
+			break
+		}
+	}
+	return out
 }
 
 func displayLemma(canonical, requested string) string {

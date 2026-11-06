@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -12,15 +13,29 @@ import (
 	"time"
 
 	"github.com/jakob/simple-vocabulary/internal/ai"
+	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
 )
 
+const (
+	// spareLemmas is how many extra lemmas are requested so dictionary misses
+	// can be replaced without shrinking the set.
+	spareLemmas = 10
+	// maxFillRounds caps follow-up requests when the spare lemmas are not enough.
+	maxFillRounds = 3
+)
+
+// errNotEnoughMatches means the model did not yield enough dictionary headwords
+// to fill the requested set.
+var errNotEnoughMatches = errors.New("not enough dictionary matches")
+
 // Server hosts the API and static frontend.
 type Server struct {
-	Dict     *dictionary.Dictionary
-	AI       ai.Provider
-	WebDir   string
-	mux      *http.ServeMux
+	Dict   *dictionary.Dictionary
+	Conj   *conjugation.Table
+	AI     ai.Provider
+	WebDir string
+	mux    *http.ServeMux
 }
 
 func New(dict *dictionary.Dictionary, provider ai.Provider, webDir string) *Server {
@@ -80,6 +95,13 @@ func (s *Server) handleLookup(w http.ResponseWriter, r *http.Request) {
 type generateRequest struct {
 	Topic string `json:"topic"`
 	Count int    `json:"count"`
+	Kind  string `json:"kind"`
+}
+
+// conjugationCard is a dictionary verb plus the paradigm the study view quizzes.
+type conjugationCard struct {
+	dictionary.Card
+	Paradigm conjugation.Paradigm `json:"paradigm"`
 }
 
 func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
@@ -104,15 +126,38 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		body.Count = 100
 	}
 
-	ctx := r.Context()
-	suggestions, err := s.AI.GenerateVocabulary(ctx, ai.GenerateRequest{
-		Topic:      body.Topic,
-		Count:      body.Count,
-		SourceLang: s.Dict.SourceLang,
-		TargetLang: s.Dict.TargetLang,
-	})
+	kind := ""
+	if body.Kind == ai.KindConjugation {
+		kind = ai.KindConjugation
+		if s.Conj == nil {
+			writeError(w, http.StatusServiceUnavailable, "conjugation data is not loaded")
+			return
+		}
+	} else if body.Kind != "" && body.Kind != "vocab" {
+		writeError(w, http.StatusBadRequest, "kind must be vocab or conjugation")
+		return
+	}
+
+	var (
+		cards     any
+		suggested int
+		err       error
+	)
+	if kind == ai.KindConjugation {
+		cards, suggested, err = s.conjugationCards(r.Context(), body.Topic, body.Count)
+	} else {
+		cards, suggested, err = s.dictionaryCards(r.Context(), body.Topic, body.Count)
+	}
 	if err != nil {
 		log.Printf("generate: %v", err)
+		if errors.Is(err, errNotEnoughMatches) {
+			msg := "Not enough of the suggested words are in the dictionary. Try a broader topic."
+			if kind == ai.KindConjugation {
+				msg = "Not enough of the suggested verbs are in the dictionary. Try a broader topic."
+			}
+			writeError(w, http.StatusBadGateway, msg)
+			return
+		}
 		msg := "vocabulary generation failed"
 		status := http.StatusBadGateway
 		if errors.Is(err, ai.ErrRateLimited) {
@@ -126,25 +171,107 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lemmas := make([]string, 0, len(suggestions))
-	fallback := make(map[string]string, len(suggestions))
-	for _, sug := range suggestions {
-		lemmas = append(lemmas, sug.Lemma)
-		if sug.Translation != "" {
-			fallback[sug.Lemma] = sug.Translation
-			fallback[strings.ToLower(sug.Lemma)] = sug.Translation
+	writeJSON(w, http.StatusOK, map[string]any{
+		"topic":     body.Topic,
+		"kind":      kindOrVocab(kind),
+		"requested": body.Count,
+		"suggested": suggested,
+		"cards":     cards,
+		"ai":        s.AI.Name(),
+		"createdAt": time.Now().UTC().Format(time.RFC3339),
+	})
+}
+
+func kindOrVocab(kind string) string {
+	if kind == ai.KindConjugation {
+		return ai.KindConjugation
+	}
+	return "vocab"
+}
+
+// dictionaryCards asks the model for more lemmas than the set needs, keeps only
+// dictionary headwords, and uses the spare suggestions to replace misses.
+// Follow-up requests use the same spare when one batch cannot fill the set.
+func (s *Server) dictionaryCards(ctx context.Context, topic string, want int) ([]dictionary.Card, int, error) {
+	return s.fill(ctx, topic, want, "", func(dictionary.Card) bool { return true })
+}
+
+func (s *Server) conjugationCards(ctx context.Context, topic string, want int) ([]conjugationCard, int, error) {
+	raw, suggested, err := s.fill(ctx, topic, want, ai.KindConjugation, func(card dictionary.Card) bool {
+		if s.Conj == nil || (card.POS != "" && card.POS != "v") {
+			return false
+		}
+		_, ok := s.Conj.Lookup(card.Source)
+		return ok
+	})
+	if err != nil {
+		return nil, suggested, err
+	}
+	cards := make([]conjugationCard, 0, len(raw))
+	for _, card := range raw {
+		p, ok := s.Conj.Lookup(card.Source)
+		if !ok {
+			continue
+		}
+		cards = append(cards, conjugationCard{Card: card, Paradigm: p})
+	}
+	if len(cards) < want {
+		return nil, suggested, errNotEnoughMatches
+	}
+	return cards, suggested, nil
+}
+
+func (s *Server) fill(ctx context.Context, topic string, want int, kind string, keep func(dictionary.Card) bool) ([]dictionary.Card, int, error) {
+	cards := make([]dictionary.Card, 0, want)
+	seen := map[string]struct{}{}
+	var exclude []string
+	suggested := 0
+
+	for round := 0; round < maxFillRounds && len(cards) < want; round++ {
+		ask := want - len(cards) + spareLemmas
+		batch, err := s.AI.GenerateVocabulary(ctx, ai.GenerateRequest{
+			Topic:      topic,
+			Count:      ask,
+			SourceLang: s.Dict.SourceLang,
+			TargetLang: s.Dict.TargetLang,
+			Exclude:    exclude,
+			Kind:       kind,
+		})
+		if err != nil {
+			return nil, suggested, err
+		}
+		suggested += len(batch)
+
+		lemmas := make([]string, 0, len(batch))
+		for _, sug := range batch {
+			lemma := strings.TrimSpace(sug.Lemma)
+			if lemma == "" {
+				continue
+			}
+			exclude = append(exclude, lemma)
+			lemmas = append(lemmas, lemma)
+		}
+
+		for _, card := range s.Dict.EnrichWords(lemmas) {
+			if !keep(card) {
+				continue
+			}
+			key := strings.ToLower(strings.TrimSpace(card.Source))
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			cards = append(cards, card)
+			if len(cards) == want {
+				break
+			}
 		}
 	}
 
-	cards := s.Dict.EnrichWords(lemmas, fallback)
-	writeJSON(w, http.StatusOK, map[string]any{
-		"topic":      body.Topic,
-		"requested":  body.Count,
-		"suggested":  len(suggestions),
-		"cards":      cards,
-		"ai":         s.AI.Name(),
-		"createdAt":  time.Now().UTC().Format(time.RFC3339),
-	})
+	if len(cards) < want {
+		return nil, suggested, errNotEnoughMatches
+	}
+	return cards, suggested, nil
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

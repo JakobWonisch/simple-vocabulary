@@ -1,0 +1,13 @@
+Spanish verb paradigms in spa-conj.json are derived from the UniMorph Spanish
+dataset (https://github.com/unimorph/spa), extracted from English Wiktionary.
+
+License: Creative Commons Attribution-ShareAlike 3.0 Unported
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Adaptations in this file: finite forms, the affirmative imperative, and the
+gerund only; voseo duplicates dropped in favor of tuteo (tú / vosotros);
+paradigms kept only when the infinitive is also a verb headword in the
+bundled FreeDict spa-deu dictionary.
+
+Attribute the UniMorph project and the English Wiktionary contributors.
+Share adaptations of this file under the same CC BY-SA 3.0 license.

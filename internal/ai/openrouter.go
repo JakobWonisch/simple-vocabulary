@@ -30,14 +30,14 @@ var ErrRateLimited = errors.New("openrouter rate limited")
 
 // OpenRouter is a Provider backed by OpenRouter's chat completions API.
 type OpenRouter struct {
-	APIKey         string
-	Models         []string
-	HTTPClient     *http.Client
-	BaseURL        string
-	SiteURL        string
-	SiteName       string
+	APIKey          string
+	Models          []string
+	HTTPClient      *http.Client
+	BaseURL         string
+	SiteURL         string
+	SiteName        string
 	PerModelTimeout time.Duration
-	MaxAttempts    int
+	MaxAttempts     int
 }
 
 // NewOpenRouterFromEnv builds a provider from environment variables.
@@ -112,18 +112,7 @@ func (o *OpenRouter) GenerateVocabulary(ctx context.Context, req GenerateRequest
 		return nil, fmt.Errorf("no OpenRouter models configured")
 	}
 
-	prompt := fmt.Sprintf(`You are a vocabulary list generator for language learners.
-Topic: %q
-Produce exactly %d useful %s lemmas (base forms) related to that topic.
-Prefer concrete, high-frequency words a beginner/intermediate learner would want.
-Include a mix of nouns (with gender when known), verbs (infinitive), and adjectives when natural.
-
-Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
-[{"lemma":"...","translation":"...","gender":"m|f|n|","pos":"n|v|adj|adv"}]
-- lemma: word in %s
-- translation: short gloss in %s (single word or short phrase)
-- gender: only for nouns; omit or empty otherwise
-- pos: part of speech`, req.Topic, req.Count, langName(req.SourceLang), langName(req.SourceLang), langName(req.TargetLang))
+	prompt := buildPrompt(req)
 
 	var lastErr error
 	rateLimitedAll := true
@@ -344,6 +333,41 @@ func uniqModels(in []string) []string {
 		out = append(out, m)
 	}
 	return out
+}
+
+func buildPrompt(req GenerateRequest) string {
+	lang := langName(req.SourceLang)
+	var prompt string
+	if req.Kind == KindConjugation {
+		prompt = fmt.Sprintf(`You are a vocabulary list generator for language learners.
+Topic: %q
+Produce exactly %d useful %s verbs related to that topic.
+Every item must be one verb in the infinitive (citation form ending in -ar, -er, or -ir). No nouns, no adjectives, no phrases, and no conjugated forms.
+Do not attach reflexive pronouns (enviar, not enviarse).
+Prefer concrete, high-frequency verbs a beginner or intermediate learner would use for that topic.
+
+Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
+[{"lemma":"...","pos":"v"}]
+- lemma: %s infinitive
+- pos: always v`, req.Topic, req.Count, lang, lang)
+	} else {
+		prompt = fmt.Sprintf(`You are a vocabulary list generator for language learners.
+Topic: %q
+Produce exactly %d useful %s lemmas (base forms) related to that topic.
+Prefer concrete, high-frequency words a beginner/intermediate learner would want.
+Each lemma must be a single dictionary headword in citation form: singular noun, infinitive verb, or base adjective. No phrases and no inflected forms.
+Include a mix of nouns (with gender when known), verbs (infinitive), and adjectives when natural.
+
+Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
+[{"lemma":"...","gender":"m|f|n|","pos":"n|v|adj|adv"}]
+- lemma: word in %s
+- gender: only for nouns; omit or empty otherwise
+- pos: part of speech`, req.Topic, req.Count, lang, lang)
+	}
+	if len(req.Exclude) > 0 {
+		prompt += "\nDo not include any of these lemmas: " + strings.Join(req.Exclude, ", ")
+	}
+	return prompt
 }
 
 func langName(code string) string {

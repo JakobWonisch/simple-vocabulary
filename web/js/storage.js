@@ -1,10 +1,30 @@
 const KEY = "simple-vocabulary:v1";
 
+const defaultConjugation = () => ({
+  mode: "ind", // ind | sbjv | imp | ger
+  tense: "prs",
+  order: "default", // default | random
+});
+
 const defaultState = () => ({
   version: 1,
   direction: "es-de", // es-de | de-es
+  conjugation: defaultConjugation(),
   sets: [],
 });
+
+function normalizeState(parsed) {
+  return {
+    ...defaultState(),
+    ...parsed,
+    conjugation: {
+      ...defaultConjugation(),
+      ...(parsed.conjugation || {}),
+    },
+    version: 1,
+    sets: parsed.sets,
+  };
+}
 
 export function loadState() {
   try {
@@ -12,11 +32,7 @@ export function loadState() {
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.sets)) return defaultState();
-    return {
-      ...defaultState(),
-      ...parsed,
-      version: 1,
-    };
+    return normalizeState(parsed);
   } catch {
     return defaultState();
   }
@@ -48,11 +64,7 @@ export function importState(file) {
           reject(new Error("Ungültiger Vokabelexport"));
           return;
         }
-        resolve({
-          ...defaultState(),
-          ...data,
-          version: 1,
-        });
+        resolve(normalizeState(data));
       } catch (err) {
         reject(err);
       }
