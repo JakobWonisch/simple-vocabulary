@@ -1,0 +1,74 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/jakob/simple-vocabulary/internal/ai"
+	"github.com/jakob/simple-vocabulary/internal/api"
+	"github.com/jakob/simple-vocabulary/internal/dictionary"
+)
+
+func main() {
+	root := findRoot()
+	dictPath := envOr("DICT_PATH", filepath.Join(root, "data", "spa-deu.json"))
+	webDir := envOr("WEB_DIR", filepath.Join(root, "web"))
+
+	dict, err := dictionary.LoadJSON(dictPath)
+	if err != nil {
+		log.Fatalf("load dictionary: %v", err)
+	}
+	log.Printf("dictionary loaded: %d entries (%s→%s)", dict.Size(), dict.SourceLang, dict.TargetLang)
+
+	var provider ai.Provider
+	if or, err := ai.NewOpenRouterFromEnv(); err != nil {
+		log.Printf("AI disabled: %v", err)
+	} else {
+		provider = or
+		log.Printf("AI provider: %s", provider.Name())
+	}
+
+	srv := api.New(dict, provider, webDir)
+	addr := api.AddrFromEnv()
+	log.Printf("listening on %s (web: %s)", addr, webDir)
+	if err := http.ListenAndServe(addr, srv.Handler()); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+func findRoot() string {
+	if v := os.Getenv("APP_ROOT"); v != "" {
+		return v
+	}
+	// Walk up from executable / cwd looking for data/spa-deu.json or go.mod.
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	dir := cwd
+	for i := 0; i < 6; i++ {
+		if fileExists(filepath.Join(dir, "go.mod")) || fileExists(filepath.Join(dir, "data", "spa-deu.json")) {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return cwd
+}
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
+}

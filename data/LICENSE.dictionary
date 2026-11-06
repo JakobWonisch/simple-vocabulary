@@ -1,0 +1,8 @@
+The Spanish–German dictionary data in spa-deu.json is derived from the FreeDict
+spa-deu dictionary (Ding-based), available from https://freedict.org/.
+
+FreeDict dictionaries are free software; see the upstream COPYING file from the
+spa-deu source package for the precise license terms of the original TEI data.
+
+Upstream source used for conversion:
+  https://download.freedict.org/dictionaries/spa-deu/

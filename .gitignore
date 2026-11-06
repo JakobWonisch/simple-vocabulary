@@ -1,0 +1,12 @@
+.env
+/tmp/
+/bin/
+/server
+*.exe
+.direnv/
+result
+result-*
+.idea/
+.vscode/
+*.swp
+.DS_Store

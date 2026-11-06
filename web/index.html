@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Vocabulary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;560;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <header class="top">
+    <a class="brand" href="#/" data-link>Simple Vocabulary</a>
+    <div class="top-actions" id="top-actions" hidden>
+      <label class="dir-toggle" title="Translation direction">
+        <span id="dir-label-left">ES</span>
+        <button type="button" id="dir-toggle" role="switch" aria-checked="false" aria-label="Toggle translation direction">
+          <span class="knob"></span>
+        </button>
+        <span id="dir-label-right">DE</span>
+      </label>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <template id="tpl-home">
+    <section class="view home">
+      <div class="home-head">
+        <h1>Your sets</h1>
+        <p class="lede">Local-first flashcards with spaced repetition. Export anytime.</p>
+      </div>
+      <div class="toolbar">
+        <a class="btn primary" href="#/new" data-link>New set</a>
+        <button type="button" class="btn ghost" id="btn-export">Export</button>
+        <label class="btn ghost file-btn">
+          Import
+          <input type="file" id="btn-import" accept="application/json,.json" hidden />
+        </label>
+      </div>
+      <ul class="set-list" id="set-list"></ul>
+      <p class="empty" id="empty-sets" hidden>No sets yet — create one from a topic.</p>
+    </section>
+  </template>
+
+  <template id="tpl-new">
+    <section class="view create">
+      <a class="back" href="#/" data-link>← Sets</a>
+      <h1>New vocabulary set</h1>
+      <p class="lede">Describe a topic. We’ll generate about 50 Spanish words and look up German translations in the built-in dictionary.</p>
+      <form id="create-form" class="create-form">
+        <label class="field">
+          <span>Topic</span>
+          <input name="topic" type="text" required maxlength="200" placeholder="e.g. ordering food in a restaurant" autocomplete="off" />
+        </label>
+        <label class="field inline">
+          <span>Word count</span>
+          <input name="count" type="number" min="10" max="100" value="50" />
+        </label>
+        <button type="submit" class="btn primary" id="create-submit">Generate set</button>
+        <p class="status" id="create-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-study">
+    <section class="view study">
+      <div class="study-bar">
+        <a class="back" href="#/" data-link>← Sets</a>
+        <span class="progress" id="study-progress"></span>
+      </div>
+      <h1 class="set-title" id="study-title"></h1>
+      <button type="button" class="flashcard" id="flashcard" aria-live="polite">
+        <span class="prompt-lang" id="card-prompt-lang"></span>
+        <span class="prompt" id="card-prompt"></span>
+        <span class="answer-wrap" id="card-answer-wrap" hidden>
+          <span class="answer-lang" id="card-answer-lang"></span>
+          <span class="answer" id="card-answer"></span>
+        </span>
+        <span class="hint" id="card-hint">Tap to reveal</span>
+      </button>
+      <div class="grade-row" id="grade-row" hidden>
+        <button type="button" class="btn grade again" data-grade="again">Again</button>
+        <button type="button" class="btn grade hard" data-grade="hard">Hard</button>
+        <button type="button" class="btn grade good" data-grade="good">Good</button>
+        <button type="button" class="btn grade easy" data-grade="easy">Easy</button>
+      </div>
+      <p class="status" id="study-status"></p>
+    </section>
+  </template>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

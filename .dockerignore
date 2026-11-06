@@ -1,0 +1,11 @@
+.git
+.direnv
+.result
+result
+result-*
+tmp
+.env
+*.md
+bin
+.idea
+.vscode
