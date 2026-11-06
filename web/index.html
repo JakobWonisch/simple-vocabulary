@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,14 +13,27 @@
   <div class="atmosphere" aria-hidden="true"></div>
   <header class="top">
     <a class="brand" href="#/" data-link>Simple Vocabulary</a>
-    <div class="top-actions" id="top-actions" hidden>
-      <label class="dir-toggle" title="Translation direction">
-        <span id="dir-label-left">ES</span>
-        <button type="button" id="dir-toggle" role="switch" aria-checked="false" aria-label="Toggle translation direction">
-          <span class="knob"></span>
-        </button>
-        <span id="dir-label-right">DE</span>
-      </label>
+    <div class="top-actions" id="top-actions">
+      <button type="button" class="icon-btn" id="settings-btn" aria-label="Einstellungen" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-pop">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      </button>
+      <div class="settings-pop" id="settings-pop" role="dialog" aria-labelledby="settings-title" hidden>
+        <p class="settings-title" id="settings-title">Einstellungen</p>
+        <fieldset>
+          <legend>Fragerichtung</legend>
+          <label>
+            <input type="radio" name="direction" value="es-de" />
+            <span class="dir-option">ES<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>DE</span>
+          </label>
+          <label>
+            <input type="radio" name="direction" value="de-es" />
+            <span class="dir-option">DE<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>ES</span>
+          </label>
+        </fieldset>
+      </div>
     </div>
   </header>
 
@@ -29,37 +42,37 @@
   <template id="tpl-home">
     <section class="view home">
       <div class="home-head">
-        <h1>Your sets</h1>
-        <p class="lede">Local-first flashcards with spaced repetition. Export anytime.</p>
+        <h1>Deine Sammlungen</h1>
+        <p class="lede">Lokale Karteikarten mit verteilter Wiederholung. Jederzeit exportierbar.</p>
       </div>
       <div class="toolbar">
-        <a class="btn primary" href="#/new" data-link>New set</a>
-        <button type="button" class="btn ghost" id="btn-export">Export</button>
+        <a class="btn primary" href="#/new" data-link>Neue Sammlung</a>
+        <button type="button" class="btn ghost" id="btn-export">Exportieren</button>
         <label class="btn ghost file-btn">
-          Import
+          Importieren
           <input type="file" id="btn-import" accept="application/json,.json" hidden />
         </label>
       </div>
       <ul class="set-list" id="set-list"></ul>
-      <p class="empty" id="empty-sets" hidden>No sets yet — create one from a topic.</p>
+      <p class="empty" id="empty-sets" hidden>Noch keine Sammlungen — erstelle eine zu einem Thema.</p>
     </section>
   </template>
 
   <template id="tpl-new">
     <section class="view create">
-      <a class="back" href="#/" data-link>← Sets</a>
-      <h1>New vocabulary set</h1>
-      <p class="lede">Describe a topic. We’ll generate about 50 Spanish words and look up German translations in the built-in dictionary.</p>
+      <a class="back" href="#/" data-link>← Sammlungen</a>
+      <h1>Neue Vokabelsammlung</h1>
+      <p class="lede">Beschreibe ein Thema. Wir erzeugen etwa 50 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.</p>
       <form id="create-form" class="create-form">
         <label class="field">
-          <span>Topic</span>
-          <input name="topic" type="text" required maxlength="200" placeholder="e.g. ordering food in a restaurant" autocomplete="off" />
+          <span>Thema</span>
+          <input name="topic" type="text" required maxlength="200" placeholder="z. B. Essen im Restaurant bestellen" autocomplete="off" />
         </label>
         <label class="field inline">
-          <span>Word count</span>
+          <span>Wortanzahl</span>
           <input name="count" type="number" min="10" max="100" value="50" />
         </label>
-        <button type="submit" class="btn primary" id="create-submit">Generate set</button>
+        <button type="submit" class="btn primary" id="create-submit">Sammlung erzeugen</button>
         <p class="status" id="create-status" role="status" aria-live="polite"></p>
       </form>
     </section>
@@ -68,24 +81,46 @@
   <template id="tpl-study">
     <section class="view study">
       <div class="study-bar">
-        <a class="back" href="#/" data-link>← Sets</a>
+        <a class="back" href="#/" data-link>← Sammlungen</a>
         <span class="progress" id="study-progress"></span>
       </div>
       <h1 class="set-title" id="study-title"></h1>
-      <button type="button" class="flashcard" id="flashcard" aria-live="polite">
-        <span class="prompt-lang" id="card-prompt-lang"></span>
-        <span class="prompt" id="card-prompt"></span>
-        <span class="answer-wrap" id="card-answer-wrap" hidden>
+      <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-live="polite">
+        <div class="card-tools">
+          <button type="button" class="card-tool flip-back" id="card-flip-back" hidden aria-label="Zurück zur Frage">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </button>
+          <button type="button" class="card-tool remove-card" id="card-remove" hidden aria-label="Wort aus der Sammlung entfernen">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+            </svg>
+          </button>
+        </div>
+        <span class="face" id="card-question">
+          <span class="prompt-lang" id="card-prompt-lang"></span>
+          <span class="prompt" id="card-prompt"></span>
+        </span>
+        <span class="face" id="card-answer-wrap" hidden>
           <span class="answer-lang" id="card-answer-lang"></span>
           <span class="answer" id="card-answer"></span>
         </span>
-        <span class="hint" id="card-hint">Tap to reveal</span>
-      </button>
-      <div class="grade-row" id="grade-row" hidden>
-        <button type="button" class="btn grade again" data-grade="again">Again</button>
-        <button type="button" class="btn grade hard" data-grade="hard">Hard</button>
-        <button type="button" class="btn grade good" data-grade="good">Good</button>
-        <button type="button" class="btn grade easy" data-grade="easy">Easy</button>
+        <span class="hint" id="card-hint">Antippen zum Aufdecken</span>
+      </div>
+      <div class="action-dock" id="action-dock">
+        <button type="button" class="btn primary show-answer" id="show-answer">Antwort zeigen</button>
+        <div class="grade-row" id="grade-row" hidden>
+          <button type="button" class="btn grade again" data-grade="again" aria-keyshortcuts="1">Nochmal<kbd>1</kbd></button>
+          <button type="button" class="btn grade hard" data-grade="hard" aria-keyshortcuts="2">Schwer<kbd>2</kbd></button>
+          <button type="button" class="btn grade good" data-grade="good" aria-keyshortcuts="3">Gut<kbd>3</kbd></button>
+          <button type="button" class="btn grade easy" data-grade="easy" aria-keyshortcuts="4">Einfach<kbd>4</kbd></button>
+        </div>
       </div>
       <p class="status" id="study-status"></p>
     </section>

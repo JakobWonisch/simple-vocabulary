@@ -2,18 +2,44 @@ import { loadState, saveState, exportState, importState, uid } from "./storage.j
 import { newSRS, review, dueCards, formatWithArticle } from "./srs.js";
 
 const app = document.getElementById("app");
-const topActions = document.getElementById("top-actions");
-const dirToggle = document.getElementById("dir-toggle");
-const dirLeft = document.getElementById("dir-label-left");
-const dirRight = document.getElementById("dir-label-right");
+const settingsBtn = document.getElementById("settings-btn");
+const settingsPop = document.getElementById("settings-pop");
+const directionInputs = settingsPop.querySelectorAll('input[name="direction"]');
+
+const knownErrors = {
+  "Generation failed": "Erzeugung fehlgeschlagen",
+  "No cards returned — try a broader topic": "Keine Karten erhalten — versuche ein breiteres Thema",
+  "Timed out waiting for the AI. Try again in a minute, or set OPENROUTER_MODEL to a faster/paid model.":
+    "Zeitüberschreitung bei der KI. Versuche es in einer Minute erneut oder setze OPENROUTER_MODEL auf ein schnelleres oder kostenpflichtiges Modell.",
+  "Something went wrong": "Etwas ist schiefgelaufen",
+  "Import failed": "Import fehlgeschlagen",
+  "AI provider not configured (set OPENROUTER_API_KEY)":
+    "KI-Anbieter ist nicht eingerichtet (OPENROUTER_API_KEY setzen)",
+  "invalid JSON body": "Ungültiger JSON-Inhalt",
+  "topic is required": "Thema ist erforderlich",
+  "vocabulary generation failed": "Vokabeln konnten nicht erzeugt werden",
+  "AI providers are rate-limited right now. Wait a minute and retry, or set OPENROUTER_MODEL to another model.":
+    "Die KI-Anbieter sind gerade ausgelastet. Warte eine Minute und versuche es erneut, oder setze OPENROUTER_MODEL auf ein anderes Modell.",
+  "AI rate limit hit. Retry shortly, or change OPENROUTER_MODEL.":
+    "KI-Limit erreicht. Versuche es gleich erneut oder ändere OPENROUTER_MODEL.",
+};
+
+function uiMessage(message, fallback) {
+  if (message && knownErrors[message]) return knownErrors[message];
+  if (message) return message;
+  return knownErrors[fallback] || fallback;
+}
 
 let state = loadState();
+let unbindStudyKeys = () => {};
 
 function persist() {
   saveState(state);
 }
 
 function route() {
+  unbindStudyKeys();
+  unbindStudyKeys = () => {};
   const hash = location.hash.replace(/^#/, "") || "/";
   const parts = hash.split("/").filter(Boolean);
 
@@ -34,7 +60,6 @@ function cloneTemplate(id) {
 }
 
 function renderHome() {
-  topActions.hidden = true;
   app.replaceChildren(cloneTemplate("tpl-home"));
 
   const list = document.getElementById("set-list");
@@ -50,7 +75,7 @@ function renderHome() {
     btn.className = "set-card";
     btn.innerHTML = `
       <strong>${escapeHtml(set.title)}</strong>
-      <span class="set-meta">${set.cards?.length ?? 0} cards · ${due} due</span>
+      <span class="set-meta">${set.cards?.length ?? 0} Karten · ${due} fällig</span>
     `;
     btn.addEventListener("click", () => {
       location.hash = `#/study/${set.id}`;
@@ -59,10 +84,10 @@ function renderHome() {
     const del = document.createElement("button");
     del.type = "button";
     del.className = "delete";
-    del.textContent = "Delete";
+    del.textContent = "Löschen";
     del.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (!confirm(`Delete set “${set.title}”?`)) return;
+      if (!confirm(`Sammlung „${set.title}“ löschen?`)) return;
       state.sets = state.sets.filter((s) => s.id !== set.id);
       persist();
       renderHome();
@@ -78,16 +103,16 @@ function renderHome() {
     if (!file) return;
     try {
       const imported = await importState(file);
-      if (state.sets.length && !confirm("Replace all local sets with the imported file?")) {
+      if (state.sets.length && !confirm("Alle lokalen Sammlungen durch die importierte Datei ersetzen?")) {
         e.target.value = "";
         return;
       }
       state = imported;
       persist();
-      updateDirToggle();
+      syncDirectionSetting();
       renderHome();
     } catch (err) {
-      alert(err.message || "Import failed");
+      alert(uiMessage(err.message, "Import failed"));
     } finally {
       e.target.value = "";
     }
@@ -95,7 +120,6 @@ function renderHome() {
 }
 
 function renderCreate() {
-  topActions.hidden = true;
   app.replaceChildren(cloneTemplate("tpl-new"));
   const form = document.getElementById("create-form");
   const status = document.getElementById("create-status");
@@ -110,17 +134,25 @@ function renderCreate() {
 
     submit.disabled = true;
     status.classList.remove("error");
-    status.textContent = "Generating vocabulary… this can take a few seconds.";
+    const started = Date.now();
+    const tick = setInterval(() => {
+      const s = Math.round((Date.now() - started) / 1000);
+      status.textContent = `Vokabeln werden erzeugt… ${s}s (probiert einige kostenlose Modelle, falls eines ausgelastet ist)`;
+    }, 500);
+
+    const controller = new AbortController();
+    const kill = setTimeout(() => controller.abort(), 80_000);
 
     try {
       const res = await fetch("/api/sets/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, count }),
+        signal: controller.signal,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
-      if (!data.cards?.length) throw new Error("No cards returned — try a broader topic");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(uiMessage(data.error, "Generation failed"));
+      if (!data.cards?.length) throw new Error(uiMessage("", "No cards returned — try a broader topic"));
 
       const set = {
         id: uid(),
@@ -140,12 +172,19 @@ function renderCreate() {
       };
       state.sets.unshift(set);
       persist();
-      status.textContent = `Created ${set.cards.length} cards. Opening…`;
+      status.textContent = `${set.cards.length} Karten erstellt. Wird geöffnet…`;
       location.hash = `#/study/${set.id}`;
     } catch (err) {
       status.classList.add("error");
-      status.textContent = err.message || "Something went wrong";
+      if (err?.name === "AbortError") {
+        status.textContent = uiMessage("", "Timed out waiting for the AI. Try again in a minute, or set OPENROUTER_MODEL to a faster/paid model.");
+      } else {
+        status.textContent = uiMessage(err.message, "Something went wrong");
+      }
       submit.disabled = false;
+    } finally {
+      clearInterval(tick);
+      clearTimeout(kill);
     }
   });
 }
@@ -157,19 +196,23 @@ function renderStudy(setId) {
     return;
   }
 
-  topActions.hidden = false;
-  updateDirToggle();
+  syncDirectionSetting();
   app.replaceChildren(cloneTemplate("tpl-study"));
 
   document.getElementById("study-title").textContent = set.title;
   const progressEl = document.getElementById("study-progress");
   const flashcard = document.getElementById("flashcard");
+  const questionFace = document.getElementById("card-question");
   const promptLang = document.getElementById("card-prompt-lang");
   const promptEl = document.getElementById("card-prompt");
   const answerWrap = document.getElementById("card-answer-wrap");
   const answerLang = document.getElementById("card-answer-lang");
   const answerEl = document.getElementById("card-answer");
+  const flipBack = document.getElementById("card-flip-back");
+  const removeCard = document.getElementById("card-remove");
   const hint = document.getElementById("card-hint");
+  const actionDock = document.getElementById("action-dock");
+  const showAnswer = document.getElementById("show-answer");
   const gradeRow = document.getElementById("grade-row");
   const studyStatus = document.getElementById("study-status");
 
@@ -179,19 +222,25 @@ function renderStudy(setId) {
 
   function syncProgress() {
     const due = dueCards(set.cards).length;
-    progressEl.textContent = `${due} due · ${set.cards.length} total`;
+    progressEl.textContent = `${due} fällig · ${set.cards.length} gesamt`;
   }
 
   function showDone() {
     current = null;
     revealed = false;
-    flashcard.disabled = true;
+    flashcard.classList.add("idle");
+    flashcard.classList.remove("revealed");
+    flashcard.tabIndex = -1;
+    flashcard.setAttribute("aria-disabled", "true");
     promptLang.textContent = "";
-    promptEl.textContent = "Done for now";
+    promptEl.textContent = "Fürs Erste geschafft";
+    questionFace.hidden = false;
     answerWrap.hidden = true;
+    flipBack.hidden = true;
+    removeCard.hidden = true;
     hint.hidden = true;
-    gradeRow.hidden = true;
-    studyStatus.textContent = "No cards due. Come back later, or switch direction and keep going.";
+    setActions("none");
+    studyStatus.textContent = "Keine Karten fällig. Komm später wieder oder wechsle die Fragerichtung und mach weiter.";
     syncProgress();
   }
 
@@ -202,24 +251,28 @@ function renderStudy(setId) {
     }
     current = queue[0];
     revealed = false;
-    flashcard.disabled = false;
-    flashcard.classList.remove("revealed");
+    flashcard.classList.remove("idle", "revealed");
+    flashcard.tabIndex = 0;
+    flashcard.setAttribute("aria-disabled", "false");
+    questionFace.hidden = false;
     answerWrap.hidden = true;
-    gradeRow.hidden = true;
+    flipBack.hidden = true;
+    removeCard.hidden = false;
+    setActions("question");
     hint.hidden = false;
-    hint.textContent = "Tap to reveal";
+    hint.textContent = "Antippen zum Aufdecken";
     studyStatus.textContent = "";
 
     const card = current.card;
     const esDe = state.direction !== "de-es";
     if (esDe) {
-      promptLang.textContent = "Spanish";
-      answerLang.textContent = "German";
+      promptLang.textContent = "Spanisch";
+      answerLang.textContent = "Deutsch";
       promptEl.textContent = formatWithArticle(card.source, card.sourceArticle);
       answerEl.textContent = formatWithArticle(card.target, card.targetArticle);
     } else {
-      promptLang.textContent = "German";
-      answerLang.textContent = "Spanish";
+      promptLang.textContent = "Deutsch";
+      answerLang.textContent = "Spanisch";
       promptEl.textContent = formatWithArticle(card.target, card.targetArticle);
       answerEl.textContent = formatWithArticle(card.source, card.sourceArticle);
     }
@@ -230,9 +283,28 @@ function renderStudy(setId) {
     if (!current || revealed) return;
     revealed = true;
     flashcard.classList.add("revealed");
+    questionFace.hidden = true;
     answerWrap.hidden = false;
+    flipBack.hidden = false;
     hint.hidden = true;
-    gradeRow.hidden = false;
+    setActions("answer");
+  }
+
+  function showQuestion() {
+    if (!current || !revealed) return;
+    revealed = false;
+    flashcard.classList.remove("revealed");
+    questionFace.hidden = false;
+    answerWrap.hidden = true;
+    flipBack.hidden = true;
+    hint.hidden = false;
+    setActions("question");
+  }
+
+  function setActions(mode) {
+    actionDock.hidden = mode === "none";
+    showAnswer.hidden = mode !== "question";
+    gradeRow.hidden = mode !== "answer";
   }
 
   function grade(g) {
@@ -246,21 +318,69 @@ function renderStudy(setId) {
   }
 
   flashcard.addEventListener("click", () => {
-    if (!current) return;
-    if (!revealed) {
-      reveal();
-      return;
-    }
-    // Second tap: advance with a default "good" review.
-    grade("good");
+    if (!current || revealed) return;
+    reveal();
   });
 
-  gradeRow.addEventListener("click", (e) => {
+  flashcard.addEventListener("keydown", (e) => {
+    if (e.target !== flashcard) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    flashcard.click();
+  });
+
+  flipBack.addEventListener("click", (e) => {
     e.stopPropagation();
+    showQuestion();
+  });
+
+  removeCard.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!current) return;
+    const card = current.card;
+    const es = formatWithArticle(card.source, card.sourceArticle);
+    const de = formatWithArticle(card.target, card.targetArticle);
+    if (!confirm(`„${es}“ / „${de}“ aus der Sammlung entfernen?`)) return;
+    const idx = set.cards.findIndex((c) => c.id === card.id);
+    if (idx < 0) return;
+    set.cards.splice(idx, 1);
+    set.updatedAt = new Date().toISOString();
+    persist();
+    queue = dueCards(set.cards);
+    showCard();
+  });
+
+  showAnswer.addEventListener("click", () => reveal());
+
+  gradeRow.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-grade]");
     if (!btn) return;
     grade(btn.dataset.grade);
   });
+
+  const gradesByKey = { 1: "again", 2: "hard", 3: "good", 4: "easy" };
+  const modifierKeys = new Set(["Shift", "Control", "Alt", "Meta", "CapsLock", "NumLock", "ScrollLock"]);
+  function onStudyKey(e) {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = e.target?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || e.target?.isContentEditable) return;
+    if (!current || !settingsPop.hidden) return;
+
+    if (!revealed) {
+      if (modifierKeys.has(e.key)) return;
+      if ((e.key === "Enter" || e.key === " ") && e.target?.closest?.(".card-tools")) return;
+      e.preventDefault();
+      reveal();
+      return;
+    }
+
+    const g = gradesByKey[e.key];
+    if (!g) return;
+    e.preventDefault();
+    grade(g);
+  }
+  document.addEventListener("keydown", onStudyKey);
+  unbindStudyKeys = () => document.removeEventListener("keydown", onStudyKey);
 
   showCard();
 }
@@ -269,24 +389,37 @@ function refreshStudyCardSides() {
   if ((location.hash || "").includes("/study/")) route();
 }
 
-function updateDirToggle() {
-  const deEs = state.direction === "de-es";
-  dirToggle.setAttribute("aria-checked", deEs ? "true" : "false");
-  dirLeft.classList.toggle("active", !deEs);
-  dirRight.classList.toggle("active", deEs);
+function syncDirectionSetting() {
+  const value = state.direction === "de-es" ? "de-es" : "es-de";
+  for (const input of directionInputs) input.checked = input.value === value;
 }
 
-dirToggle.addEventListener("click", () => {
-  state.direction = state.direction === "es-de" ? "de-es" : "es-de";
+function setSettingsOpen(open) {
+  settingsPop.hidden = !open;
+  settingsBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+settingsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setSettingsOpen(settingsPop.hidden);
+});
+
+settingsPop.addEventListener("click", (e) => e.stopPropagation());
+
+settingsPop.addEventListener("change", (e) => {
+  const input = e.target.closest('input[name="direction"]');
+  if (!input) return;
+  state.direction = input.value === "de-es" ? "de-es" : "es-de";
   persist();
-  updateDirToggle();
   refreshStudyCardSides();
 });
 
-document.body.addEventListener("click", (e) => {
-  const a = e.target.closest("[data-link]");
-  if (!a) return;
-  // allow default hash navigation
+document.addEventListener("click", () => {
+  if (!settingsPop.hidden) setSettingsOpen(false);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !settingsPop.hidden) setSettingsOpen(false);
 });
 
 function escapeHtml(s) {
@@ -298,5 +431,5 @@ function escapeHtml(s) {
 }
 
 window.addEventListener("hashchange", route);
-updateDirToggle();
+syncDirectionSetting();
 route();

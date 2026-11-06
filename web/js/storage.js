@@ -40,12 +40,12 @@ export function exportState(state) {
 export function importState(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden"));
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result));
         if (!data || !Array.isArray(data.sets)) {
-          reject(new Error("Invalid vocabulary export"));
+          reject(new Error("Ungültiger Vokabelexport"));
           return;
         }
         resolve({

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -112,7 +113,16 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("generate: %v", err)
-		writeError(w, http.StatusBadGateway, "vocabulary generation failed")
+		msg := "vocabulary generation failed"
+		status := http.StatusBadGateway
+		if errors.Is(err, ai.ErrRateLimited) {
+			status = http.StatusTooManyRequests
+			msg = "AI providers are rate-limited right now. Wait a minute and retry, or set OPENROUTER_MODEL to another model."
+		} else if strings.Contains(strings.ToLower(err.Error()), "rate") {
+			status = http.StatusTooManyRequests
+			msg = "AI rate limit hit. Retry shortly, or change OPENROUTER_MODEL."
+		}
+		writeError(w, status, msg)
 		return
 	}
 

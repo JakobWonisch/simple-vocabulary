@@ -34,7 +34,10 @@ docker compose up --build
 |----------|---------|---------|
 | `PORT` | `8080` | Listen port |
 | `OPENROUTER_API_KEY` | — | Required for set generation |
-| `OPENROUTER_MODEL` | `google/gemma-2-9b-it:free` | OpenRouter model id |
+| `OPENROUTER_MODEL` | `nvidia/nemotron-3.5-lightning:free` | Preferred OpenRouter model |
+| `OPENROUTER_FALLBACK_MODELS` | built-in free chain | Models tried on 429/503/timeout |
+| `OPENROUTER_PER_MODEL_TIMEOUT_SEC` | `25` | Per-model attempt timeout |
+| `OPENROUTER_MAX_ATTEMPTS` | `3` | Max models tried per generate |
 | `DICT_PATH` | `data/spa-deu.json` | Dictionary JSON |
 | `WEB_DIR` | `web` | Static frontend |
 
