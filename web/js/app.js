@@ -1017,7 +1017,24 @@ document.addEventListener("keydown", (e) => {
   if (!infoPop.hidden) setInfoOpen(false);
 });
 
-document.getElementById("btn-export").addEventListener("click", () => exportState(state));
+const snackbar = document.getElementById("snackbar");
+let snackbarTimer = 0;
+
+function showSnackbar(message, { error = false } = {}) {
+  snackbar.textContent = message;
+  snackbar.classList.toggle("error", error);
+  snackbar.hidden = false;
+  clearTimeout(snackbarTimer);
+  snackbarTimer = setTimeout(() => {
+    snackbar.hidden = true;
+  }, 3200);
+}
+
+document.getElementById("btn-export").addEventListener("click", () => {
+  exportState(state);
+  setSettingsOpen(false);
+  showSnackbar("Exportiert");
+});
 document.getElementById("btn-import").addEventListener("change", async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -1031,8 +1048,10 @@ document.getElementById("btn-import").addEventListener("change", async (e) => {
     persist();
     syncDirectionSetting();
     route();
+    setSettingsOpen(false);
+    showSnackbar("Importiert");
   } catch (err) {
-    alert(uiMessage(err.message, "Import failed"));
+    showSnackbar(uiMessage(err.message, "Import failed"), { error: true });
   } finally {
     e.target.value = "";
   }

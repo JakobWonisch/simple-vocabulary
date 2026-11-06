@@ -60,6 +60,7 @@ body:has(.view.home) {
 
 .top {
   position: relative;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -74,7 +75,7 @@ body:has(.view.home) {
 .snackbar {
   position: absolute;
   top: calc(100% - 0.15rem);
-  left: 1.25rem;
+  right: 1.25rem;
   z-index: 30;
   margin: 0;
   max-width: min(18rem, calc(100% - 2.5rem));

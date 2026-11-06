@@ -1,0 +1,14 @@
+# Prod only: join the nginx-proxy-manager network.
+# That network does not exist in dev, so it stays out of docker-compose.yml.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+services:
+  vocab:
+    networks:
+      - default
+      - proxy
+
+networks:
+  proxy:
+    external: true
