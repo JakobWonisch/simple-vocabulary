@@ -26,13 +26,32 @@ function normalizeState(parsed) {
   };
 }
 
-export function loadState() {
+export function hasStoredState() {
+  return localStorage.getItem(KEY) !== null;
+}
+
+// loadState returns saved browser state when it exists. The seed file is
+// fetched only when nothing is stored. A successful seed load is written
+// immediately; an existing value is never replaced.
+export async function loadState() {
+  const raw = localStorage.getItem(KEY);
+  if (raw !== null) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.sets)) return normalizeState(parsed);
+    } catch {
+      // Leave the stored value untouched.
+    }
+    return defaultState();
+  }
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.sets)) return defaultState();
-    return normalizeState(parsed);
+    const res = await fetch("/api/initial");
+    if (!res.ok) return defaultState();
+    const data = await res.json();
+    if (!data || !Array.isArray(data.sets)) return defaultState();
+    const state = normalizeState(data);
+    saveState(state);
+    return state;
   } catch {
     return defaultState();
   }

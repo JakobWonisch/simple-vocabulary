@@ -17,6 +17,7 @@ func main() {
 	dictPath := envOr("DICT_PATH", filepath.Join(root, "data", "spa-deu.json"))
 	conjPath := envOr("CONJ_PATH", filepath.Join(root, "data", "spa-conj.json"))
 	webDir := envOr("WEB_DIR", filepath.Join(root, "web"))
+	initialPath := envOr("INITIAL_PATH", filepath.Join(root, "data", "simple-vocabulary-initial.json"))
 
 	dict, err := dictionary.LoadJSON(dictPath)
 	if err != nil {
@@ -40,6 +41,12 @@ func main() {
 
 	srv := api.New(dict, provider, webDir)
 	srv.Conj = conj
+	srv.InitialPath = initialPath
+	if _, err := os.Stat(initialPath); err != nil {
+		log.Printf("initial configuration not found: %s", initialPath)
+	} else {
+		log.Printf("initial configuration: %s", initialPath)
+	}
 	addr := api.AddrFromEnv()
 	log.Printf("listening on %s (web: %s)", addr, webDir)
 	if err := http.ListenAndServe(addr, srv.Handler()); err != nil {

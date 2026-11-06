@@ -1,0 +1,6428 @@
+{
+  "version": 1,
+  "direction": "es-de",
+  "conjugation": {
+    "mode": "ind",
+    "tense": "prs",
+    "order": "default"
+  },
+  "sets": [
+    {
+      "id": "4b6db545-c5e8-4e59-9ac7-c1ee720198e4",
+      "title": "internet, computer und programmieren",
+      "kind": "vocab",
+      "createdAt": "2026-11-06T13:20:30Z",
+      "updatedAt": "2026-11-06T13:21:12.260Z",
+      "cards": [
+        {
+          "id": "7e93d710-47a0-4352-8c21-998d0a871563",
+          "source": "ordenador",
+          "sourceArticle": "el",
+          "target": "Computer",
+          "targetArticle": "der",
+          "translations": [
+            "Computer"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "44c72a6f-d3e1-4c02-bca5-c7d256f57b83",
+          "source": "computadora",
+          "sourceArticle": "la",
+          "target": "Computer",
+          "targetArticle": "der",
+          "translations": [
+            "Computer"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "052355c1-231d-47ce-be26-41e26f083bd1",
+          "source": "pantalla",
+          "sourceArticle": "la",
+          "target": "Deckmantel",
+          "targetArticle": "der",
+          "translations": [
+            "Deckmantel",
+            "Tarnung",
+            "Schirm"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "8c222b60-3b83-4d96-9b74-26144675ac75",
+          "source": "teclado",
+          "sourceArticle": "el",
+          "target": "Tastatur",
+          "targetArticle": "die",
+          "translations": [
+            "Tastatur"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "12ef8ff5-7c20-45b3-ade8-0b15cc20bbb2",
+          "source": "ratón",
+          "sourceArticle": "el",
+          "target": "Maus",
+          "targetArticle": "die",
+          "translations": [
+            "Maus"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "1670a119-c8d3-442c-a33e-7e8f23c82801",
+          "source": "archivo",
+          "sourceArticle": "el",
+          "target": "Archiv",
+          "targetArticle": "das",
+          "translations": [
+            "Archiv",
+            "Datei"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "f0424010-4290-4885-9d76-7d7b498ce0d9",
+          "source": "carpeta",
+          "sourceArticle": "la",
+          "target": "Mappe",
+          "targetArticle": "die",
+          "translations": [
+            "Mappe",
+            "Ordner"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "6660eb2f-648e-43af-9d0d-c0fa2363c004",
+          "source": "programa",
+          "sourceArticle": "el",
+          "target": "Plan",
+          "targetArticle": "der",
+          "translations": [
+            "Plan",
+            "Programm"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "dc921a12-21e2-4f3c-9fd6-dfc9ff161ece",
+          "source": "código",
+          "sourceArticle": "el",
+          "target": "Code",
+          "targetArticle": "der",
+          "translations": [
+            "Code",
+            "Gesetzbuch",
+            "Kodex"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ce16ade8-599d-43f4-9890-3ea35f792e18",
+          "source": "contraseña",
+          "sourceArticle": "la",
+          "target": "Passwort",
+          "targetArticle": "das",
+          "translations": [
+            "Passwort"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        }
+      ]
+    },
+    {
+      "id": "9d4579c1-a91d-4eeb-a4d3-c09d2225b4f7",
+      "title": "parties, essen gehen, fortgehen, socializing",
+      "kind": "conjugation",
+      "createdAt": "2026-11-06T12:42:34Z",
+      "updatedAt": "2026-11-06T13:42:22.974Z",
+      "cards": [
+        {
+          "id": "f4eb8c58-7ae1-4055-aea7-023875f13796",
+          "source": "celebrar",
+          "sourceArticle": "",
+          "target": "feiern",
+          "targetArticle": "",
+          "translations": [
+            "feiern",
+            "loben",
+            "preisen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "celebraría",
+                "celebrarías",
+                "celebraría",
+                "celebraríamos",
+                "celebraríais",
+                "celebrarían"
+              ],
+              "fut": [
+                "celebraré",
+                "celebrarás",
+                "celebrará",
+                "celebraremos",
+                "celebraréis",
+                "celebrarán"
+              ],
+              "ipfv": [
+                "celebraba",
+                "celebrabas",
+                "celebraba",
+                "celebrábamos",
+                "celebrabais",
+                "celebraban"
+              ],
+              "pfv": [
+                "celebré",
+                "celebraste",
+                "celebró",
+                "celebramos",
+                "celebrasteis",
+                "celebraron"
+              ],
+              "prs": [
+                "celebro",
+                "celebras",
+                "celebra",
+                "celebramos",
+                "celebráis",
+                "celebran"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "celebrare",
+                "celebrares",
+                "celebrare",
+                "celebráremos",
+                "celebrareis",
+                "celebraren"
+              ],
+              "prs": [
+                "celebre",
+                "celebres",
+                "celebre",
+                "celebremos",
+                "celebréis",
+                "celebren"
+              ],
+              "ra": [
+                "celebrara",
+                "celebraras",
+                "celebrara",
+                "celebráramos",
+                "celebrarais",
+                "celebraran"
+              ],
+              "se": [
+                "celebrase",
+                "celebrases",
+                "celebrase",
+                "celebrásemos",
+                "celebraseis",
+                "celebrasen"
+              ]
+            },
+            "imp": [
+              "",
+              "celebra",
+              "celebre",
+              "celebremos",
+              "celebrad",
+              "celebren"
+            ],
+            "ger": "celebrando"
+          }
+        },
+        {
+          "id": "9ad64de6-0b92-4d1d-a1ac-257a75350ee8",
+          "source": "festejar",
+          "sourceArticle": "",
+          "target": "feiern",
+          "targetArticle": "",
+          "translations": [
+            "feiern"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "festejaría",
+                "festejarías",
+                "festejaría",
+                "festejaríamos",
+                "festejaríais",
+                "festejarían"
+              ],
+              "fut": [
+                "festejaré",
+                "festejarás",
+                "festejará",
+                "festejaremos",
+                "festejaréis",
+                "festejarán"
+              ],
+              "ipfv": [
+                "festejaba",
+                "festejabas",
+                "festejaba",
+                "festejábamos",
+                "festejabais",
+                "festejaban"
+              ],
+              "pfv": [
+                "festejé",
+                "festejaste",
+                "festejó",
+                "festejamos",
+                "festejasteis",
+                "festejaron"
+              ],
+              "prs": [
+                "festejo",
+                "festejas",
+                "festeja",
+                "festejamos",
+                "festejáis",
+                "festejan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "festejare",
+                "festejares",
+                "festejare",
+                "festejáremos",
+                "festejareis",
+                "festejaren"
+              ],
+              "prs": [
+                "festeje",
+                "festejes",
+                "festeje",
+                "festejemos",
+                "festejéis",
+                "festejen"
+              ],
+              "ra": [
+                "festejara",
+                "festejaras",
+                "festejara",
+                "festejáramos",
+                "festejarais",
+                "festejaran"
+              ],
+              "se": [
+                "festejase",
+                "festejases",
+                "festejase",
+                "festejásemos",
+                "festejaseis",
+                "festejasen"
+              ]
+            },
+            "imp": [
+              "",
+              "festeja",
+              "festeje",
+              "festejemos",
+              "festejad",
+              "festejen"
+            ],
+            "ger": "festejando"
+          }
+        },
+        {
+          "id": "efdbbf7a-5e54-4f82-9d6f-d23470c92296",
+          "source": "invitar",
+          "sourceArticle": "",
+          "target": "einladen",
+          "targetArticle": "",
+          "translations": [
+            "einladen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "invitaría",
+                "invitarías",
+                "invitaría",
+                "invitaríamos",
+                "invitaríais",
+                "invitarían"
+              ],
+              "fut": [
+                "invitaré",
+                "invitarás",
+                "invitará",
+                "invitaremos",
+                "invitaréis",
+                "invitarán"
+              ],
+              "ipfv": [
+                "invitaba",
+                "invitabas",
+                "invitaba",
+                "invitábamos",
+                "invitabais",
+                "invitaban"
+              ],
+              "pfv": [
+                "invité",
+                "invitaste",
+                "invitó",
+                "invitamos",
+                "invitasteis",
+                "invitaron"
+              ],
+              "prs": [
+                "invito",
+                "invitas",
+                "invita",
+                "invitamos",
+                "invitáis",
+                "invitan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "invitare",
+                "invitares",
+                "invitare",
+                "invitáremos",
+                "invitareis",
+                "invitaren"
+              ],
+              "prs": [
+                "invite",
+                "invites",
+                "invite",
+                "invitemos",
+                "invitéis",
+                "inviten"
+              ],
+              "ra": [
+                "invitara",
+                "invitaras",
+                "invitara",
+                "invitáramos",
+                "invitarais",
+                "invitaran"
+              ],
+              "se": [
+                "invitase",
+                "invitases",
+                "invitase",
+                "invitásemos",
+                "invitaseis",
+                "invitasen"
+              ]
+            },
+            "imp": [
+              "",
+              "invita",
+              "invite",
+              "invitemos",
+              "invitad",
+              "inviten"
+            ],
+            "ger": "invitando"
+          }
+        },
+        {
+          "id": "4af909cf-0098-4238-8557-79794fa509bd",
+          "source": "salir",
+          "sourceArticle": "",
+          "target": "herausgehen",
+          "targetArticle": "",
+          "translations": [
+            "herausgehen",
+            "weggehen",
+            "ausgehen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "saldría",
+                "saldrías",
+                "saldría",
+                "saldríamos",
+                "saldríais",
+                "saldrían"
+              ],
+              "fut": [
+                "saldré",
+                "saldrás",
+                "saldrá",
+                "saldremos",
+                "saldréis",
+                "saldrán"
+              ],
+              "ipfv": [
+                "salía",
+                "salías",
+                "salía",
+                "salíamos",
+                "salíais",
+                "salían"
+              ],
+              "pfv": [
+                "salí",
+                "saliste",
+                "salió",
+                "salimos",
+                "salisteis",
+                "salieron"
+              ],
+              "prs": [
+                "salgo",
+                "sales",
+                "sale",
+                "salimos",
+                "salís",
+                "salen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "saliere",
+                "salieres",
+                "saliere",
+                "saliéremos",
+                "saliereis",
+                "salieren"
+              ],
+              "prs": [
+                "salga",
+                "salgas",
+                "salga",
+                "salgamos",
+                "salgáis",
+                "salgan"
+              ],
+              "ra": [
+                "saliera",
+                "salieras",
+                "saliera",
+                "saliéramos",
+                "salierais",
+                "salieran"
+              ],
+              "se": [
+                "saliese",
+                "salieses",
+                "saliese",
+                "saliésemos",
+                "salieseis",
+                "saliesen"
+              ]
+            },
+            "imp": [
+              "",
+              "sal",
+              "salga",
+              "salgamos",
+              "salid",
+              "salgan"
+            ],
+            "ger": "saliendo"
+          }
+        },
+        {
+          "id": "3b58b5b4-43db-47a8-8d4e-d9d7dd199a97",
+          "source": "quedar",
+          "sourceArticle": "",
+          "target": "sich verabreden",
+          "targetArticle": "",
+          "translations": [
+            "sich verabreden",
+            "verbleiben",
+            "bleiben"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "quedaría",
+                "quedarías",
+                "quedaría",
+                "quedaríamos",
+                "quedaríais",
+                "quedarían"
+              ],
+              "fut": [
+                "quedaré",
+                "quedarás",
+                "quedará",
+                "quedaremos",
+                "quedaréis",
+                "quedarán"
+              ],
+              "ipfv": [
+                "quedaba",
+                "quedabas",
+                "quedaba",
+                "quedábamos",
+                "quedabais",
+                "quedaban"
+              ],
+              "pfv": [
+                "quedé",
+                "quedaste",
+                "quedó",
+                "quedamos",
+                "quedasteis",
+                "quedaron"
+              ],
+              "prs": [
+                "quedo",
+                "quedas",
+                "queda",
+                "quedamos",
+                "quedáis",
+                "quedan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "quedare",
+                "quedares",
+                "quedare",
+                "quedáremos",
+                "quedareis",
+                "quedaren"
+              ],
+              "prs": [
+                "quede",
+                "quedes",
+                "quede",
+                "quedemos",
+                "quedéis",
+                "queden"
+              ],
+              "ra": [
+                "quedara",
+                "quedaras",
+                "quedara",
+                "quedáramos",
+                "quedarais",
+                "quedaran"
+              ],
+              "se": [
+                "quedase",
+                "quedases",
+                "quedase",
+                "quedásemos",
+                "quedaseis",
+                "quedasen"
+              ]
+            },
+            "imp": [
+              "",
+              "queda",
+              "quede",
+              "quedemos",
+              "quedad",
+              "queden"
+            ],
+            "ger": "quedando"
+          }
+        },
+        {
+          "id": "ffc46c07-b95e-4eec-b239-40ad1759ca8c",
+          "source": "reunir",
+          "sourceArticle": "",
+          "target": "verbinden",
+          "targetArticle": "",
+          "translations": [
+            "verbinden",
+            "zusammenfügen",
+            "vereinen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "reuniría",
+                "reunirías",
+                "reuniría",
+                "reuniríamos",
+                "reuniríais",
+                "reunirían"
+              ],
+              "fut": [
+                "reuniré",
+                "reunirás",
+                "reunirá",
+                "reuniremos",
+                "reuniréis",
+                "reunirán"
+              ],
+              "ipfv": [
+                "reunía",
+                "reunías",
+                "reunía",
+                "reuníamos",
+                "reuníais",
+                "reunían"
+              ],
+              "pfv": [
+                "reuní",
+                "reuniste",
+                "reunió",
+                "reunimos",
+                "reunisteis",
+                "reunieron"
+              ],
+              "prs": [
+                "reúno",
+                "reúnes",
+                "reúne",
+                "reunimos",
+                "reunís",
+                "reúnen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "reuniere",
+                "reunieres",
+                "reuniere",
+                "reuniéremos",
+                "reuniereis",
+                "reunieren"
+              ],
+              "prs": [
+                "reúna",
+                "reúnas",
+                "reúna",
+                "reunamos",
+                "reunáis",
+                "reúnan"
+              ],
+              "ra": [
+                "reuniera",
+                "reunieras",
+                "reuniera",
+                "reuniéramos",
+                "reunierais",
+                "reunieran"
+              ],
+              "se": [
+                "reuniese",
+                "reunieses",
+                "reuniese",
+                "reuniésemos",
+                "reunieseis",
+                "reuniesen"
+              ]
+            },
+            "imp": [
+              "",
+              "reúne",
+              "reúna",
+              "reunamos",
+              "reunid",
+              "reúnan"
+            ],
+            "ger": "reuniendo"
+          }
+        },
+        {
+          "id": "8d8c8682-0971-4fc5-9f8b-02beb12e25f0",
+          "source": "visitar",
+          "sourceArticle": "",
+          "target": "besuchen",
+          "targetArticle": "",
+          "translations": [
+            "besuchen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "visitaría",
+                "visitarías",
+                "visitaría",
+                "visitaríamos",
+                "visitaríais",
+                "visitarían"
+              ],
+              "fut": [
+                "visitaré",
+                "visitarás",
+                "visitará",
+                "visitaremos",
+                "visitaréis",
+                "visitarán"
+              ],
+              "ipfv": [
+                "visitaba",
+                "visitabas",
+                "visitaba",
+                "visitábamos",
+                "visitabais",
+                "visitaban"
+              ],
+              "pfv": [
+                "visité",
+                "visitaste",
+                "visitó",
+                "visitamos",
+                "visitasteis",
+                "visitaron"
+              ],
+              "prs": [
+                "visito",
+                "visitas",
+                "visita",
+                "visitamos",
+                "visitáis",
+                "visitan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "visitare",
+                "visitares",
+                "visitare",
+                "visitáremos",
+                "visitareis",
+                "visitaren"
+              ],
+              "prs": [
+                "visite",
+                "visites",
+                "visite",
+                "visitemos",
+                "visitéis",
+                "visiten"
+              ],
+              "ra": [
+                "visitara",
+                "visitaras",
+                "visitara",
+                "visitáramos",
+                "visitarais",
+                "visitaran"
+              ],
+              "se": [
+                "visitase",
+                "visitases",
+                "visitase",
+                "visitásemos",
+                "visitaseis",
+                "visitasen"
+              ]
+            },
+            "imp": [
+              "",
+              "visita",
+              "visite",
+              "visitemos",
+              "visitad",
+              "visiten"
+            ],
+            "ger": "visitando"
+          }
+        },
+        {
+          "id": "a8b1d031-ea9d-44a6-b5ea-086453f845a4",
+          "source": "saludar",
+          "sourceArticle": "",
+          "target": "begrüßen",
+          "targetArticle": "",
+          "translations": [
+            "begrüßen",
+            "grüßen",
+            "salutieren"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "saludaría",
+                "saludarías",
+                "saludaría",
+                "saludaríamos",
+                "saludaríais",
+                "saludarían"
+              ],
+              "fut": [
+                "saludaré",
+                "saludarás",
+                "saludará",
+                "saludaremos",
+                "saludaréis",
+                "saludarán"
+              ],
+              "ipfv": [
+                "saludaba",
+                "saludabas",
+                "saludaba",
+                "saludábamos",
+                "saludabais",
+                "saludaban"
+              ],
+              "pfv": [
+                "saludé",
+                "saludaste",
+                "saludó",
+                "saludamos",
+                "saludasteis",
+                "saludaron"
+              ],
+              "prs": [
+                "saludo",
+                "saludas",
+                "saluda",
+                "saludamos",
+                "saludáis",
+                "saludan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "saludare",
+                "saludares",
+                "saludare",
+                "saludáremos",
+                "saludareis",
+                "saludaren"
+              ],
+              "prs": [
+                "salude",
+                "saludes",
+                "salude",
+                "saludemos",
+                "saludéis",
+                "saluden"
+              ],
+              "ra": [
+                "saludara",
+                "saludaras",
+                "saludara",
+                "saludáramos",
+                "saludarais",
+                "saludaran"
+              ],
+              "se": [
+                "saludase",
+                "saludases",
+                "saludase",
+                "saludásemos",
+                "saludaseis",
+                "saludasen"
+              ]
+            },
+            "imp": [
+              "",
+              "saluda",
+              "salude",
+              "saludemos",
+              "saludad",
+              "saluden"
+            ],
+            "ger": "saludando"
+          }
+        },
+        {
+          "id": "89a2de72-5f11-41a0-a2aa-0a4a88d59c70",
+          "source": "despedir",
+          "sourceArticle": "",
+          "target": "kündigen",
+          "targetArticle": "",
+          "translations": [
+            "kündigen",
+            "entlassen",
+            "verabschieden"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "despediría",
+                "despedirías",
+                "despediría",
+                "despediríamos",
+                "despediríais",
+                "despedirían"
+              ],
+              "fut": [
+                "despediré",
+                "despedirás",
+                "despedirá",
+                "despediremos",
+                "despediréis",
+                "despedirán"
+              ],
+              "ipfv": [
+                "despedía",
+                "despedías",
+                "despedía",
+                "despedíamos",
+                "despedíais",
+                "despedían"
+              ],
+              "pfv": [
+                "despedí",
+                "despediste",
+                "despidió",
+                "despedimos",
+                "despedisteis",
+                "despidieron"
+              ],
+              "prs": [
+                "despido",
+                "despides",
+                "despide",
+                "despedimos",
+                "despedís",
+                "despiden"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "despidiere",
+                "despidieres",
+                "despidiere",
+                "despidiéremos",
+                "despidiereis",
+                "despidieren"
+              ],
+              "prs": [
+                "despida",
+                "despidas",
+                "despida",
+                "despidamos",
+                "despidáis",
+                "despidan"
+              ],
+              "ra": [
+                "despidiera",
+                "despidieras",
+                "despidiera",
+                "despidiéramos",
+                "despidierais",
+                "despidieran"
+              ],
+              "se": [
+                "despidiese",
+                "despidieses",
+                "despidiese",
+                "despidiésemos",
+                "despidieseis",
+                "despidiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "despide",
+              "despida",
+              "despidamos",
+              "despedid",
+              "despidan"
+            ],
+            "ger": "despidiendo"
+          }
+        },
+        {
+          "id": "374e8862-f8b6-47bb-b2ea-5a2f2a777542",
+          "source": "presentar",
+          "sourceArticle": "",
+          "target": "einreichen",
+          "targetArticle": "",
+          "translations": [
+            "einreichen",
+            "präsentieren",
+            "vorführen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "presentaría",
+                "presentarías",
+                "presentaría",
+                "presentaríamos",
+                "presentaríais",
+                "presentarían"
+              ],
+              "fut": [
+                "presentaré",
+                "presentarás",
+                "presentará",
+                "presentaremos",
+                "presentaréis",
+                "presentarán"
+              ],
+              "ipfv": [
+                "presentaba",
+                "presentabas",
+                "presentaba",
+                "presentábamos",
+                "presentabais",
+                "presentaban"
+              ],
+              "pfv": [
+                "presenté",
+                "presentaste",
+                "presentó",
+                "presentamos",
+                "presentasteis",
+                "presentaron"
+              ],
+              "prs": [
+                "presento",
+                "presentas",
+                "presenta",
+                "presentamos",
+                "presentáis",
+                "presentan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "presentare",
+                "presentares",
+                "presentare",
+                "presentáremos",
+                "presentareis",
+                "presentaren"
+              ],
+              "prs": [
+                "presente",
+                "presentes",
+                "presente",
+                "presentemos",
+                "presentéis",
+                "presenten"
+              ],
+              "ra": [
+                "presentara",
+                "presentaras",
+                "presentara",
+                "presentáramos",
+                "presentarais",
+                "presentaran"
+              ],
+              "se": [
+                "presentase",
+                "presentases",
+                "presentase",
+                "presentásemos",
+                "presentaseis",
+                "presentasen"
+              ]
+            },
+            "imp": [
+              "",
+              "presenta",
+              "presente",
+              "presentemos",
+              "presentad",
+              "presenten"
+            ],
+            "ger": "presentando"
+          }
+        },
+        {
+          "id": "88d4e826-47a9-48b6-b815-95bcbbafee22",
+          "source": "conocer",
+          "sourceArticle": "",
+          "target": "kennen",
+          "targetArticle": "",
+          "translations": [
+            "kennen",
+            "kennen lernen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "conocería",
+                "conocerías",
+                "conocería",
+                "conoceríamos",
+                "conoceríais",
+                "conocerían"
+              ],
+              "fut": [
+                "conoceré",
+                "conocerás",
+                "conocerá",
+                "conoceremos",
+                "conoceréis",
+                "conocerán"
+              ],
+              "ipfv": [
+                "conocía",
+                "conocías",
+                "conocía",
+                "conocíamos",
+                "conocíais",
+                "conocían"
+              ],
+              "pfv": [
+                "conocí",
+                "conociste",
+                "conoció",
+                "conocimos",
+                "conocisteis",
+                "conocieron"
+              ],
+              "prs": [
+                "conozco",
+                "conoces",
+                "conoce",
+                "conocemos",
+                "conocéis",
+                "conocen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "conociere",
+                "conocieres",
+                "conociere",
+                "conociéremos",
+                "conociereis",
+                "conocieren"
+              ],
+              "prs": [
+                "conozca",
+                "conozcas",
+                "conozca",
+                "conozcamos",
+                "conozcáis",
+                "conozcan"
+              ],
+              "ra": [
+                "conociera",
+                "conocieras",
+                "conociera",
+                "conociéramos",
+                "conocierais",
+                "conocieran"
+              ],
+              "se": [
+                "conociese",
+                "conocieses",
+                "conociese",
+                "conociésemos",
+                "conocieseis",
+                "conociesen"
+              ]
+            },
+            "imp": [
+              "",
+              "conoce",
+              "conozca",
+              "conozcamos",
+              "conoced",
+              "conozcan"
+            ],
+            "ger": "conociendo"
+          }
+        },
+        {
+          "id": "72fac3ed-a54e-42e7-9241-4982a43d3f2b",
+          "source": "charlar",
+          "sourceArticle": "",
+          "target": "plaudern",
+          "targetArticle": "",
+          "translations": [
+            "plaudern"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "charlaría",
+                "charlarías",
+                "charlaría",
+                "charlaríamos",
+                "charlaríais",
+                "charlarían"
+              ],
+              "fut": [
+                "charlaré",
+                "charlarás",
+                "charlará",
+                "charlaremos",
+                "charlaréis",
+                "charlarán"
+              ],
+              "ipfv": [
+                "charlaba",
+                "charlabas",
+                "charlaba",
+                "charlábamos",
+                "charlabais",
+                "charlaban"
+              ],
+              "pfv": [
+                "charlé",
+                "charlaste",
+                "charló",
+                "charlamos",
+                "charlasteis",
+                "charlaron"
+              ],
+              "prs": [
+                "charlo",
+                "charlas",
+                "charla",
+                "charlamos",
+                "charláis",
+                "charlan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "charlare",
+                "charlares",
+                "charlare",
+                "charláremos",
+                "charlareis",
+                "charlaren"
+              ],
+              "prs": [
+                "charle",
+                "charles",
+                "charle",
+                "charlemos",
+                "charléis",
+                "charlen"
+              ],
+              "ra": [
+                "charlara",
+                "charlaras",
+                "charlara",
+                "charláramos",
+                "charlarais",
+                "charlaran"
+              ],
+              "se": [
+                "charlase",
+                "charlases",
+                "charlase",
+                "charlásemos",
+                "charlaseis",
+                "charlasen"
+              ]
+            },
+            "imp": [
+              "",
+              "charla",
+              "charle",
+              "charlemos",
+              "charlad",
+              "charlen"
+            ],
+            "ger": "charlando"
+          }
+        },
+        {
+          "id": "d9da7099-8471-4aef-b96d-2a20ab3655fd",
+          "source": "conversar",
+          "sourceArticle": "",
+          "target": "kommunizieren",
+          "targetArticle": "",
+          "translations": [
+            "kommunizieren",
+            "sich unterhalten"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "conversaría",
+                "conversarías",
+                "conversaría",
+                "conversaríamos",
+                "conversaríais",
+                "conversarían"
+              ],
+              "fut": [
+                "conversaré",
+                "conversarás",
+                "conversará",
+                "conversaremos",
+                "conversaréis",
+                "conversarán"
+              ],
+              "ipfv": [
+                "conversaba",
+                "conversabas",
+                "conversaba",
+                "conversábamos",
+                "conversabais",
+                "conversaban"
+              ],
+              "pfv": [
+                "conversé",
+                "conversaste",
+                "conversó",
+                "conversamos",
+                "conversasteis",
+                "conversaron"
+              ],
+              "prs": [
+                "converso",
+                "conversas",
+                "conversa",
+                "conversamos",
+                "conversáis",
+                "conversan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "conversare",
+                "conversares",
+                "conversare",
+                "conversáremos",
+                "conversareis",
+                "conversaren"
+              ],
+              "prs": [
+                "converse",
+                "converses",
+                "converse",
+                "conversemos",
+                "converséis",
+                "conversen"
+              ],
+              "ra": [
+                "conversara",
+                "conversaras",
+                "conversara",
+                "conversáramos",
+                "conversarais",
+                "conversaran"
+              ],
+              "se": [
+                "conversase",
+                "conversases",
+                "conversase",
+                "conversásemos",
+                "conversaseis",
+                "conversasen"
+              ]
+            },
+            "imp": [
+              "",
+              "conversa",
+              "converse",
+              "conversemos",
+              "conversad",
+              "conversen"
+            ],
+            "ger": "conversando"
+          }
+        },
+        {
+          "id": "a24f1775-da38-4c22-a2f1-5ae02d19933a",
+          "source": "hablar",
+          "sourceArticle": "",
+          "target": "sprechen",
+          "targetArticle": "",
+          "translations": [
+            "sprechen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "hablaría",
+                "hablarías",
+                "hablaría",
+                "hablaríamos",
+                "hablaríais",
+                "hablarían"
+              ],
+              "fut": [
+                "hablaré",
+                "hablarás",
+                "hablará",
+                "hablaremos",
+                "hablaréis",
+                "hablarán"
+              ],
+              "ipfv": [
+                "hablaba",
+                "hablabas",
+                "hablaba",
+                "hablábamos",
+                "hablabais",
+                "hablaban"
+              ],
+              "pfv": [
+                "hablé",
+                "hablaste",
+                "habló",
+                "hablamos",
+                "hablasteis",
+                "hablaron"
+              ],
+              "prs": [
+                "hablo",
+                "hablas",
+                "habla",
+                "hablamos",
+                "habláis",
+                "hablan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "hablare",
+                "hablares",
+                "hablare",
+                "habláremos",
+                "hablareis",
+                "hablaren"
+              ],
+              "prs": [
+                "hable",
+                "hables",
+                "hable",
+                "hablemos",
+                "habléis",
+                "hablen"
+              ],
+              "ra": [
+                "hablara",
+                "hablaras",
+                "hablara",
+                "habláramos",
+                "hablarais",
+                "hablaran"
+              ],
+              "se": [
+                "hablase",
+                "hablases",
+                "hablase",
+                "hablásemos",
+                "hablaseis",
+                "hablasen"
+              ]
+            },
+            "imp": [
+              "",
+              "habla",
+              "hable",
+              "hablemos",
+              "hablad",
+              "hablen"
+            ],
+            "ger": "hablando"
+          }
+        },
+        {
+          "id": "cd164950-0722-4f1d-a5f7-94a64849b9b2",
+          "source": "comentar",
+          "sourceArticle": "",
+          "target": "kommentieren",
+          "targetArticle": "",
+          "translations": [
+            "kommentieren"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "comentaría",
+                "comentarías",
+                "comentaría",
+                "comentaríamos",
+                "comentaríais",
+                "comentarían"
+              ],
+              "fut": [
+                "comentaré",
+                "comentarás",
+                "comentará",
+                "comentaremos",
+                "comentaréis",
+                "comentarán"
+              ],
+              "ipfv": [
+                "comentaba",
+                "comentabas",
+                "comentaba",
+                "comentábamos",
+                "comentabais",
+                "comentaban"
+              ],
+              "pfv": [
+                "comenté",
+                "comentaste",
+                "comentó",
+                "comentamos",
+                "comentasteis",
+                "comentaron"
+              ],
+              "prs": [
+                "comento",
+                "comentas",
+                "comenta",
+                "comentamos",
+                "comentáis",
+                "comentan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "comentare",
+                "comentares",
+                "comentare",
+                "comentáremos",
+                "comentareis",
+                "comentaren"
+              ],
+              "prs": [
+                "comente",
+                "comentes",
+                "comente",
+                "comentemos",
+                "comentéis",
+                "comenten"
+              ],
+              "ra": [
+                "comentara",
+                "comentaras",
+                "comentara",
+                "comentáramos",
+                "comentarais",
+                "comentaran"
+              ],
+              "se": [
+                "comentase",
+                "comentases",
+                "comentase",
+                "comentásemos",
+                "comentaseis",
+                "comentasen"
+              ]
+            },
+            "imp": [
+              "",
+              "comenta",
+              "comente",
+              "comentemos",
+              "comentad",
+              "comenten"
+            ],
+            "ger": "comentando"
+          }
+        },
+        {
+          "id": "7c698c95-9d4a-4c97-9bf4-8a0f16c165e1",
+          "source": "contar",
+          "sourceArticle": "",
+          "target": "erzählen",
+          "targetArticle": "",
+          "translations": [
+            "erzählen",
+            "gelten",
+            "rechnen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "contaría",
+                "contarías",
+                "contaría",
+                "contaríamos",
+                "contaríais",
+                "contarían"
+              ],
+              "fut": [
+                "contaré",
+                "contarás",
+                "contará",
+                "contaremos",
+                "contaréis",
+                "contarán"
+              ],
+              "ipfv": [
+                "contaba",
+                "contabas",
+                "contaba",
+                "contábamos",
+                "contabais",
+                "contaban"
+              ],
+              "pfv": [
+                "conté",
+                "contaste",
+                "contó",
+                "contamos",
+                "contasteis",
+                "contaron"
+              ],
+              "prs": [
+                "cuento",
+                "cuentas",
+                "cuenta",
+                "contamos",
+                "contáis",
+                "cuentan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "contare",
+                "contares",
+                "contare",
+                "contáremos",
+                "contareis",
+                "contaren"
+              ],
+              "prs": [
+                "cuente",
+                "cuentes",
+                "cuente",
+                "contemos",
+                "contéis",
+                "cuenten"
+              ],
+              "ra": [
+                "contara",
+                "contaras",
+                "contara",
+                "contáramos",
+                "contarais",
+                "contaran"
+              ],
+              "se": [
+                "contase",
+                "contases",
+                "contase",
+                "contásemos",
+                "contaseis",
+                "contasen"
+              ]
+            },
+            "imp": [
+              "",
+              "cuenta",
+              "cuente",
+              "contemos",
+              "contad",
+              "cuenten"
+            ],
+            "ger": "contando"
+          }
+        },
+        {
+          "id": "dea06901-0311-474b-b4b9-0643974182bc",
+          "source": "reír",
+          "sourceArticle": "",
+          "target": "lachen",
+          "targetArticle": "",
+          "translations": [
+            "lachen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "reiría",
+                "reirías",
+                "reiría",
+                "reiríamos",
+                "reiríais",
+                "reirían"
+              ],
+              "fut": [
+                "reiré",
+                "reirás",
+                "reirá",
+                "reiremos",
+                "reiréis",
+                "reirán"
+              ],
+              "ipfv": [
+                "reía",
+                "reías",
+                "reía",
+                "reíamos",
+                "reíais",
+                "reían"
+              ],
+              "pfv": [
+                "reí",
+                "reíste",
+                "rio",
+                "reímos",
+                "reísteis",
+                "rieron"
+              ],
+              "prs": [
+                "río",
+                "ríes",
+                "ríe",
+                "reímos",
+                "reís",
+                "ríen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "riere",
+                "rieres",
+                "riere",
+                "riéremos",
+                "riereis",
+                "rieren"
+              ],
+              "prs": [
+                "ría",
+                "rías",
+                "ría",
+                "riamos",
+                "riais",
+                "rían"
+              ],
+              "ra": [
+                "riera",
+                "rieras",
+                "riera",
+                "riéramos",
+                "rierais",
+                "rieran"
+              ],
+              "se": [
+                "riese",
+                "rieses",
+                "riese",
+                "riésemos",
+                "rieseis",
+                "riesen"
+              ]
+            },
+            "imp": [
+              "",
+              "ríe",
+              "ría",
+              "riamos",
+              "reíd",
+              "rían"
+            ],
+            "ger": "riendo"
+          }
+        },
+        {
+          "id": "c420b33e-2ec6-44ef-b778-7dcee25cbfd8",
+          "source": "bailar",
+          "sourceArticle": "",
+          "target": "tanzen",
+          "targetArticle": "",
+          "translations": [
+            "tanzen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "bailaría",
+                "bailarías",
+                "bailaría",
+                "bailaríamos",
+                "bailaríais",
+                "bailarían"
+              ],
+              "fut": [
+                "bailaré",
+                "bailarás",
+                "bailará",
+                "bailaremos",
+                "bailaréis",
+                "bailarán"
+              ],
+              "ipfv": [
+                "bailaba",
+                "bailabas",
+                "bailaba",
+                "bailábamos",
+                "bailabais",
+                "bailaban"
+              ],
+              "pfv": [
+                "bailé",
+                "bailaste",
+                "bailó",
+                "bailamos",
+                "bailasteis",
+                "bailaron"
+              ],
+              "prs": [
+                "bailo",
+                "bailas",
+                "baila",
+                "bailamos",
+                "bailáis",
+                "bailan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "bailare",
+                "bailares",
+                "bailare",
+                "bailáremos",
+                "bailareis",
+                "bailaren"
+              ],
+              "prs": [
+                "baile",
+                "bailes",
+                "baile",
+                "bailemos",
+                "bailéis",
+                "bailen"
+              ],
+              "ra": [
+                "bailara",
+                "bailaras",
+                "bailara",
+                "bailáramos",
+                "bailarais",
+                "bailaran"
+              ],
+              "se": [
+                "bailase",
+                "bailases",
+                "bailase",
+                "bailásemos",
+                "bailaseis",
+                "bailasen"
+              ]
+            },
+            "imp": [
+              "",
+              "baila",
+              "baile",
+              "bailemos",
+              "bailad",
+              "bailen"
+            ],
+            "ger": "bailando"
+          }
+        },
+        {
+          "id": "4e971258-6141-4478-9c5e-cc0478a25e94",
+          "source": "tocar",
+          "sourceArticle": "",
+          "target": "spielen",
+          "targetArticle": "",
+          "translations": [
+            "spielen",
+            "berühren"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "tocaría",
+                "tocarías",
+                "tocaría",
+                "tocaríamos",
+                "tocaríais",
+                "tocarían"
+              ],
+              "fut": [
+                "tocaré",
+                "tocarás",
+                "tocará",
+                "tocaremos",
+                "tocaréis",
+                "tocarán"
+              ],
+              "ipfv": [
+                "tocaba",
+                "tocabas",
+                "tocaba",
+                "tocábamos",
+                "tocabais",
+                "tocaban"
+              ],
+              "pfv": [
+                "toqué",
+                "tocaste",
+                "tocó",
+                "tocamos",
+                "tocasteis",
+                "tocaron"
+              ],
+              "prs": [
+                "toco",
+                "tocas",
+                "toca",
+                "tocamos",
+                "tocáis",
+                "tocan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "tocare",
+                "tocares",
+                "tocare",
+                "tocáremos",
+                "tocareis",
+                "tocaren"
+              ],
+              "prs": [
+                "toque",
+                "toques",
+                "toque",
+                "toquemos",
+                "toquéis",
+                "toquen"
+              ],
+              "ra": [
+                "tocara",
+                "tocaras",
+                "tocara",
+                "tocáramos",
+                "tocarais",
+                "tocaran"
+              ],
+              "se": [
+                "tocase",
+                "tocases",
+                "tocase",
+                "tocásemos",
+                "tocaseis",
+                "tocasen"
+              ]
+            },
+            "imp": [
+              "",
+              "toca",
+              "toque",
+              "toquemos",
+              "tocad",
+              "toquen"
+            ],
+            "ger": "tocando"
+          }
+        },
+        {
+          "id": "445f2a10-42f1-4dbd-ac15-9e8c8869789a",
+          "source": "escuchar",
+          "sourceArticle": "",
+          "target": "hören",
+          "targetArticle": "",
+          "translations": [
+            "hören",
+            "anhören",
+            "zuhören"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "escucharía",
+                "escucharías",
+                "escucharía",
+                "escucharíamos",
+                "escucharíais",
+                "escucharían"
+              ],
+              "fut": [
+                "escucharé",
+                "escucharás",
+                "escuchará",
+                "escucharemos",
+                "escucharéis",
+                "escucharán"
+              ],
+              "ipfv": [
+                "escuchaba",
+                "escuchabas",
+                "escuchaba",
+                "escuchábamos",
+                "escuchabais",
+                "escuchaban"
+              ],
+              "pfv": [
+                "escuché",
+                "escuchaste",
+                "escuchó",
+                "escuchamos",
+                "escuchasteis",
+                "escucharon"
+              ],
+              "prs": [
+                "escucho",
+                "escuchas",
+                "escucha",
+                "escuchamos",
+                "escucháis",
+                "escuchan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "escuchare",
+                "escuchares",
+                "escuchare",
+                "escucháremos",
+                "escuchareis",
+                "escucharen"
+              ],
+              "prs": [
+                "escuche",
+                "escuches",
+                "escuche",
+                "escuchemos",
+                "escuchéis",
+                "escuchen"
+              ],
+              "ra": [
+                "escuchara",
+                "escucharas",
+                "escuchara",
+                "escucháramos",
+                "escucharais",
+                "escucharan"
+              ],
+              "se": [
+                "escuchase",
+                "escuchases",
+                "escuchase",
+                "escuchásemos",
+                "escuchaseis",
+                "escuchasen"
+              ]
+            },
+            "imp": [
+              "",
+              "escucha",
+              "escuche",
+              "escuchemos",
+              "escuchad",
+              "escuchen"
+            ],
+            "ger": "escuchando"
+          }
+        },
+        {
+          "id": "48778ffd-2e57-4f74-84c0-b7c41420d691",
+          "source": "brindar",
+          "sourceArticle": "",
+          "target": "anstoßen (Gläser)",
+          "targetArticle": "",
+          "translations": [
+            "anstoßen (Gläser)"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "brindaría",
+                "brindarías",
+                "brindaría",
+                "brindaríamos",
+                "brindaríais",
+                "brindarían"
+              ],
+              "fut": [
+                "brindaré",
+                "brindarás",
+                "brindará",
+                "brindaremos",
+                "brindaréis",
+                "brindarán"
+              ],
+              "ipfv": [
+                "brindaba",
+                "brindabas",
+                "brindaba",
+                "brindábamos",
+                "brindabais",
+                "brindaban"
+              ],
+              "pfv": [
+                "brindé",
+                "brindaste",
+                "brindó",
+                "brindamos",
+                "brindasteis",
+                "brindaron"
+              ],
+              "prs": [
+                "brindo",
+                "brindas",
+                "brinda",
+                "brindamos",
+                "brindáis",
+                "brindan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "brindare",
+                "brindares",
+                "brindare",
+                "brindáremos",
+                "brindareis",
+                "brindaren"
+              ],
+              "prs": [
+                "brinde",
+                "brindes",
+                "brinde",
+                "brindemos",
+                "brindéis",
+                "brinden"
+              ],
+              "ra": [
+                "brindara",
+                "brindaras",
+                "brindara",
+                "brindáramos",
+                "brindarais",
+                "brindaran"
+              ],
+              "se": [
+                "brindase",
+                "brindases",
+                "brindase",
+                "brindásemos",
+                "brindaseis",
+                "brindasen"
+              ]
+            },
+            "imp": [
+              "",
+              "brinda",
+              "brinde",
+              "brindemos",
+              "brindad",
+              "brinden"
+            ],
+            "ger": "brindando"
+          }
+        },
+        {
+          "id": "9320081b-fbc7-4357-a283-f85184a73965",
+          "source": "beber",
+          "sourceArticle": "",
+          "target": "trinken",
+          "targetArticle": "",
+          "translations": [
+            "trinken"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "bebería",
+                "beberías",
+                "bebería",
+                "beberíamos",
+                "beberíais",
+                "beberían"
+              ],
+              "fut": [
+                "beberé",
+                "beberás",
+                "beberá",
+                "beberemos",
+                "beberéis",
+                "beberán"
+              ],
+              "ipfv": [
+                "bebía",
+                "bebías",
+                "bebía",
+                "bebíamos",
+                "bebíais",
+                "bebían"
+              ],
+              "pfv": [
+                "bebí",
+                "bebiste",
+                "bebió",
+                "bebimos",
+                "bebisteis",
+                "bebieron"
+              ],
+              "prs": [
+                "bebo",
+                "bebes",
+                "bebe",
+                "bebemos",
+                "bebéis",
+                "beben"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "bebiere",
+                "bebieres",
+                "bebiere",
+                "bebiéremos",
+                "bebiereis",
+                "bebieren"
+              ],
+              "prs": [
+                "beba",
+                "bebas",
+                "beba",
+                "bebamos",
+                "bebáis",
+                "beban"
+              ],
+              "ra": [
+                "bebiera",
+                "bebieras",
+                "bebiera",
+                "bebiéramos",
+                "bebierais",
+                "bebieran"
+              ],
+              "se": [
+                "bebiese",
+                "bebieses",
+                "bebiese",
+                "bebiésemos",
+                "bebieseis",
+                "bebiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "bebe",
+              "beba",
+              "bebamos",
+              "bebed",
+              "beban"
+            ],
+            "ger": "bebiendo"
+          }
+        },
+        {
+          "id": "09c32fb7-a850-4713-aa01-4bb7feaebf0d",
+          "source": "tomar",
+          "sourceArticle": "",
+          "target": "einnehmen",
+          "targetArticle": "",
+          "translations": [
+            "einnehmen",
+            "trinken",
+            "nehmen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "tomaría",
+                "tomarías",
+                "tomaría",
+                "tomaríamos",
+                "tomaríais",
+                "tomarían"
+              ],
+              "fut": [
+                "tomaré",
+                "tomarás",
+                "tomará",
+                "tomaremos",
+                "tomaréis",
+                "tomarán"
+              ],
+              "ipfv": [
+                "tomaba",
+                "tomabas",
+                "tomaba",
+                "tomábamos",
+                "tomabais",
+                "tomaban"
+              ],
+              "pfv": [
+                "tomé",
+                "tomaste",
+                "tomó",
+                "tomamos",
+                "tomasteis",
+                "tomaron"
+              ],
+              "prs": [
+                "tomo",
+                "tomas",
+                "toma",
+                "tomamos",
+                "tomáis",
+                "toman"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "tomare",
+                "tomares",
+                "tomare",
+                "tomáremos",
+                "tomareis",
+                "tomaren"
+              ],
+              "prs": [
+                "tome",
+                "tomes",
+                "tome",
+                "tomemos",
+                "toméis",
+                "tomen"
+              ],
+              "ra": [
+                "tomara",
+                "tomaras",
+                "tomara",
+                "tomáramos",
+                "tomarais",
+                "tomaran"
+              ],
+              "se": [
+                "tomase",
+                "tomases",
+                "tomase",
+                "tomásemos",
+                "tomaseis",
+                "tomasen"
+              ]
+            },
+            "imp": [
+              "",
+              "toma",
+              "tome",
+              "tomemos",
+              "tomad",
+              "tomen"
+            ],
+            "ger": "tomando"
+          }
+        },
+        {
+          "id": "86528492-c05c-4da3-bbc4-eaa7a70d745d",
+          "source": "pedir",
+          "sourceArticle": "",
+          "target": "bestellen",
+          "targetArticle": "",
+          "translations": [
+            "bestellen",
+            "beantragen",
+            "betteln"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "pediría",
+                "pedirías",
+                "pediría",
+                "pediríamos",
+                "pediríais",
+                "pedirían"
+              ],
+              "fut": [
+                "pediré",
+                "pedirás",
+                "pedirá",
+                "pediremos",
+                "pediréis",
+                "pedirán"
+              ],
+              "ipfv": [
+                "pedía",
+                "pedías",
+                "pedía",
+                "pedíamos",
+                "pedíais",
+                "pedían"
+              ],
+              "pfv": [
+                "pedí",
+                "pediste",
+                "pidió",
+                "pedimos",
+                "pedisteis",
+                "pidieron"
+              ],
+              "prs": [
+                "pido",
+                "pides",
+                "pide",
+                "pedimos",
+                "pedís",
+                "piden"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "pidiere",
+                "pidieres",
+                "pidiere",
+                "pidiéremos",
+                "pidiereis",
+                "pidieren"
+              ],
+              "prs": [
+                "pida",
+                "pidas",
+                "pida",
+                "pidamos",
+                "pidáis",
+                "pidan"
+              ],
+              "ra": [
+                "pidiera",
+                "pidieras",
+                "pidiera",
+                "pidiéramos",
+                "pidierais",
+                "pidieran"
+              ],
+              "se": [
+                "pidiese",
+                "pidieses",
+                "pidiese",
+                "pidiésemos",
+                "pidieseis",
+                "pidiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "pide",
+              "pida",
+              "pidamos",
+              "pedid",
+              "pidan"
+            ],
+            "ger": "pidiendo"
+          }
+        },
+        {
+          "id": "b3e9954d-c3ec-418a-b062-5acd48eb48ed",
+          "source": "reservar",
+          "sourceArticle": "",
+          "target": "aufbewahren",
+          "targetArticle": "",
+          "translations": [
+            "aufbewahren",
+            "buchen",
+            "reservieren"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "reservaría",
+                "reservarías",
+                "reservaría",
+                "reservaríamos",
+                "reservaríais",
+                "reservarían"
+              ],
+              "fut": [
+                "reservaré",
+                "reservarás",
+                "reservará",
+                "reservaremos",
+                "reservaréis",
+                "reservarán"
+              ],
+              "ipfv": [
+                "reservaba",
+                "reservabas",
+                "reservaba",
+                "reservábamos",
+                "reservabais",
+                "reservaban"
+              ],
+              "pfv": [
+                "reservé",
+                "reservaste",
+                "reservó",
+                "reservamos",
+                "reservasteis",
+                "reservaron"
+              ],
+              "prs": [
+                "reservo",
+                "reservas",
+                "reserva",
+                "reservamos",
+                "reserváis",
+                "reservan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "reservare",
+                "reservares",
+                "reservare",
+                "reserváremos",
+                "reservareis",
+                "reservaren"
+              ],
+              "prs": [
+                "reserve",
+                "reserves",
+                "reserve",
+                "reservemos",
+                "reservéis",
+                "reserven"
+              ],
+              "ra": [
+                "reservara",
+                "reservaras",
+                "reservara",
+                "reserváramos",
+                "reservarais",
+                "reservaran"
+              ],
+              "se": [
+                "reservase",
+                "reservases",
+                "reservase",
+                "reservásemos",
+                "reservaseis",
+                "reservasen"
+              ]
+            },
+            "imp": [
+              "",
+              "reserva",
+              "reserve",
+              "reservemos",
+              "reservad",
+              "reserven"
+            ],
+            "ger": "reservando"
+          }
+        },
+        {
+          "id": "c8466822-f29c-4e99-9a74-b05d3344d8cd",
+          "source": "cenar",
+          "sourceArticle": "",
+          "target": "zu Abend essen",
+          "targetArticle": "",
+          "translations": [
+            "zu Abend essen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "cenaría",
+                "cenarías",
+                "cenaría",
+                "cenaríamos",
+                "cenaríais",
+                "cenarían"
+              ],
+              "fut": [
+                "cenaré",
+                "cenarás",
+                "cenará",
+                "cenaremos",
+                "cenaréis",
+                "cenarán"
+              ],
+              "ipfv": [
+                "cenaba",
+                "cenabas",
+                "cenaba",
+                "cenábamos",
+                "cenabais",
+                "cenaban"
+              ],
+              "pfv": [
+                "cené",
+                "cenaste",
+                "cenó",
+                "cenamos",
+                "cenasteis",
+                "cenaron"
+              ],
+              "prs": [
+                "ceno",
+                "cenas",
+                "cena",
+                "cenamos",
+                "cenáis",
+                "cenan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "cenare",
+                "cenares",
+                "cenare",
+                "cenáremos",
+                "cenareis",
+                "cenaren"
+              ],
+              "prs": [
+                "cene",
+                "cenes",
+                "cene",
+                "cenemos",
+                "cenéis",
+                "cenen"
+              ],
+              "ra": [
+                "cenara",
+                "cenaras",
+                "cenara",
+                "cenáramos",
+                "cenarais",
+                "cenaran"
+              ],
+              "se": [
+                "cenase",
+                "cenases",
+                "cenase",
+                "cenásemos",
+                "cenaseis",
+                "cenasen"
+              ]
+            },
+            "imp": [
+              "",
+              "cena",
+              "cene",
+              "cenemos",
+              "cenad",
+              "cenen"
+            ],
+            "ger": "cenando"
+          }
+        },
+        {
+          "id": "1eb3673d-cf40-45c0-a30b-8226b880bef4",
+          "source": "comer",
+          "sourceArticle": "",
+          "target": "essen",
+          "targetArticle": "",
+          "translations": [
+            "essen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "comería",
+                "comerías",
+                "comería",
+                "comeríamos",
+                "comeríais",
+                "comerían"
+              ],
+              "fut": [
+                "comeré",
+                "comerás",
+                "comerá",
+                "comeremos",
+                "comeréis",
+                "comerán"
+              ],
+              "ipfv": [
+                "comía",
+                "comías",
+                "comía",
+                "comíamos",
+                "comíais",
+                "comían"
+              ],
+              "pfv": [
+                "comí",
+                "comiste",
+                "comió",
+                "comimos",
+                "comisteis",
+                "comieron"
+              ],
+              "prs": [
+                "como",
+                "comes",
+                "come",
+                "comemos",
+                "coméis",
+                "comen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "comiere",
+                "comieres",
+                "comiere",
+                "comiéremos",
+                "comiereis",
+                "comieren"
+              ],
+              "prs": [
+                "coma",
+                "comas",
+                "coma",
+                "comamos",
+                "comáis",
+                "coman"
+              ],
+              "ra": [
+                "comiera",
+                "comieras",
+                "comiera",
+                "comiéramos",
+                "comierais",
+                "comieran"
+              ],
+              "se": [
+                "comiese",
+                "comieses",
+                "comiese",
+                "comiésemos",
+                "comieseis",
+                "comiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "come",
+              "coma",
+              "comamos",
+              "comed",
+              "coman"
+            ],
+            "ger": "comiendo"
+          }
+        },
+        {
+          "id": "d87b046e-82f7-4800-8d41-74517831a902",
+          "source": "almorzar",
+          "sourceArticle": "",
+          "target": "zu Mittag essen",
+          "targetArticle": "",
+          "translations": [
+            "zu Mittag essen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "almorzaría",
+                "almorzarías",
+                "almorzaría",
+                "almorzaríamos",
+                "almorzaríais",
+                "almorzarían"
+              ],
+              "fut": [
+                "almorzaré",
+                "almorzarás",
+                "almorzará",
+                "almorzaremos",
+                "almorzaréis",
+                "almorzarán"
+              ],
+              "ipfv": [
+                "almorzaba",
+                "almorzabas",
+                "almorzaba",
+                "almorzábamos",
+                "almorzabais",
+                "almorzaban"
+              ],
+              "pfv": [
+                "almorcé",
+                "almorzaste",
+                "almorzó",
+                "almorzamos",
+                "almorzasteis",
+                "almorzaron"
+              ],
+              "prs": [
+                "almuerzo",
+                "almuerzas",
+                "almuerza",
+                "almorzamos",
+                "almorzáis",
+                "almuerzan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "almorzare",
+                "almorzares",
+                "almorzare",
+                "almorzáremos",
+                "almorzareis",
+                "almorzaren"
+              ],
+              "prs": [
+                "almuerce",
+                "almuerces",
+                "almuerce",
+                "almorcemos",
+                "almorcéis",
+                "almuercen"
+              ],
+              "ra": [
+                "almorzara",
+                "almorzaras",
+                "almorzara",
+                "almorzáramos",
+                "almorzarais",
+                "almorzaran"
+              ],
+              "se": [
+                "almorzase",
+                "almorzases",
+                "almorzase",
+                "almorzásemos",
+                "almorzaseis",
+                "almorzasen"
+              ]
+            },
+            "imp": [
+              "",
+              "almuerza",
+              "almuerce",
+              "almorcemos",
+              "almorzad",
+              "almuercen"
+            ],
+            "ger": "almorzando"
+          }
+        },
+        {
+          "id": "06dcf264-f561-4d63-8966-3df0134970b8",
+          "source": "desayunar",
+          "sourceArticle": "",
+          "target": "frühstücken",
+          "targetArticle": "",
+          "translations": [
+            "frühstücken"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "desayunaría",
+                "desayunarías",
+                "desayunaría",
+                "desayunaríamos",
+                "desayunaríais",
+                "desayunarían"
+              ],
+              "fut": [
+                "desayunaré",
+                "desayunarás",
+                "desayunará",
+                "desayunaremos",
+                "desayunaréis",
+                "desayunarán"
+              ],
+              "ipfv": [
+                "desayunaba",
+                "desayunabas",
+                "desayunaba",
+                "desayunábamos",
+                "desayunabais",
+                "desayunaban"
+              ],
+              "pfv": [
+                "desayuné",
+                "desayunaste",
+                "desayunó",
+                "desayunamos",
+                "desayunasteis",
+                "desayunaron"
+              ],
+              "prs": [
+                "desayuno",
+                "desayunas",
+                "desayuna",
+                "desayunamos",
+                "desayunáis",
+                "desayunan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "desayunare",
+                "desayunares",
+                "desayunare",
+                "desayunáremos",
+                "desayunareis",
+                "desayunaren"
+              ],
+              "prs": [
+                "desayune",
+                "desayunes",
+                "desayune",
+                "desayunemos",
+                "desayunéis",
+                "desayunen"
+              ],
+              "ra": [
+                "desayunara",
+                "desayunaras",
+                "desayunara",
+                "desayunáramos",
+                "desayunarais",
+                "desayunaran"
+              ],
+              "se": [
+                "desayunase",
+                "desayunases",
+                "desayunase",
+                "desayunásemos",
+                "desayunaseis",
+                "desayunasen"
+              ]
+            },
+            "imp": [
+              "",
+              "desayuna",
+              "desayune",
+              "desayunemos",
+              "desayunad",
+              "desayunen"
+            ],
+            "ger": "desayunando"
+          }
+        },
+        {
+          "id": "1f9ee79e-ead2-48c9-bece-9368c619b909",
+          "source": "merendar",
+          "sourceArticle": "",
+          "target": "vespern",
+          "targetArticle": "",
+          "translations": [
+            "vespern",
+            "essen (Snack, kleine Mahlzeit)"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "merendaría",
+                "merendarías",
+                "merendaría",
+                "merendaríamos",
+                "merendaríais",
+                "merendarían"
+              ],
+              "fut": [
+                "merendaré",
+                "merendarás",
+                "merendará",
+                "merendaremos",
+                "merendaréis",
+                "merendarán"
+              ],
+              "ipfv": [
+                "merendaba",
+                "merendabas",
+                "merendaba",
+                "merendábamos",
+                "merendabais",
+                "merendaban"
+              ],
+              "pfv": [
+                "merendé",
+                "merendaste",
+                "merendó",
+                "merendamos",
+                "merendasteis",
+                "merendaron"
+              ],
+              "prs": [
+                "meriendo",
+                "meriendas",
+                "merienda",
+                "merendamos",
+                "merendáis",
+                "meriendan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "merendare",
+                "merendares",
+                "merendare",
+                "merendáremos",
+                "merendareis",
+                "merendaren"
+              ],
+              "prs": [
+                "meriende",
+                "meriendes",
+                "meriende",
+                "merendemos",
+                "merendéis",
+                "merienden"
+              ],
+              "ra": [
+                "merendara",
+                "merendaras",
+                "merendara",
+                "merendáramos",
+                "merendarais",
+                "merendaran"
+              ],
+              "se": [
+                "merendase",
+                "merendases",
+                "merendase",
+                "merendásemos",
+                "merendaseis",
+                "merendasen"
+              ]
+            },
+            "imp": [
+              "",
+              "merienda",
+              "meriende",
+              "merendemos",
+              "merendad",
+              "merienden"
+            ],
+            "ger": "merendando"
+          }
+        },
+        {
+          "id": "bb4540e3-bd46-4621-b07c-cb917a158e24",
+          "source": "probar",
+          "sourceArticle": "",
+          "target": "anprobieren",
+          "targetArticle": "",
+          "translations": [
+            "anprobieren",
+            "ausprobieren",
+            "beweisen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "probaría",
+                "probarías",
+                "probaría",
+                "probaríamos",
+                "probaríais",
+                "probarían"
+              ],
+              "fut": [
+                "probaré",
+                "probarás",
+                "probará",
+                "probaremos",
+                "probaréis",
+                "probarán"
+              ],
+              "ipfv": [
+                "probaba",
+                "probabas",
+                "probaba",
+                "probábamos",
+                "probabais",
+                "probaban"
+              ],
+              "pfv": [
+                "probé",
+                "probaste",
+                "probó",
+                "probamos",
+                "probasteis",
+                "probaron"
+              ],
+              "prs": [
+                "pruebo",
+                "pruebas",
+                "prueba",
+                "probamos",
+                "probáis",
+                "prueban"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "probare",
+                "probares",
+                "probare",
+                "probáremos",
+                "probareis",
+                "probaren"
+              ],
+              "prs": [
+                "pruebe",
+                "pruebes",
+                "pruebe",
+                "probemos",
+                "probéis",
+                "prueben"
+              ],
+              "ra": [
+                "probara",
+                "probaras",
+                "probara",
+                "probáramos",
+                "probarais",
+                "probaran"
+              ],
+              "se": [
+                "probase",
+                "probases",
+                "probase",
+                "probásemos",
+                "probaseis",
+                "probasen"
+              ]
+            },
+            "imp": [
+              "",
+              "prueba",
+              "pruebe",
+              "probemos",
+              "probad",
+              "prueben"
+            ],
+            "ger": "probando"
+          }
+        },
+        {
+          "id": "877d2306-935c-40a8-b1c4-22efb273f30b",
+          "source": "degustar",
+          "sourceArticle": "",
+          "target": "probieren",
+          "targetArticle": "",
+          "translations": [
+            "probieren",
+            "kosten",
+            "verkosten"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "degustaría",
+                "degustarías",
+                "degustaría",
+                "degustaríamos",
+                "degustaríais",
+                "degustarían"
+              ],
+              "fut": [
+                "degustaré",
+                "degustarás",
+                "degustará",
+                "degustaremos",
+                "degustaréis",
+                "degustarán"
+              ],
+              "ipfv": [
+                "degustaba",
+                "degustabas",
+                "degustaba",
+                "degustábamos",
+                "degustabais",
+                "degustaban"
+              ],
+              "pfv": [
+                "degusté",
+                "degustaste",
+                "degustó",
+                "degustamos",
+                "degustasteis",
+                "degustaron"
+              ],
+              "prs": [
+                "degusto",
+                "degustas",
+                "degusta",
+                "degustamos",
+                "degustáis",
+                "degustan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "degustare",
+                "degustares",
+                "degustare",
+                "degustáremos",
+                "degustareis",
+                "degustaren"
+              ],
+              "prs": [
+                "deguste",
+                "degustes",
+                "deguste",
+                "degustemos",
+                "degustéis",
+                "degusten"
+              ],
+              "ra": [
+                "degustara",
+                "degustaras",
+                "degustara",
+                "degustáramos",
+                "degustarais",
+                "degustaran"
+              ],
+              "se": [
+                "degustase",
+                "degustases",
+                "degustase",
+                "degustásemos",
+                "degustaseis",
+                "degustasen"
+              ]
+            },
+            "imp": [
+              "",
+              "degusta",
+              "deguste",
+              "degustemos",
+              "degustad",
+              "degusten"
+            ],
+            "ger": "degustando"
+          }
+        },
+        {
+          "id": "6a3d1224-123a-477d-822a-ba1d5979f0e8",
+          "source": "cocinar",
+          "sourceArticle": "",
+          "target": "kochen",
+          "targetArticle": "",
+          "translations": [
+            "kochen",
+            "zubereiten"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "cocinaría",
+                "cocinarías",
+                "cocinaría",
+                "cocinaríamos",
+                "cocinaríais",
+                "cocinarían"
+              ],
+              "fut": [
+                "cocinaré",
+                "cocinarás",
+                "cocinará",
+                "cocinaremos",
+                "cocinaréis",
+                "cocinarán"
+              ],
+              "ipfv": [
+                "cocinaba",
+                "cocinabas",
+                "cocinaba",
+                "cocinábamos",
+                "cocinabais",
+                "cocinaban"
+              ],
+              "pfv": [
+                "cociné",
+                "cocinaste",
+                "cocinó",
+                "cocinamos",
+                "cocinasteis",
+                "cocinaron"
+              ],
+              "prs": [
+                "cocino",
+                "cocinas",
+                "cocina",
+                "cocinamos",
+                "cocináis",
+                "cocinan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "cocinare",
+                "cocinares",
+                "cocinare",
+                "cocináremos",
+                "cocinareis",
+                "cocinaren"
+              ],
+              "prs": [
+                "cocine",
+                "cocines",
+                "cocine",
+                "cocinemos",
+                "cocinéis",
+                "cocinen"
+              ],
+              "ra": [
+                "cocinara",
+                "cocinaras",
+                "cocinara",
+                "cocináramos",
+                "cocinarais",
+                "cocinaran"
+              ],
+              "se": [
+                "cocinase",
+                "cocinases",
+                "cocinase",
+                "cocinásemos",
+                "cocinaseis",
+                "cocinasen"
+              ]
+            },
+            "imp": [
+              "",
+              "cocina",
+              "cocine",
+              "cocinemos",
+              "cocinad",
+              "cocinen"
+            ],
+            "ger": "cocinando"
+          }
+        },
+        {
+          "id": "35df785b-3d2f-4e12-9df1-c3b0f0eca3e0",
+          "source": "pagar",
+          "sourceArticle": "",
+          "target": "büßen",
+          "targetArticle": "",
+          "translations": [
+            "büßen",
+            "zahlen",
+            "bezahlen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "pagaría",
+                "pagarías",
+                "pagaría",
+                "pagaríamos",
+                "pagaríais",
+                "pagarían"
+              ],
+              "fut": [
+                "pagaré",
+                "pagarás",
+                "pagará",
+                "pagaremos",
+                "pagaréis",
+                "pagarán"
+              ],
+              "ipfv": [
+                "pagaba",
+                "pagabas",
+                "pagaba",
+                "pagábamos",
+                "pagabais",
+                "pagaban"
+              ],
+              "pfv": [
+                "pagué",
+                "pagaste",
+                "pagó",
+                "pagamos",
+                "pagasteis",
+                "pagaron"
+              ],
+              "prs": [
+                "pago",
+                "pagas",
+                "paga",
+                "pagamos",
+                "pagáis",
+                "pagan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "pagare",
+                "pagares",
+                "pagare",
+                "pagáremos",
+                "pagareis",
+                "pagaren"
+              ],
+              "prs": [
+                "pague",
+                "pagues",
+                "pague",
+                "paguemos",
+                "paguéis",
+                "paguen"
+              ],
+              "ra": [
+                "pagara",
+                "pagaras",
+                "pagara",
+                "pagáramos",
+                "pagarais",
+                "pagaran"
+              ],
+              "se": [
+                "pagase",
+                "pagases",
+                "pagase",
+                "pagásemos",
+                "pagaseis",
+                "pagasen"
+              ]
+            },
+            "imp": [
+              "",
+              "paga",
+              "pague",
+              "paguemos",
+              "pagad",
+              "paguen"
+            ],
+            "ger": "pagando"
+          }
+        },
+        {
+          "id": "d565c971-7e9a-4b11-9034-b8bf587ce6c4",
+          "source": "compartir",
+          "sourceArticle": "",
+          "target": "aufteilen",
+          "targetArticle": "",
+          "translations": [
+            "aufteilen",
+            "teilen mit"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "compartiría",
+                "compartirías",
+                "compartiría",
+                "compartiríamos",
+                "compartiríais",
+                "compartirían"
+              ],
+              "fut": [
+                "compartiré",
+                "compartirás",
+                "compartirá",
+                "compartiremos",
+                "compartiréis",
+                "compartirán"
+              ],
+              "ipfv": [
+                "compartía",
+                "compartías",
+                "compartía",
+                "compartíamos",
+                "compartíais",
+                "compartían"
+              ],
+              "pfv": [
+                "compartí",
+                "compartiste",
+                "compartió",
+                "compartimos",
+                "compartisteis",
+                "compartieron"
+              ],
+              "prs": [
+                "comparto",
+                "compartes",
+                "comparte",
+                "compartimos",
+                "compartís",
+                "comparten"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "compartiere",
+                "compartieres",
+                "compartiere",
+                "compartiéremos",
+                "compartiereis",
+                "compartieren"
+              ],
+              "prs": [
+                "comparta",
+                "compartas",
+                "comparta",
+                "compartamos",
+                "compartáis",
+                "compartan"
+              ],
+              "ra": [
+                "compartiera",
+                "compartieras",
+                "compartiera",
+                "compartiéramos",
+                "compartierais",
+                "compartieran"
+              ],
+              "se": [
+                "compartiese",
+                "compartieses",
+                "compartiese",
+                "compartiésemos",
+                "compartieseis",
+                "compartiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "comparte",
+              "comparta",
+              "compartamos",
+              "compartid",
+              "compartan"
+            ],
+            "ger": "compartiendo"
+          }
+        },
+        {
+          "id": "1b8f71e0-f154-428d-9963-b7c8f0fd7b28",
+          "source": "organizar",
+          "sourceArticle": "",
+          "target": "gestalten",
+          "targetArticle": "",
+          "translations": [
+            "gestalten",
+            "gliedern",
+            "ordnen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "organizaría",
+                "organizarías",
+                "organizaría",
+                "organizaríamos",
+                "organizaríais",
+                "organizarían"
+              ],
+              "fut": [
+                "organizaré",
+                "organizarás",
+                "organizará",
+                "organizaremos",
+                "organizaréis",
+                "organizarán"
+              ],
+              "ipfv": [
+                "organizaba",
+                "organizabas",
+                "organizaba",
+                "organizábamos",
+                "organizabais",
+                "organizaban"
+              ],
+              "pfv": [
+                "organicé",
+                "organizaste",
+                "organizó",
+                "organizamos",
+                "organizasteis",
+                "organizaron"
+              ],
+              "prs": [
+                "organizo",
+                "organizas",
+                "organiza",
+                "organizamos",
+                "organizáis",
+                "organizan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "organizare",
+                "organizares",
+                "organizare",
+                "organizáremos",
+                "organizareis",
+                "organizaren"
+              ],
+              "prs": [
+                "organice",
+                "organices",
+                "organice",
+                "organicemos",
+                "organicéis",
+                "organicen"
+              ],
+              "ra": [
+                "organizara",
+                "organizaras",
+                "organizara",
+                "organizáramos",
+                "organizarais",
+                "organizaran"
+              ],
+              "se": [
+                "organizase",
+                "organizases",
+                "organizase",
+                "organizásemos",
+                "organizaseis",
+                "organizasen"
+              ]
+            },
+            "imp": [
+              "",
+              "organiza",
+              "organice",
+              "organicemos",
+              "organizad",
+              "organicen"
+            ],
+            "ger": "organizando"
+          }
+        },
+        {
+          "id": "eb6786d7-e849-467a-ac95-a817ecc7c200",
+          "source": "planear",
+          "sourceArticle": "",
+          "target": "gleiten (Gleitflug)",
+          "targetArticle": "",
+          "translations": [
+            "gleiten (Gleitflug)",
+            "vorhaben",
+            "planen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "planearía",
+                "planearías",
+                "planearía",
+                "planearíamos",
+                "planearíais",
+                "planearían"
+              ],
+              "fut": [
+                "planearé",
+                "planearás",
+                "planeará",
+                "planearemos",
+                "planearéis",
+                "planearán"
+              ],
+              "ipfv": [
+                "planeaba",
+                "planeabas",
+                "planeaba",
+                "planeábamos",
+                "planeabais",
+                "planeaban"
+              ],
+              "pfv": [
+                "planeé",
+                "planeaste",
+                "planeó",
+                "planeamos",
+                "planeasteis",
+                "planearon"
+              ],
+              "prs": [
+                "planeo",
+                "planeas",
+                "planea",
+                "planeamos",
+                "planeáis",
+                "planean"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "planeare",
+                "planeares",
+                "planeare",
+                "planeáremos",
+                "planeareis",
+                "planearen"
+              ],
+              "prs": [
+                "planee",
+                "planees",
+                "planee",
+                "planeemos",
+                "planeéis",
+                "planeen"
+              ],
+              "ra": [
+                "planeara",
+                "planearas",
+                "planeara",
+                "planeáramos",
+                "planearais",
+                "planearan"
+              ],
+              "se": [
+                "planease",
+                "planeases",
+                "planease",
+                "planeásemos",
+                "planeaseis",
+                "planeasen"
+              ]
+            },
+            "imp": [
+              "",
+              "planea",
+              "planee",
+              "planeemos",
+              "planead",
+              "planeen"
+            ],
+            "ger": "planeando"
+          }
+        },
+        {
+          "id": "c9de2ffe-957e-4e62-91d7-7f39f934d61d",
+          "source": "asistir",
+          "sourceArticle": "",
+          "target": "teilnehmen",
+          "targetArticle": "",
+          "translations": [
+            "teilnehmen",
+            "helfen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "asistiría",
+                "asistirías",
+                "asistiría",
+                "asistiríamos",
+                "asistiríais",
+                "asistirían"
+              ],
+              "fut": [
+                "asistiré",
+                "asistirás",
+                "asistirá",
+                "asistiremos",
+                "asistiréis",
+                "asistirán"
+              ],
+              "ipfv": [
+                "asistía",
+                "asistías",
+                "asistía",
+                "asistíamos",
+                "asistíais",
+                "asistían"
+              ],
+              "pfv": [
+                "asistí",
+                "asististe",
+                "asistió",
+                "asistimos",
+                "asististeis",
+                "asistieron"
+              ],
+              "prs": [
+                "asisto",
+                "asistes",
+                "asiste",
+                "asistimos",
+                "asistís",
+                "asisten"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "asistiere",
+                "asistieres",
+                "asistiere",
+                "asistiéremos",
+                "asistiereis",
+                "asistieren"
+              ],
+              "prs": [
+                "asista",
+                "asistas",
+                "asista",
+                "asistamos",
+                "asistáis",
+                "asistan"
+              ],
+              "ra": [
+                "asistiera",
+                "asistieras",
+                "asistiera",
+                "asistiéramos",
+                "asistierais",
+                "asistieran"
+              ],
+              "se": [
+                "asistiese",
+                "asistieses",
+                "asistiese",
+                "asistiésemos",
+                "asistieseis",
+                "asistiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "asiste",
+              "asista",
+              "asistamos",
+              "asistid",
+              "asistan"
+            ],
+            "ger": "asistiendo"
+          }
+        },
+        {
+          "id": "6dbcf7f8-4317-4ac7-a9c0-3c8855246eee",
+          "source": "acudir",
+          "sourceArticle": "",
+          "target": "kommen",
+          "targetArticle": "",
+          "translations": [
+            "kommen",
+            "herbeieilen",
+            "sich einfinden"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "acudiría",
+                "acudirías",
+                "acudiría",
+                "acudiríamos",
+                "acudiríais",
+                "acudirían"
+              ],
+              "fut": [
+                "acudiré",
+                "acudirás",
+                "acudirá",
+                "acudiremos",
+                "acudiréis",
+                "acudirán"
+              ],
+              "ipfv": [
+                "acudía",
+                "acudías",
+                "acudía",
+                "acudíamos",
+                "acudíais",
+                "acudían"
+              ],
+              "pfv": [
+                "acudí",
+                "acudiste",
+                "acudió",
+                "acudimos",
+                "acudisteis",
+                "acudieron"
+              ],
+              "prs": [
+                "acudo",
+                "acudes",
+                "acude",
+                "acudimos",
+                "acudís",
+                "acuden"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "acudiere",
+                "acudieres",
+                "acudiere",
+                "acudiéremos",
+                "acudiereis",
+                "acudieren"
+              ],
+              "prs": [
+                "acuda",
+                "acudas",
+                "acuda",
+                "acudamos",
+                "acudáis",
+                "acudan"
+              ],
+              "ra": [
+                "acudiera",
+                "acudieras",
+                "acudiera",
+                "acudiéramos",
+                "acudierais",
+                "acudieran"
+              ],
+              "se": [
+                "acudiese",
+                "acudieses",
+                "acudiese",
+                "acudiésemos",
+                "acudieseis",
+                "acudiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "acude",
+              "acuda",
+              "acudamos",
+              "acudid",
+              "acudan"
+            ],
+            "ger": "acudiendo"
+          }
+        },
+        {
+          "id": "7baffabf-2123-42d5-b5da-fa626b46c26c",
+          "source": "llegar",
+          "sourceArticle": "",
+          "target": "ankommen",
+          "targetArticle": "",
+          "translations": [
+            "ankommen",
+            "eintreffen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "llegaría",
+                "llegarías",
+                "llegaría",
+                "llegaríamos",
+                "llegaríais",
+                "llegarían"
+              ],
+              "fut": [
+                "llegaré",
+                "llegarás",
+                "llegará",
+                "llegaremos",
+                "llegaréis",
+                "llegarán"
+              ],
+              "ipfv": [
+                "llegaba",
+                "llegabas",
+                "llegaba",
+                "llegábamos",
+                "llegabais",
+                "llegaban"
+              ],
+              "pfv": [
+                "llegué",
+                "llegaste",
+                "llegó",
+                "llegamos",
+                "llegasteis",
+                "llegaron"
+              ],
+              "prs": [
+                "llego",
+                "llegas",
+                "llega",
+                "llegamos",
+                "llegáis",
+                "llegan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "llegare",
+                "llegares",
+                "llegare",
+                "llegáremos",
+                "llegareis",
+                "llegaren"
+              ],
+              "prs": [
+                "llegue",
+                "llegues",
+                "llegue",
+                "lleguemos",
+                "lleguéis",
+                "lleguen"
+              ],
+              "ra": [
+                "llegara",
+                "llegaras",
+                "llegara",
+                "llegáramos",
+                "llegarais",
+                "llegaran"
+              ],
+              "se": [
+                "llegase",
+                "llegases",
+                "llegase",
+                "llegásemos",
+                "llegaseis",
+                "llegasen"
+              ]
+            },
+            "imp": [
+              "",
+              "llega",
+              "llegue",
+              "lleguemos",
+              "llegad",
+              "lleguen"
+            ],
+            "ger": "llegando"
+          }
+        },
+        {
+          "id": "ef3775fd-ffd7-4a33-86a5-894e465e7fee",
+          "source": "entrar",
+          "sourceArticle": "",
+          "target": "hineingehen",
+          "targetArticle": "",
+          "translations": [
+            "hineingehen",
+            "betreten",
+            "eindringen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "entraría",
+                "entrarías",
+                "entraría",
+                "entraríamos",
+                "entraríais",
+                "entrarían"
+              ],
+              "fut": [
+                "entraré",
+                "entrarás",
+                "entrará",
+                "entraremos",
+                "entraréis",
+                "entrarán"
+              ],
+              "ipfv": [
+                "entraba",
+                "entrabas",
+                "entraba",
+                "entrábamos",
+                "entrabais",
+                "entraban"
+              ],
+              "pfv": [
+                "entré",
+                "entraste",
+                "entró",
+                "entramos",
+                "entrasteis",
+                "entraron"
+              ],
+              "prs": [
+                "entro",
+                "entras",
+                "entra",
+                "entramos",
+                "entráis",
+                "entran"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "entrare",
+                "entrares",
+                "entrare",
+                "entráremos",
+                "entrareis",
+                "entraren"
+              ],
+              "prs": [
+                "entre",
+                "entres",
+                "entre",
+                "entremos",
+                "entréis",
+                "entren"
+              ],
+              "ra": [
+                "entrara",
+                "entraras",
+                "entrara",
+                "entráramos",
+                "entrarais",
+                "entraran"
+              ],
+              "se": [
+                "entrase",
+                "entrases",
+                "entrase",
+                "entrásemos",
+                "entraseis",
+                "entrasen"
+              ]
+            },
+            "imp": [
+              "",
+              "entra",
+              "entre",
+              "entremos",
+              "entrad",
+              "entren"
+            ],
+            "ger": "entrando"
+          }
+        },
+        {
+          "id": "90a62247-e6fd-4f0e-a143-97e037007dd4",
+          "source": "esperar",
+          "sourceArticle": "",
+          "target": "warten",
+          "targetArticle": "",
+          "translations": [
+            "warten",
+            "erwarten",
+            "hoffen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "esperaría",
+                "esperarías",
+                "esperaría",
+                "esperaríamos",
+                "esperaríais",
+                "esperarían"
+              ],
+              "fut": [
+                "esperaré",
+                "esperarás",
+                "esperará",
+                "esperaremos",
+                "esperaréis",
+                "esperarán"
+              ],
+              "ipfv": [
+                "esperaba",
+                "esperabas",
+                "esperaba",
+                "esperábamos",
+                "esperabais",
+                "esperaban"
+              ],
+              "pfv": [
+                "esperé",
+                "esperaste",
+                "esperó",
+                "esperamos",
+                "esperasteis",
+                "esperaron"
+              ],
+              "prs": [
+                "espero",
+                "esperas",
+                "espera",
+                "esperamos",
+                "esperáis",
+                "esperan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "esperare",
+                "esperares",
+                "esperare",
+                "esperáremos",
+                "esperareis",
+                "esperaren"
+              ],
+              "prs": [
+                "espere",
+                "esperes",
+                "espere",
+                "esperemos",
+                "esperéis",
+                "esperen"
+              ],
+              "ra": [
+                "esperara",
+                "esperaras",
+                "esperara",
+                "esperáramos",
+                "esperarais",
+                "esperaran"
+              ],
+              "se": [
+                "esperase",
+                "esperases",
+                "esperase",
+                "esperásemos",
+                "esperaseis",
+                "esperasen"
+              ]
+            },
+            "imp": [
+              "",
+              "espera",
+              "espere",
+              "esperemos",
+              "esperad",
+              "esperen"
+            ],
+            "ger": "esperando"
+          }
+        },
+        {
+          "id": "ea1b9e39-4709-4bd3-af34-23b51767d735",
+          "source": "abrazar",
+          "sourceArticle": "",
+          "target": "umarmen",
+          "targetArticle": "",
+          "translations": [
+            "umarmen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "abrazaría",
+                "abrazarías",
+                "abrazaría",
+                "abrazaríamos",
+                "abrazaríais",
+                "abrazarían"
+              ],
+              "fut": [
+                "abrazaré",
+                "abrazarás",
+                "abrazará",
+                "abrazaremos",
+                "abrazaréis",
+                "abrazarán"
+              ],
+              "ipfv": [
+                "abrazaba",
+                "abrazabas",
+                "abrazaba",
+                "abrazábamos",
+                "abrazabais",
+                "abrazaban"
+              ],
+              "pfv": [
+                "abracé",
+                "abrazaste",
+                "abrazó",
+                "abrazamos",
+                "abrazasteis",
+                "abrazaron"
+              ],
+              "prs": [
+                "abrazo",
+                "abrazas",
+                "abraza",
+                "abrazamos",
+                "abrazáis",
+                "abrazan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "abrazare",
+                "abrazares",
+                "abrazare",
+                "abrazáremos",
+                "abrazareis",
+                "abrazaren"
+              ],
+              "prs": [
+                "abrace",
+                "abraces",
+                "abrace",
+                "abracemos",
+                "abracéis",
+                "abracen"
+              ],
+              "ra": [
+                "abrazara",
+                "abrazaras",
+                "abrazara",
+                "abrazáramos",
+                "abrazarais",
+                "abrazaran"
+              ],
+              "se": [
+                "abrazase",
+                "abrazases",
+                "abrazase",
+                "abrazásemos",
+                "abrazaseis",
+                "abrazasen"
+              ]
+            },
+            "imp": [
+              "",
+              "abraza",
+              "abrace",
+              "abracemos",
+              "abrazad",
+              "abracen"
+            ],
+            "ger": "abrazando"
+          }
+        },
+        {
+          "id": "67b6b69c-2a5a-4091-9ebc-c8aea755434e",
+          "source": "besar",
+          "sourceArticle": "",
+          "target": "küssen",
+          "targetArticle": "",
+          "translations": [
+            "küssen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "besaría",
+                "besarías",
+                "besaría",
+                "besaríamos",
+                "besaríais",
+                "besarían"
+              ],
+              "fut": [
+                "besaré",
+                "besarás",
+                "besará",
+                "besaremos",
+                "besaréis",
+                "besarán"
+              ],
+              "ipfv": [
+                "besaba",
+                "besabas",
+                "besaba",
+                "besábamos",
+                "besabais",
+                "besaban"
+              ],
+              "pfv": [
+                "besé",
+                "besaste",
+                "besó",
+                "besamos",
+                "besasteis",
+                "besaron"
+              ],
+              "prs": [
+                "beso",
+                "besas",
+                "besa",
+                "besamos",
+                "besáis",
+                "besan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "besare",
+                "besares",
+                "besare",
+                "besáremos",
+                "besareis",
+                "besaren"
+              ],
+              "prs": [
+                "bese",
+                "beses",
+                "bese",
+                "besemos",
+                "beséis",
+                "besen"
+              ],
+              "ra": [
+                "besara",
+                "besaras",
+                "besara",
+                "besáramos",
+                "besarais",
+                "besaran"
+              ],
+              "se": [
+                "besase",
+                "besases",
+                "besase",
+                "besásemos",
+                "besaseis",
+                "besasen"
+              ]
+            },
+            "imp": [
+              "",
+              "besa",
+              "bese",
+              "besemos",
+              "besad",
+              "besen"
+            ],
+            "ger": "besando"
+          }
+        },
+        {
+          "id": "735a4454-4353-473a-b891-33c9300c3a68",
+          "source": "sonreír",
+          "sourceArticle": "",
+          "target": "lächeln",
+          "targetArticle": "",
+          "translations": [
+            "lächeln"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "sonreiría",
+                "sonreirías",
+                "sonreiría",
+                "sonreiríamos",
+                "sonreiríais",
+                "sonreirían"
+              ],
+              "fut": [
+                "sonreiré",
+                "sonreirás",
+                "sonreirá",
+                "sonreiremos",
+                "sonreiréis",
+                "sonreirán"
+              ],
+              "ipfv": [
+                "sonreía",
+                "sonreías",
+                "sonreía",
+                "sonreíamos",
+                "sonreíais",
+                "sonreían"
+              ],
+              "pfv": [
+                "sonreí",
+                "sonreíste",
+                "sonrió",
+                "sonreímos",
+                "sonreísteis",
+                "sonrieron"
+              ],
+              "prs": [
+                "sonrío",
+                "sonríes",
+                "sonríe",
+                "sonreímos",
+                "sonreís",
+                "sonríen"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "sonriere",
+                "sonrieres",
+                "sonriere",
+                "sonriéremos",
+                "sonriereis",
+                "sonrieren"
+              ],
+              "prs": [
+                "sonría",
+                "sonrías",
+                "sonría",
+                "sonriamos",
+                "sonriáis",
+                "sonrían"
+              ],
+              "ra": [
+                "sonriera",
+                "sonrieras",
+                "sonriera",
+                "sonriéramos",
+                "sonrierais",
+                "sonrieran"
+              ],
+              "se": [
+                "sonriese",
+                "sonrieses",
+                "sonriese",
+                "sonriésemos",
+                "sonrieseis",
+                "sonriesen"
+              ]
+            },
+            "imp": [
+              "",
+              "sonríe",
+              "sonría",
+              "sonriamos",
+              "sonreíd",
+              "sonrían"
+            ],
+            "ger": "sonriendo"
+          }
+        },
+        {
+          "id": "43e4b899-bc6c-4f2c-98eb-c73f3ab515d1",
+          "source": "disfrutar",
+          "sourceArticle": "",
+          "target": "genießen",
+          "targetArticle": "",
+          "translations": [
+            "genießen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "disfrutaría",
+                "disfrutarías",
+                "disfrutaría",
+                "disfrutaríamos",
+                "disfrutaríais",
+                "disfrutarían"
+              ],
+              "fut": [
+                "disfrutaré",
+                "disfrutarás",
+                "disfrutará",
+                "disfrutaremos",
+                "disfrutaréis",
+                "disfrutarán"
+              ],
+              "ipfv": [
+                "disfrutaba",
+                "disfrutabas",
+                "disfrutaba",
+                "disfrutábamos",
+                "disfrutabais",
+                "disfrutaban"
+              ],
+              "pfv": [
+                "disfruté",
+                "disfrutaste",
+                "disfrutó",
+                "disfrutamos",
+                "disfrutasteis",
+                "disfrutaron"
+              ],
+              "prs": [
+                "disfruto",
+                "disfrutas",
+                "disfruta",
+                "disfrutamos",
+                "disfrutáis",
+                "disfrutan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "disfrutare",
+                "disfrutares",
+                "disfrutare",
+                "disfrutáremos",
+                "disfrutareis",
+                "disfrutaren"
+              ],
+              "prs": [
+                "disfrute",
+                "disfrutes",
+                "disfrute",
+                "disfrutemos",
+                "disfrutéis",
+                "disfruten"
+              ],
+              "ra": [
+                "disfrutara",
+                "disfrutaras",
+                "disfrutara",
+                "disfrutáramos",
+                "disfrutarais",
+                "disfrutaran"
+              ],
+              "se": [
+                "disfrutase",
+                "disfrutases",
+                "disfrutase",
+                "disfrutásemos",
+                "disfrutaseis",
+                "disfrutasen"
+              ]
+            },
+            "imp": [
+              "",
+              "disfruta",
+              "disfrute",
+              "disfrutemos",
+              "disfrutad",
+              "disfruten"
+            ],
+            "ger": "disfrutando"
+          }
+        },
+        {
+          "id": "d7f246ba-9bca-43c9-aee0-c98de891a391",
+          "source": "gozar",
+          "sourceArticle": "",
+          "target": "genießen",
+          "targetArticle": "",
+          "translations": [
+            "genießen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "gozaría",
+                "gozarías",
+                "gozaría",
+                "gozaríamos",
+                "gozaríais",
+                "gozarían"
+              ],
+              "fut": [
+                "gozaré",
+                "gozarás",
+                "gozará",
+                "gozaremos",
+                "gozaréis",
+                "gozarán"
+              ],
+              "ipfv": [
+                "gozaba",
+                "gozabas",
+                "gozaba",
+                "gozábamos",
+                "gozabais",
+                "gozaban"
+              ],
+              "pfv": [
+                "gocé",
+                "gozaste",
+                "gozó",
+                "gozamos",
+                "gozasteis",
+                "gozaron"
+              ],
+              "prs": [
+                "gozo",
+                "gozas",
+                "goza",
+                "gozamos",
+                "gozáis",
+                "gozan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "gozare",
+                "gozares",
+                "gozare",
+                "gozáremos",
+                "gozareis",
+                "gozaren"
+              ],
+              "prs": [
+                "goce",
+                "goces",
+                "goce",
+                "gocemos",
+                "gocéis",
+                "gocen"
+              ],
+              "ra": [
+                "gozara",
+                "gozaras",
+                "gozara",
+                "gozáramos",
+                "gozarais",
+                "gozaran"
+              ],
+              "se": [
+                "gozase",
+                "gozases",
+                "gozase",
+                "gozásemos",
+                "gozaseis",
+                "gozasen"
+              ]
+            },
+            "imp": [
+              "",
+              "goza",
+              "goce",
+              "gocemos",
+              "gozad",
+              "gocen"
+            ],
+            "ger": "gozando"
+          }
+        },
+        {
+          "id": "47bec266-fb5a-49c5-a09b-48f5fd75eb1a",
+          "source": "descansar",
+          "sourceArticle": "",
+          "target": "ausruhen",
+          "targetArticle": "",
+          "translations": [
+            "ausruhen",
+            "ruhen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "descansaría",
+                "descansarías",
+                "descansaría",
+                "descansaríamos",
+                "descansaríais",
+                "descansarían"
+              ],
+              "fut": [
+                "descansaré",
+                "descansarás",
+                "descansará",
+                "descansaremos",
+                "descansaréis",
+                "descansarán"
+              ],
+              "ipfv": [
+                "descansaba",
+                "descansabas",
+                "descansaba",
+                "descansábamos",
+                "descansabais",
+                "descansaban"
+              ],
+              "pfv": [
+                "descansé",
+                "descansaste",
+                "descansó",
+                "descansamos",
+                "descansasteis",
+                "descansaron"
+              ],
+              "prs": [
+                "descanso",
+                "descansas",
+                "descansa",
+                "descansamos",
+                "descansáis",
+                "descansan"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "descansare",
+                "descansares",
+                "descansare",
+                "descansáremos",
+                "descansareis",
+                "descansaren"
+              ],
+              "prs": [
+                "descanse",
+                "descanses",
+                "descanse",
+                "descansemos",
+                "descanséis",
+                "descansen"
+              ],
+              "ra": [
+                "descansara",
+                "descansaras",
+                "descansara",
+                "descansáramos",
+                "descansarais",
+                "descansaran"
+              ],
+              "se": [
+                "descansase",
+                "descansases",
+                "descansase",
+                "descansásemos",
+                "descansaseis",
+                "descansasen"
+              ]
+            },
+            "imp": [
+              "",
+              "descansa",
+              "descanse",
+              "descansemos",
+              "descansad",
+              "descansen"
+            ],
+            "ger": "descansando"
+          }
+        },
+        {
+          "id": "ea2df304-84e1-4413-a53b-a10bc0b2a1e1",
+          "source": "fumar",
+          "sourceArticle": "",
+          "target": "rauchen",
+          "targetArticle": "",
+          "translations": [
+            "rauchen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "fumaría",
+                "fumarías",
+                "fumaría",
+                "fumaríamos",
+                "fumaríais",
+                "fumarían"
+              ],
+              "fut": [
+                "fumaré",
+                "fumarás",
+                "fumará",
+                "fumaremos",
+                "fumaréis",
+                "fumarán"
+              ],
+              "ipfv": [
+                "fumaba",
+                "fumabas",
+                "fumaba",
+                "fumábamos",
+                "fumabais",
+                "fumaban"
+              ],
+              "pfv": [
+                "fumé",
+                "fumaste",
+                "fumó",
+                "fumamos",
+                "fumasteis",
+                "fumaron"
+              ],
+              "prs": [
+                "fumo",
+                "fumas",
+                "fuma",
+                "fumamos",
+                "fumáis",
+                "fuman"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "fumare",
+                "fumares",
+                "fumare",
+                "fumáremos",
+                "fumareis",
+                "fumaren"
+              ],
+              "prs": [
+                "fume",
+                "fumes",
+                "fume",
+                "fumemos",
+                "fuméis",
+                "fumen"
+              ],
+              "ra": [
+                "fumara",
+                "fumaras",
+                "fumara",
+                "fumáramos",
+                "fumarais",
+                "fumaran"
+              ],
+              "se": [
+                "fumase",
+                "fumases",
+                "fumase",
+                "fumásemos",
+                "fumaseis",
+                "fumasen"
+              ]
+            },
+            "imp": [
+              "",
+              "fuma",
+              "fume",
+              "fumemos",
+              "fumad",
+              "fumen"
+            ],
+            "ger": "fumando"
+          }
+        },
+        {
+          "id": "1a326c75-b86f-476d-ad93-5ebacb542117",
+          "source": "discutir",
+          "sourceArticle": "",
+          "target": "besprechen",
+          "targetArticle": "",
+          "translations": [
+            "besprechen",
+            "diskutieren",
+            "erörtern"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": {
+            "ind": {
+              "cond": [
+                "discutiría",
+                "discutirías",
+                "discutiría",
+                "discutiríamos",
+                "discutiríais",
+                "discutirían"
+              ],
+              "fut": [
+                "discutiré",
+                "discutirás",
+                "discutirá",
+                "discutiremos",
+                "discutiréis",
+                "discutirán"
+              ],
+              "ipfv": [
+                "discutía",
+                "discutías",
+                "discutía",
+                "discutíamos",
+                "discutíais",
+                "discutían"
+              ],
+              "pfv": [
+                "discutí",
+                "discutiste",
+                "discutió",
+                "discutimos",
+                "discutisteis",
+                "discutieron"
+              ],
+              "prs": [
+                "discuto",
+                "discutes",
+                "discute",
+                "discutimos",
+                "discutís",
+                "discuten"
+              ]
+            },
+            "sbjv": {
+              "fut": [
+                "discutiere",
+                "discutieres",
+                "discutiere",
+                "discutiéremos",
+                "discutiereis",
+                "discutieren"
+              ],
+              "prs": [
+                "discuta",
+                "discutas",
+                "discuta",
+                "discutamos",
+                "discutáis",
+                "discutan"
+              ],
+              "ra": [
+                "discutiera",
+                "discutieras",
+                "discutiera",
+                "discutiéramos",
+                "discutierais",
+                "discutieran"
+              ],
+              "se": [
+                "discutiese",
+                "discutieses",
+                "discutiese",
+                "discutiésemos",
+                "discutieseis",
+                "discutiesen"
+              ]
+            },
+            "imp": [
+              "",
+              "discute",
+              "discuta",
+              "discutamos",
+              "discutid",
+              "discutan"
+            ],
+            "ger": "discutiendo"
+          }
+        }
+      ]
+    },
+    {
+      "id": "462cd934-414d-4fdd-957f-e64e0a1b3e52",
+      "title": "sport und freizeit",
+      "kind": "vocab",
+      "createdAt": "2026-11-06T12:40:16Z",
+      "updatedAt": "2026-11-06T13:30:45.699Z",
+      "cards": [
+        {
+          "id": "95bdc268-31a9-409c-800a-5f70ae36d537",
+          "source": "deporte",
+          "sourceArticle": "el",
+          "target": "Sport",
+          "targetArticle": "der",
+          "translations": [
+            "Sport",
+            "Sportart"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ed590e05-78bc-4b63-bfff-27188cc3c07d",
+          "source": "fútbol",
+          "sourceArticle": "el",
+          "target": "Fußball",
+          "targetArticle": "der",
+          "translations": [
+            "Fußball",
+            "Leder"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "34548e86-e0dd-40bc-baa3-7a873164486b",
+          "source": "baloncesto",
+          "sourceArticle": "el",
+          "target": "Basketball",
+          "targetArticle": "der",
+          "translations": [
+            "Basketball"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "756333ea-e186-49e7-8bad-0ebd87450ff0",
+          "source": "tenis",
+          "sourceArticle": "el",
+          "target": "Tennis",
+          "targetArticle": "das",
+          "translations": [
+            "Tennis"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "9af52438-6a03-480c-9322-21613f944198",
+          "source": "natación",
+          "sourceArticle": "la",
+          "target": "Schwimmen",
+          "targetArticle": "das",
+          "translations": [
+            "Schwimmen",
+            "Schwimmsport"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "72506d45-18aa-4bba-b51c-756f0cddcbcd",
+          "source": "ciclismo",
+          "sourceArticle": "el",
+          "target": "Radsport",
+          "targetArticle": "der",
+          "translations": [
+            "Radsport",
+            "Radrennsport"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b2e166d8-ce01-46ce-a39a-d882d5f0473d",
+          "source": "atletismo",
+          "sourceArticle": "el",
+          "target": "Leichtathletik",
+          "targetArticle": "die",
+          "translations": [
+            "Leichtathletik"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "48f36406-56fb-4e05-bc08-3592a764f77d",
+          "source": "gimnasio",
+          "sourceArticle": "el",
+          "target": "Fitnesscenter",
+          "targetArticle": "das",
+          "translations": [
+            "Fitnesscenter",
+            "Sporthalle",
+            "Fitnessstudio"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "01dec291-7ecc-40c8-b7ea-163088877f4c",
+          "source": "equipo",
+          "sourceArticle": "el",
+          "target": "Mannschaft",
+          "targetArticle": "die",
+          "translations": [
+            "Mannschaft"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "1158a98e-ae0b-46da-b162-1f440397e7c5",
+          "source": "jugador",
+          "sourceArticle": "el",
+          "target": "Spieler",
+          "targetArticle": "der",
+          "translations": [
+            "Spieler"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "94c109c8-393e-4cf0-b5b9-c9e06d4f8fad",
+          "source": "entrenador",
+          "sourceArticle": "el",
+          "target": "Trainer",
+          "targetArticle": "der",
+          "translations": [
+            "Trainer"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b79496d2-b87b-43c0-9552-4f9f2b3fe0ba",
+          "source": "árbitro",
+          "sourceArticle": "el",
+          "target": "Schiedsrichter",
+          "targetArticle": "der",
+          "translations": [
+            "Schiedsrichter",
+            "Unparteiischer"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "086ca543-caeb-4e36-969a-59f42c23ac0d",
+          "source": "partido",
+          "sourceArticle": "el",
+          "target": "Partei",
+          "targetArticle": "die",
+          "translations": [
+            "Partei",
+            "politische Partei",
+            "Spiel"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "570f7821-f54a-4507-87a4-b05f2e32cb54",
+          "source": "competición",
+          "sourceArticle": "la",
+          "target": "Wettbewerb",
+          "targetArticle": "der",
+          "translations": [
+            "Wettbewerb"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "d9c890cb-bb89-457e-8f64-e38a8e4c3f8a",
+          "source": "medalla",
+          "sourceArticle": "la",
+          "target": "Medaille",
+          "targetArticle": "die",
+          "translations": [
+            "Medaille"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "0309cdd1-655b-4042-9da5-38eeffdd3379",
+          "source": "estadio",
+          "sourceArticle": "el",
+          "target": "Stadium",
+          "targetArticle": "das",
+          "translations": [
+            "Stadium"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "af50260e-8280-454f-83b1-f7881467dfbf",
+          "source": "piscina",
+          "sourceArticle": "la",
+          "target": "Schwimmbad",
+          "targetArticle": "das",
+          "translations": [
+            "Schwimmbad"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "28a9b814-128e-48ed-ab46-e2b7e111d65d",
+          "source": "cancha",
+          "sourceArticle": "la",
+          "target": "Sportplatz",
+          "targetArticle": "der",
+          "translations": [
+            "Sportplatz"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "cce8e166-f619-4f9b-a179-a2c814fdb04f",
+          "source": "pelota",
+          "sourceArticle": "la",
+          "target": "Ball",
+          "targetArticle": "der",
+          "translations": [
+            "Ball",
+            "Tennisball"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "46d9207a-4cdc-4c18-9c80-16d7984b3dc9",
+          "source": "balón",
+          "sourceArticle": "el",
+          "target": "Ball",
+          "targetArticle": "der",
+          "translations": [
+            "Ball"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b405dcdd-54fe-4e4c-998b-9db471f3f53e",
+          "source": "raqueta",
+          "sourceArticle": "la",
+          "target": "Schläger",
+          "targetArticle": "der",
+          "translations": [
+            "Schläger",
+            "Tennisschläger"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "1b756e8a-0276-46e0-84f7-dead992c3242",
+          "source": "bicicleta",
+          "sourceArticle": "la",
+          "target": "Fahrrad",
+          "targetArticle": "das",
+          "translations": [
+            "Fahrrad",
+            "Rad"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "fb9d618e-8988-4710-9d5c-de497af3d165",
+          "source": "carrera",
+          "sourceArticle": "la",
+          "target": "Karriere",
+          "targetArticle": "die",
+          "translations": [
+            "Karriere",
+            "Beruf",
+            "Laufbahn"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "bcb735d2-60a2-4620-a550-f47ddc4458dc",
+          "source": "excursión",
+          "sourceArticle": "la",
+          "target": "Ausflug",
+          "targetArticle": "der",
+          "translations": [
+            "Ausflug"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b662a1b6-ff5c-435e-8f33-78ef3112f4ee",
+          "source": "viaje",
+          "sourceArticle": "el",
+          "target": "Reise",
+          "targetArticle": "die",
+          "translations": [
+            "Reise"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "00d02519-4f0f-4da0-bf26-0895214a7281",
+          "source": "ocio",
+          "sourceArticle": "el",
+          "target": "Freizeit",
+          "targetArticle": "die",
+          "translations": [
+            "Freizeit",
+            "Muße",
+            "Müßiggang"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "5e81a16e-38b2-46ed-b4f6-d5c42c382edb",
+          "source": "pasatiempo",
+          "sourceArticle": "el",
+          "target": "Zeitvertreib",
+          "targetArticle": "der",
+          "translations": [
+            "Zeitvertreib"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "d160463f-d846-4536-8e68-a64d8053144c",
+          "source": "música",
+          "sourceArticle": "la",
+          "target": "Musikerin",
+          "targetArticle": "die",
+          "translations": [
+            "Musikerin",
+            "Musik"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "1f8f5049-3e35-4401-8f04-3d40161bf1ed",
+          "source": "lectura",
+          "sourceArticle": "la",
+          "target": "Lektüre",
+          "targetArticle": "die",
+          "translations": [
+            "Lektüre",
+            "Lesen",
+            "Lesung"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "fb854b7c-f961-4d5c-aabc-5f18acfa344e",
+          "source": "parque",
+          "sourceArticle": "el",
+          "target": "Park",
+          "targetArticle": "der",
+          "translations": [
+            "Park"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "05a6a967-d8dc-4e4b-b5dd-324ba30c930a",
+          "source": "playa",
+          "sourceArticle": "la",
+          "target": "Strand",
+          "targetArticle": "der",
+          "translations": [
+            "Strand"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "bbff2656-c680-4ef8-b8e1-de9b5e470e65",
+          "source": "montaña",
+          "sourceArticle": "la",
+          "target": "Berge",
+          "targetArticle": "die",
+          "translations": [
+            "Berge",
+            "Berg",
+            "Gebirge"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "c69cf296-8806-475f-b6b5-248521540379",
+          "source": "jugar",
+          "sourceArticle": "",
+          "target": "spielen",
+          "targetArticle": "",
+          "translations": [
+            "spielen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "332f72be-d63a-40c4-9f1a-108b7161f0de",
+          "source": "correr",
+          "sourceArticle": "",
+          "target": "aufziehen",
+          "targetArticle": "",
+          "translations": [
+            "aufziehen",
+            "zuziehen (Vorhang usw.)",
+            "fließen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "65443e1b-5d57-4ec8-9ca6-9c56d0f35061",
+          "source": "nadar",
+          "sourceArticle": "",
+          "target": "schwimmen",
+          "targetArticle": "",
+          "translations": [
+            "schwimmen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "7209a7c8-5782-4a15-8b76-13b069c757f9",
+          "source": "ganar",
+          "sourceArticle": "",
+          "target": "führen",
+          "targetArticle": "",
+          "translations": [
+            "führen",
+            "in Führung liegen",
+            "gewinnen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "08d9024a-532d-43a0-a638-c7cf4f28060d",
+          "source": "perder",
+          "sourceArticle": "",
+          "target": "verlieren",
+          "targetArticle": "",
+          "translations": [
+            "verlieren",
+            "verpassen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "021cd77f-401d-4833-bdda-c56dbe990c89",
+          "source": "competir",
+          "sourceArticle": "",
+          "target": "konkurrieren",
+          "targetArticle": "",
+          "translations": [
+            "konkurrieren",
+            "wetteifern",
+            "kämpfen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "73e531ab-5262-4c76-9b3b-d9e5143b64da",
+          "source": "practicar",
+          "sourceArticle": "",
+          "target": "ausüben",
+          "targetArticle": "",
+          "translations": [
+            "ausüben",
+            "praktizieren",
+            "treiben (Sport)"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ed3e0ee5-733b-49db-9f96-d0f8846e2346",
+          "source": "caminar",
+          "sourceArticle": "",
+          "target": "gehen",
+          "targetArticle": "",
+          "translations": [
+            "gehen",
+            "wandern"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "cbb773dc-b1e5-4e8a-ae5a-8359a4acbbb8",
+          "source": "viajar",
+          "sourceArticle": "el",
+          "target": "Reisen",
+          "targetArticle": "das",
+          "translations": [
+            "Reisen"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "dcc63d51-6a48-4c87-a309-7343b770650f",
+          "source": "descansar",
+          "sourceArticle": "",
+          "target": "ausruhen",
+          "targetArticle": "",
+          "translations": [
+            "ausruhen",
+            "ruhen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "043275b6-06c8-4372-8404-f60c13c3ce0a",
+          "source": "bailar",
+          "sourceArticle": "",
+          "target": "tanzen",
+          "targetArticle": "",
+          "translations": [
+            "tanzen"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b3188ff5-1ab7-4cb2-af0b-f39781c3cdb3",
+          "source": "leer",
+          "sourceArticle": "",
+          "target": "lesen",
+          "targetArticle": "",
+          "translations": [
+            "lesen",
+            "ablesen",
+            "vorlesen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "c47df474-1217-4704-b739-616739e58dd0",
+          "source": "escuchar",
+          "sourceArticle": "",
+          "target": "hören",
+          "targetArticle": "",
+          "translations": [
+            "hören",
+            "anhören",
+            "zuhören"
+          ],
+          "pos": "",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "61216bbc-e961-491e-b1f3-a2cff116eebe",
+          "source": "mirar",
+          "sourceArticle": "",
+          "target": "anschauen",
+          "targetArticle": "",
+          "translations": [
+            "anschauen",
+            "ansehen",
+            "anblicken"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ce1fac21-87a0-4617-bd73-6c1403227263",
+          "source": "salir",
+          "sourceArticle": "",
+          "target": "herausgehen",
+          "targetArticle": "",
+          "translations": [
+            "herausgehen",
+            "weggehen",
+            "ausgehen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "20ea2124-efb1-446a-a2ed-5a7bd2a8205f",
+          "source": "quedar",
+          "sourceArticle": "",
+          "target": "sich verabreden",
+          "targetArticle": "",
+          "translations": [
+            "sich verabreden",
+            "verbleiben",
+            "bleiben"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "e2c4b585-1d5d-41b9-be7b-509fd73b8c77",
+          "source": "disfrutar",
+          "sourceArticle": "",
+          "target": "genießen",
+          "targetArticle": "",
+          "translations": [
+            "genießen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "892c38af-8050-4d9e-870a-a5b2e796b197",
+          "source": "relajarse",
+          "sourceArticle": "",
+          "target": "sich entspannen",
+          "targetArticle": "",
+          "translations": [
+            "sich entspannen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        }
+      ]
+    },
+    {
+      "id": "b5fcf625-69ab-4375-af64-5fdedcb11310",
+      "title": "ordering food in a restaurant",
+      "kind": "vocab",
+      "createdAt": "2026-11-04T20:20:46Z",
+      "updatedAt": "2026-11-06T14:04:56.361Z",
+      "cards": [
+        {
+          "id": "944dfef3-658c-489e-89fa-6f6d926d01ef",
+          "source": "silla",
+          "sourceArticle": "la",
+          "target": "Stuhl",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "302e5937-99a3-4dad-a4ac-f2d72e80f093",
+          "source": "menú",
+          "sourceArticle": "el",
+          "target": "Menü",
+          "targetArticle": "das",
+          "translations": [
+            "Menü"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "05b678bb-2f55-4f18-bbdb-b5cbc57c33ca",
+          "source": "camarero",
+          "sourceArticle": "el",
+          "target": "Kellner",
+          "targetArticle": "der",
+          "translations": [
+            "Kellner"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "e979a71c-37f0-4d3c-9b3c-9eb218ae1785",
+          "source": "mesera",
+          "sourceArticle": "la",
+          "target": "Kellnerin",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "8f04365c-9e43-4f92-85d6-04881cf1f27d",
+          "source": "cliente",
+          "sourceArticle": "el",
+          "target": "Kunde",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "67303fbd-c199-448e-b8f6-613495aba699",
+          "source": "cuenta",
+          "sourceArticle": "la",
+          "target": "Rechnung",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "adb84b92-3c60-4191-9604-a403859e5d28",
+          "source": "plato",
+          "sourceArticle": "el",
+          "target": "Gang",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "e6835ca2-c703-4f2f-8758-782df4297a57",
+          "source": "bebida",
+          "sourceArticle": "la",
+          "target": "Limonade",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "2d0dc31a-8a6a-4903-bdef-d67e451724d1",
+          "source": "agua",
+          "sourceArticle": "la",
+          "target": "Wasser",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "b278b3da-288c-4e2f-b0df-670d5c3e5fa7",
+          "source": "vino",
+          "sourceArticle": "el",
+          "target": "Wein",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "e5b1dc28-ac3f-4c6e-926e-864172f08119",
+          "source": "café",
+          "sourceArticle": "el",
+          "target": "Kaffee",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "5f588c26-7c10-4174-9521-25019c81b1aa",
+          "source": "cerveza",
+          "sourceArticle": "la",
+          "target": "Bier",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "a898a02b-75f8-4abd-a5c7-25da3b38ffaf",
+          "source": "pan",
+          "sourceArticle": "el",
+          "target": "Brot",
+          "targetArticle": "das",
+          "translations": [
+            "Brot"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "0fccf16f-c565-428d-9f2a-6aaf1fe7f743",
+          "source": "postre",
+          "sourceArticle": "el",
+          "target": "Nachspeise",
+          "targetArticle": "die",
+          "translations": [
+            "Nachspeise",
+            "Nachtisch"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "9bc1fa8f-088d-4d82-9109-596105cb9212",
+          "source": "entrada",
+          "sourceArticle": "la",
+          "target": "Eingang",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "2883f52c-bbf5-4b2c-855c-4fdd1eb6cdc5",
+          "source": "sopa",
+          "sourceArticle": "la",
+          "target": "Suppe",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "17136524-73c4-4203-94ae-39792378178d",
+          "source": "ensalada",
+          "sourceArticle": "la",
+          "target": "Salat",
+          "targetArticle": "der",
+          "translations": [
+            "Salat"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "dd44a960-9d26-498e-9221-f2ef276d55df",
+          "source": "carne",
+          "sourceArticle": "la",
+          "target": "Fleisch",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ab19024b-7b0b-477e-8704-d6a064d2d4be",
+          "source": "pollo",
+          "sourceArticle": "el",
+          "target": "Hähnchen",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "f3cac80b-917e-42c2-969c-27afdd503f32",
+          "source": "pescado",
+          "sourceArticle": "el",
+          "target": "Fisch",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "863be9d9-8a7c-4e68-9eac-d48274501eca",
+          "source": "arroz",
+          "sourceArticle": "el",
+          "target": "Reis",
+          "targetArticle": "der",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "46d7d2c3-380b-4505-9e55-1ae0d48f50ca",
+          "source": "patata",
+          "sourceArticle": "la",
+          "target": "Kartoffel",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "56d05b90-0676-4c67-9c55-7437cf643e78",
+          "source": "vaso",
+          "sourceArticle": "el",
+          "target": "Glas",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "c82cde9e-f105-4801-a36d-a0220a3b99aa",
+          "source": "tenedor",
+          "sourceArticle": "el",
+          "target": "Gabel",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "5ab6d7e3-9862-4499-b6bc-f434daedc8df",
+          "source": "cuchillo",
+          "sourceArticle": "el",
+          "target": "Messer",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "13b59929-8159-4f7d-942f-09b80d5bfe2b",
+          "source": "cuchara",
+          "sourceArticle": "la",
+          "target": "Löffel",
+          "targetArticle": "der",
+          "translations": [
+            "Löffel"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "9f815718-76d3-413f-ab69-196d12f327f1",
+          "source": "servilleta",
+          "sourceArticle": "la",
+          "target": "Serviette",
+          "targetArticle": "die",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "22d827dc-d27e-4edc-9882-b198827b7793",
+          "source": "restaurante",
+          "sourceArticle": "el",
+          "target": "Restaurant",
+          "targetArticle": "das",
+          "translations": [],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "49cfa267-a763-43ac-9cca-e8909982bf73",
+          "source": "salsa",
+          "sourceArticle": "",
+          "target": "Sauce",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "",
+          "foundInDict": false,
+          "paradigm": null
+        },
+        {
+          "id": "1682c1fd-3cc0-4bcb-b51a-514bbcecf43a",
+          "source": "pedir",
+          "sourceArticle": "",
+          "target": "bestellen",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "959a4692-0f41-4e2e-b300-73967bea4634",
+          "source": "querer",
+          "sourceArticle": "",
+          "target": "lieben",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "2f5eba16-a5d9-4ef8-99a0-4c3be311a50e",
+          "source": "elegir",
+          "sourceArticle": "",
+          "target": "wählen",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "6efbc5e4-94ea-4469-9dcb-0aa994d64db0",
+          "source": "pagar",
+          "sourceArticle": "",
+          "target": "büßen",
+          "targetArticle": "",
+          "translations": [
+            "büßen",
+            "zahlen",
+            "bezahlen"
+          ],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "2fd141bc-149e-4572-8d7f-fc3310b15710",
+          "source": "servir",
+          "sourceArticle": "",
+          "target": "servieren",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "",
+          "foundInDict": false,
+          "paradigm": null
+        },
+        {
+          "id": "45646754-a68d-42fe-be1d-7ab0a17a4bbd",
+          "source": "recomendar",
+          "sourceArticle": "",
+          "target": "empfehlen",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "310f7865-3fa5-4cd5-9c95-3893db0d7a5a",
+          "source": "traer",
+          "sourceArticle": "",
+          "target": "bringen",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "40278c5e-4c8a-426b-9eed-f7d85d6d3bf3",
+          "source": "solicitar",
+          "sourceArticle": "",
+          "target": "sich bewerben",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "5dd955c4-d4c3-4caa-90ee-8e0fcb853c9a",
+          "source": "decidir",
+          "sourceArticle": "",
+          "target": "entscheiden",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "ccd91872-1d28-4ff3-85c6-d7d08e8c3e09",
+          "source": "esperar",
+          "sourceArticle": "",
+          "target": "warten",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "v",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "fb5b001b-b8c0-4f56-860d-bfec1af05244",
+          "source": "delicioso",
+          "sourceArticle": "",
+          "target": "lecker",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "adj",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "d1dc6e55-bcf5-43d3-a64c-1a547c254354",
+          "source": "rico",
+          "sourceArticle": "",
+          "target": "herrlich",
+          "targetArticle": "",
+          "translations": [
+            "herrlich",
+            "toll",
+            "lecker"
+          ],
+          "pos": "adj",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "c14c460a-2cde-47d4-9bf3-334f92f3bc34",
+          "source": "picante",
+          "sourceArticle": "",
+          "target": "pikant",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "adj",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "9839252c-25be-45de-9f72-b5536d56f0be",
+          "source": "dulce",
+          "sourceArticle": "",
+          "target": "süß",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "adj",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "a11a2d33-8b50-4630-8ef5-5708fe4bf6c6",
+          "source": "salado",
+          "sourceArticle": "",
+          "target": "salzig",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "",
+          "foundInDict": false,
+          "paradigm": null
+        },
+        {
+          "id": "10b9778f-6f40-43d7-8a51-f748455b498d",
+          "source": "caliente",
+          "sourceArticle": "",
+          "target": "erregt",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "adj",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "823c76ed-b0ad-448b-a5f4-62f05f048886",
+          "source": "frío",
+          "sourceArticle": "el",
+          "target": "Kälte",
+          "targetArticle": "die",
+          "translations": [
+            "Kälte"
+          ],
+          "pos": "n",
+          "foundInDict": true,
+          "paradigm": null
+        },
+        {
+          "id": "319f666b-e155-4ae7-982f-ca0f6e5f0460",
+          "source": "sabroso",
+          "sourceArticle": "",
+          "target": "schmackhaft",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "",
+          "foundInDict": false,
+          "paradigm": null
+        },
+        {
+          "id": "d085ed15-dced-4eff-8983-47680ac00469",
+          "source": "nuevo",
+          "sourceArticle": "",
+          "target": "neu",
+          "targetArticle": "",
+          "translations": [],
+          "pos": "",
+          "foundInDict": false,
+          "paradigm": null
+        }
+      ]
+    }
+  ]
+}

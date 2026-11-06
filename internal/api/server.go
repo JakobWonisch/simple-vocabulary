@@ -31,11 +31,12 @@ var errNotEnoughMatches = errors.New("not enough dictionary matches")
 
 // Server hosts the API and static frontend.
 type Server struct {
-	Dict   *dictionary.Dictionary
-	Conj   *conjugation.Table
-	AI     ai.Provider
-	WebDir string
-	mux    *http.ServeMux
+	Dict        *dictionary.Dictionary
+	Conj        *conjugation.Table
+	AI          ai.Provider
+	WebDir      string
+	InitialPath string
+	mux         *http.ServeMux
 }
 
 func New(dict *dictionary.Dictionary, provider ai.Provider, webDir string) *Server {
@@ -51,8 +52,28 @@ func (s *Server) Handler() http.Handler {
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 	s.mux.HandleFunc("GET /api/dict/lookup", s.handleLookup)
+	s.mux.HandleFunc("GET /api/initial", s.handleInitial)
 	s.mux.HandleFunc("POST /api/sets/generate", s.handleGenerate)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
+}
+
+// handleInitial returns the seed configuration for browsers that have no
+// saved state. It never writes client storage; the frontend applies it only
+// when localStorage is empty.
+func (s *Server) handleInitial(w http.ResponseWriter, r *http.Request) {
+	if s.InitialPath == "" {
+		http.NotFound(w, r)
+		return
+	}
+	body, err := os.ReadFile(s.InitialPath)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(body)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

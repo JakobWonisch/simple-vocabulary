@@ -1,4 +1,4 @@
-import { loadState, saveState, exportState, importState, uid } from "./storage.js";
+import { loadState, saveState, exportState, importState, uid, hasStoredState } from "./storage.js";
 import { pickCard, markSeen, timesSeen, formatWithArticle } from "./memory.js";
 
 const app = document.getElementById("app");
@@ -74,7 +74,13 @@ function uiMessage(message, fallback) {
   return knownErrors[fallback] || fallback;
 }
 
-let state = loadState();
+let state = {
+  version: 1,
+  direction: "es-de",
+  conjugation: { mode: "ind", tense: "prs", order: "default" },
+  sets: [],
+};
+let stateReady = false;
 let unbindStudyKeys = () => {};
 let refreshConjugation = () => {};
 let resetConjugationOrder = () => {};
@@ -113,6 +119,7 @@ const MODE_LABEL = {
 };
 
 function persist() {
+  if (!stateReady) return;
   saveState(state);
 }
 
@@ -130,6 +137,7 @@ function homeHash(kind) {
 }
 
 function route() {
+  if (!stateReady) return;
   unbindStudyKeys();
   unbindStudyKeys = () => {};
   refreshConjugation = () => {};
@@ -976,6 +984,7 @@ settingsBtn.addEventListener("click", (e) => {
 settingsPop.addEventListener("click", (e) => e.stopPropagation());
 
 settingsPop.addEventListener("change", (e) => {
+  if (!stateReady) return;
   const input = e.target.closest('input[name="direction"]');
   if (input) {
     state.direction = input.value === "de-es" ? "de-es" : "es-de";
@@ -1031,13 +1040,17 @@ function showSnackbar(message, { error = false } = {}) {
 }
 
 document.getElementById("btn-export").addEventListener("click", () => {
+  if (!stateReady) return;
   exportState(state);
   setSettingsOpen(false);
   showSnackbar("Exportiert");
 });
 document.getElementById("btn-import").addEventListener("change", async (e) => {
   const file = e.target.files?.[0];
-  if (!file) return;
+  if (!file || !stateReady) {
+    e.target.value = "";
+    return;
+  }
   try {
     const imported = await importState(file);
     if (state.sets.length && !confirm("Alle lokalen Sammlungen durch die importierte Datei ersetzen?")) {
@@ -1066,5 +1079,28 @@ function escapeHtml(s) {
 }
 
 window.addEventListener("hashchange", route);
-syncDirectionSetting();
-route();
+
+function showInitialLoading() {
+  const status = document.createElement("div");
+  status.className = "initial-loading";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  const spinner = document.createElement("span");
+  spinner.className = "spinner";
+  spinner.setAttribute("aria-hidden", "true");
+  const text = document.createElement("p");
+  text.textContent = "Vokabeln werden geladen...";
+  status.append(spinner, text);
+  app.replaceChildren(status);
+  app.setAttribute("aria-busy", "true");
+}
+
+if (!hasStoredState()) showInitialLoading();
+
+loadState().then((loaded) => {
+  app.removeAttribute("aria-busy");
+  state = loaded;
+  stateReady = true;
+  syncDirectionSetting();
+  route();
+});
