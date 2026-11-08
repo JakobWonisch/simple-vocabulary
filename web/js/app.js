@@ -1,5 +1,6 @@
 import { loadState, saveState, exportState, importState, uid, hasStoredState } from "./storage.js";
 import { pickCard, markSeen, timesSeen, formatWithArticle } from "./memory.js";
+import { MASTERY_LEVEL, formatDuration, formatPercent, masteryRatio, nextStatsSort, recordSample, sortStatsRows, trimmedMean } from "./stats.js";
 
 const app = document.getElementById("app");
 const settingsBtn = document.getElementById("settings-btn");
@@ -26,6 +27,7 @@ const knownErrors = {
     "Zu wenige der vorgeschlagenen Verben stehen als Verb im Wörterbuch. Versuche ein breiteres Thema.",
   "conjugation data is not loaded": "Konjugationsdaten sind nicht geladen",
   "kind must be vocab or conjugation": "Die Sammlungsart ist ungültig",
+  "difficulty must be easy, medium, or hard": "Die Schwierigkeit ist ungültig",
   "AI providers are rate-limited right now. Wait a minute and retry, or set OPENROUTER_MODEL to another model.":
     "Die KI-Anbieter sind gerade ausgelastet. Warte eine Minute und versuche es erneut, oder setze OPENROUTER_MODEL auf ein anderes Modell.",
   "AI rate limit hit. Retry shortly, or change OPENROUTER_MODEL.":
@@ -46,6 +48,39 @@ function meaningList(card) {
   }
   if (!list.length && card?.target) list.push(card.target);
   return list;
+}
+
+async function refreshConjugationParadigms(set) {
+  const lemmas = [];
+  const seen = new Set();
+  for (const card of set.cards || []) {
+    const lemma = String(card.source || "").trim();
+    const key = lemma.toLocaleLowerCase();
+    if (!lemma || seen.has(key)) continue;
+    seen.add(key);
+    lemmas.push(lemma);
+  }
+  if (!lemmas.length) return;
+  try {
+    const res = await fetch("/api/conj/paradigms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lemmas }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const paradigms = data.paradigms || {};
+    let changed = false;
+    for (const card of set.cards || []) {
+      const paradigm = paradigms[card.source];
+      if (!paradigm) continue;
+      card.paradigm = paradigm;
+      changed = true;
+    }
+    if (changed) persist();
+  } catch {
+    // Study stays usable if the server is offline or has not been restarted.
+  }
 }
 
 async function ensureTranslations(card) {
@@ -85,6 +120,8 @@ let unbindStudyKeys = () => {};
 let refreshConjugation = () => {};
 let resetConjugationOrder = () => {};
 let repaintStudy = () => {};
+let closeOpenSetMenu = () => {};
+let openMenuButton = null;
 
 const PERSONS = [
   { id: "yo", index: 0, label: "yo" },
@@ -98,7 +135,7 @@ const PERSONS = [
 const TENSE_OPTIONS = {
   ind: [
     ["prs", "Presente"],
-    ["pfv", "Pretérito"],
+    ["pfv", "Pretérito indefinido"],
     ["ipfv", "Imperfecto"],
     ["fut", "Futuro"],
     ["cond", "Condicional"],
@@ -115,7 +152,7 @@ const MODE_LABEL = {
   ind: "Indikativ",
   sbjv: "Subjuntivo",
   imp: "Imperativ",
-  ger: "Gerundium",
+  ger: "Gerundium & Partizip",
 };
 
 function persist() {
@@ -132,12 +169,106 @@ function parseRoute() {
   };
 }
 
+const difficultyLabels = {
+  easy: "Einfach",
+  medium: "Mittel",
+  hard: "Schwierig",
+};
+
+function selectedDifficulty(value) {
+  return difficultyLabels[value] ? value : "medium";
+}
+
+function difficultyLabel(value) {
+  return difficultyLabels[value] || "";
+}
+
+let difficultyPickAbort = null;
+
+function bindDifficultyPick(form) {
+  difficultyPickAbort?.abort();
+  difficultyPickAbort = new AbortController();
+  const { signal } = difficultyPickAbort;
+  const pick = form.querySelector(".pick");
+  const toggle = pick.querySelector(".pick-toggle");
+  const menu = pick.querySelector(".pick-menu");
+  const value = pick.querySelector(".pick-value");
+  const hidden = pick.querySelector('input[name="difficulty"]');
+  const options = [...menu.querySelectorAll(".pick-option")];
+  const selected = () => options.find((opt) => opt.getAttribute("aria-selected") === "true") || options[0];
+
+  const close = (focusToggle = false) => {
+    menu.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    if (focusToggle) toggle.focus();
+  };
+
+  const open = () => {
+    menu.hidden = false;
+    toggle.setAttribute("aria-expanded", "true");
+    selected().focus();
+  };
+
+  const choose = (opt) => {
+    for (const item of options) item.setAttribute("aria-selected", item === opt ? "true" : "false");
+    hidden.value = opt.dataset.value;
+    value.textContent = opt.textContent.trim();
+    close(true);
+  };
+
+  toggle.addEventListener("click", () => {
+    if (menu.hidden) open();
+    else close();
+  }, { signal });
+
+  toggle.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (menu.hidden) open();
+    } else if (e.key === "Escape") {
+      close();
+    }
+  }, { signal });
+
+  menu.addEventListener("keydown", (e) => {
+    const index = options.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const delta = e.key === "ArrowDown" ? 1 : -1;
+      const next = options[(index + delta + options.length) % options.length];
+      next.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      options[0].focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      options.at(-1).focus();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      close(true);
+    } else if (e.key === "Tab") {
+      close();
+    }
+  }, { signal });
+
+  for (const opt of options) {
+    opt.addEventListener("click", () => choose(opt), { signal });
+  }
+
+  document.addEventListener("pointerdown", (e) => {
+    if (!pick.contains(e.target)) close();
+  }, { signal });
+}
+
 function homeHash(kind) {
   return kind === "conjugation" ? "#/conjugation" : "#/";
 }
 
 function route() {
   if (!stateReady) return;
+  difficultyPickAbort?.abort();
+  difficultyPickAbort = null;
+  closeOpenSetMenu();
   unbindStudyKeys();
   unbindStudyKeys = () => {};
   refreshConjugation = () => {};
@@ -151,6 +282,8 @@ function route() {
     const set = state.sets.find((s) => s.id === parts[1]);
     if (set?.kind === "conjugation") renderConjugation(parts[1]);
     else renderStudy(parts[1]);
+  } else if (parts[0] === "stats" && parts[1]) {
+    renderStats(parts[1]);
   } else {
     renderHome();
   }
@@ -195,6 +328,81 @@ function renderHome() {
   fillSetList(document.getElementById("set-list-conj"), document.getElementById("empty-conj"), sets.filter((set) => set.kind === "conjugation"), "conjugation");
 }
 
+function masteryEl() {
+  const el = document.createElement("div");
+  el.className = "mastery";
+  el.setAttribute("role", "progressbar");
+  el.setAttribute("aria-valuemin", "0");
+  el.setAttribute("aria-valuemax", "100");
+  el.setAttribute("aria-valuenow", "0");
+  el.setAttribute("aria-label", `Fortschritt, 100 % sind ${MASTERY_LEVEL} Wiederholungen pro Wort`);
+  el.innerHTML = `<span class="mastery-track"><span class="mastery-fill"></span></span><span class="mastery-pct"></span>`;
+  return el;
+}
+
+function paintMastery(el, cards) {
+  if (!el) return;
+  const ratio = masteryRatio(cards);
+  const label = formatPercent(ratio);
+  const filled = Math.min(1, Math.max(0, ratio));
+  el.setAttribute("aria-valuenow", String(Math.round(filled * 100)));
+  el.setAttribute("aria-valuetext", label);
+  el.setAttribute("aria-label", `Fortschritt, 100 % sind ${MASTERY_LEVEL} Wiederholungen pro Wort`);
+  el.title = `100 % sind ${MASTERY_LEVEL} Mal pro Wort. Weitere Wiederholungen zählen im Prozentwert weiter.`;
+  const fill = el.querySelector(".mastery-fill");
+  if (fill) fill.style.width = `${filled * 100}%`;
+  const pct = el.querySelector(".mastery-pct");
+  if (pct) pct.textContent = label;
+}
+
+function placeSetMenu(pop, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const width = pop.offsetWidth;
+  const height = pop.offsetHeight;
+  let top = rect.bottom + 6;
+  if (top + height > window.innerHeight - 8) top = Math.max(8, rect.top - height - 6);
+  let left = rect.right - width;
+  left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+  pop.style.top = `${top}px`;
+  pop.style.left = `${left}px`;
+}
+
+function openSetMenu(pop, toggle) {
+  closeOpenSetMenu();
+  pop.hidden = false;
+  toggle.setAttribute("aria-expanded", "true");
+  placeSetMenu(pop, toggle);
+  const scroller = toggle.closest(".set-scroll");
+  const onScroll = () => closeOpenSetMenu();
+  scroller?.addEventListener("scroll", onScroll);
+  const onResize = () => closeOpenSetMenu();
+  window.addEventListener("resize", onResize);
+  openMenuButton = toggle;
+  pop.querySelector("button")?.focus();
+  closeOpenSetMenu = () => {
+    pop.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    scroller?.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onResize);
+    openMenuButton = null;
+    closeOpenSetMenu = () => {};
+  };
+}
+
+function menuButton(label, className, action) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.setAttribute("role", "menuitem");
+  button.textContent = label;
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeOpenSetMenu();
+    action();
+  });
+  return button;
+}
+
 function fillSetList(list, empty, sets, kind) {
   empty.hidden = sets.length > 0;
   for (const set of sets) {
@@ -202,32 +410,145 @@ function fillSetList(list, empty, sets, kind) {
     const count = set.cards?.length ?? 0;
     const seen = (set.cards || []).filter((card) => timesSeen(card) > 0).length;
     const kindLabel = kind === "conjugation" ? `${count} Verben` : `${count} Karten`;
+    const level = difficultyLabel(set.difficulty);
+    const meta = level ? `${kindLabel} · ${level} · ${seen} gesehen` : `${kindLabel} · ${seen} gesehen`;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "set-card";
-    btn.innerHTML = `
-      <strong>${escapeHtml(set.title)}</strong>
-      <span class="set-meta">${kindLabel} · ${seen} gesehen</span>
-    `;
+    const title = document.createElement("strong");
+    title.textContent = set.title;
+    const bar = masteryEl();
+    paintMastery(bar, set.cards);
+    const metaEl = document.createElement("span");
+    metaEl.className = "set-meta";
+    metaEl.textContent = meta;
+    btn.append(title, bar, metaEl);
     btn.addEventListener("click", () => {
       location.hash = `#/study/${set.id}`;
     });
 
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "delete";
-    del.textContent = "Löschen";
-    del.addEventListener("click", (e) => {
+    const menu = document.createElement("div");
+    menu.className = "set-menu";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "set-menu-btn";
+    toggle.setAttribute("aria-label", `Menü für ${set.title}`);
+    toggle.setAttribute("aria-haspopup", "menu");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>`;
+    const pop = document.createElement("div");
+    pop.className = "set-menu-pop";
+    pop.setAttribute("role", "menu");
+    pop.hidden = true;
+    pop.append(
+      menuButton("Statistik", "", () => {
+        location.hash = `#/stats/${set.id}`;
+      }),
+      menuButton("Löschen", "danger", () => {
+        if (!confirm(`Sammlung „${set.title}“ löschen?`)) return;
+        state.sets = state.sets.filter((s) => s.id !== set.id);
+        persist();
+        renderHome();
+      }),
+    );
+    pop.addEventListener("click", (e) => e.stopPropagation());
+    toggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (!confirm(`Sammlung „${set.title}“ löschen?`)) return;
-      state.sets = state.sets.filter((s) => s.id !== set.id);
-      persist();
-      renderHome();
+      if (!pop.hidden) closeOpenSetMenu();
+      else openSetMenu(pop, toggle);
     });
-    btn.appendChild(del);
-    li.appendChild(btn);
+    menu.append(toggle, pop);
+    li.append(btn, menu);
     list.appendChild(li);
   }
+}
+
+function statsNote() {
+  return "Die Zeit läuft, bis du bei Vokabeln die Antwort aufdeckst und bei der Konjugation alle Formen. Der Durchschnitt lässt die schnellste und die langsamste Messung aus, sobald mindestens drei Zeiten vorliegen.";
+}
+
+function timeTitle(samples) {
+  const n = Array.isArray(samples) ? samples.length : 0;
+  if (!n) return "Noch keine Messung";
+  if (n < 3) return n === 1 ? "1 Messung" : `${n} Messungen`;
+  return `${n} Messungen, schnellste und langsamste ausgelassen`;
+}
+
+function renderStats(setId) {
+  const set = state.sets.find((s) => s.id === setId);
+  if (!set) {
+    location.hash = "#/";
+    return;
+  }
+  app.replaceChildren(cloneTemplate("tpl-stats"));
+  const back = document.getElementById("stats-back");
+  back.href = homeHash(set.kind);
+  document.getElementById("stats-title").textContent = set.title;
+  document.getElementById("stats-note").textContent = statsNote();
+
+  const cards = set.cards || [];
+  const body = document.getElementById("stats-body");
+  const empty = document.getElementById("stats-empty");
+  const table = body.closest("table");
+  empty.hidden = cards.length > 0;
+  if (table) table.hidden = cards.length === 0;
+  const conj = set.kind === "conjugation";
+  const rows = cards.map((card, index) => {
+    const samples = Array.isArray(card.times) ? card.times : [];
+    return {
+      index,
+      card,
+      word: conj ? card.source || "" : formatWithArticle(card.source, card.sourceArticle),
+      seen: timesSeen(card),
+      time: trimmedMean(samples),
+      samples,
+    };
+  });
+  let sort = { key: null, dir: null };
+
+  function renderRow(entry) {
+    const row = document.createElement("tr");
+    const word = document.createElement("td");
+    const name = document.createElement("span");
+    name.className = "stats-word";
+    name.textContent = entry.word;
+    word.append(name);
+    const gloss = meaningList(entry.card)[0];
+    if (gloss) {
+      const sub = document.createElement("span");
+      sub.className = "stats-gloss";
+      sub.textContent = gloss;
+      word.append(sub);
+    }
+    const views = document.createElement("td");
+    views.className = "num";
+    views.textContent = String(entry.seen);
+    const time = document.createElement("td");
+    time.className = "num";
+    time.textContent = formatDuration(entry.time);
+    time.title = timeTitle(entry.samples);
+    row.append(word, views, time);
+    return row;
+  }
+
+  function paintRows() {
+    body.replaceChildren(...sortStatsRows(rows, sort).map(renderRow));
+    if (!table) return;
+    for (const button of table.querySelectorAll(".stats-sort")) {
+      const th = button.closest("th");
+      const active = sort.key === button.dataset.sort;
+      th.setAttribute("aria-sort", active ? (sort.dir === "asc" ? "ascending" : "descending") : "none");
+    }
+  }
+
+  table?.addEventListener("click", (e) => {
+    const button = e.target.closest(".stats-sort");
+    if (!button) return;
+    const first = button.dataset.first === "desc" ? "desc" : "asc";
+    sort = nextStatsSort(sort, button.dataset.sort, first);
+    paintRows();
+  });
+  paintRows();
 }
 
 function renderCreate(kindHint) {
@@ -257,6 +578,7 @@ function renderCreate(kindHint) {
     if (e.target.name === "kind") syncKindCopy();
   });
   syncKindCopy();
+  bindDifficultyPick(form);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -264,6 +586,7 @@ function renderCreate(kindHint) {
     const topic = String(fd.get("topic") || "").trim();
     const count = Number(fd.get("count") || 50);
     const kind = selectedKind();
+    const difficulty = selectedDifficulty(fd.get("difficulty"));
     if (!topic) return;
 
     submit.disabled = true;
@@ -286,7 +609,7 @@ function renderCreate(kindHint) {
       const res = await fetch("/api/sets/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, count, kind }),
+        body: JSON.stringify({ topic, count, kind, difficulty }),
         signal: controller.signal,
       });
       const data = await res.json().catch(() => ({}));
@@ -297,6 +620,7 @@ function renderCreate(kindHint) {
         id: uid(),
         title: topic,
         kind: kind === "conjugation" ? "conjugation" : "vocab",
+        difficulty: selectedDifficulty(data.difficulty || difficulty),
         createdAt: data.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         cards: data.cards.map((c) => ({
@@ -344,6 +668,7 @@ function renderStudy(setId) {
 
   document.getElementById("study-title").textContent = set.title;
   const progressEl = document.getElementById("study-progress");
+  const mastery = document.getElementById("study-mastery");
   const flashcard = document.getElementById("flashcard");
   const questionFace = document.getElementById("card-question");
   const promptLang = document.getElementById("card-prompt-lang");
@@ -370,10 +695,26 @@ function renderStudy(setId) {
 
   let revealed = false;
   let current = null;
+  let counted = false;
+  let answerStarted = 0;
+  let answerOpen = false;
 
   function syncProgress() {
     const seen = set.cards.filter((card) => timesSeen(card) > 0).length;
     progressEl.textContent = `${seen} gesehen · ${set.cards.length} gesamt`;
+    paintMastery(mastery, set.cards);
+  }
+
+  function armAnswerTimer() {
+    answerStarted = performance.now();
+    answerOpen = true;
+  }
+
+  function takeAnswerTime() {
+    if (!answerOpen || !current?.card) return;
+    answerOpen = false;
+    if (!recordSample(current.card, performance.now() - answerStarted)) return;
+    persist();
   }
 
   function placeRemove() {
@@ -412,9 +753,7 @@ function renderStudy(setId) {
     const token = ++showToken;
     const turn = Number.isFinite(set.turn) ? set.turn : 0;
     current = pickCard(set.cards, turn);
-    set.turn = markSeen(set.cards[current.index], turn);
-    set.updatedAt = new Date().toISOString();
-    persist();
+    counted = false;
     revealed = false;
     flashcard.classList.remove("idle", "revealed");
     flashcard.tabIndex = 0;
@@ -429,6 +768,7 @@ function renderStudy(setId) {
     hint.hidden = false;
     hint.textContent = "Antippen zum Aufdecken";
     studyStatus.textContent = "";
+    armAnswerTimer();
 
     const card = current.card;
     const esDe = state.direction !== "de-es";
@@ -482,8 +822,20 @@ function renderStudy(setId) {
     answerAlts.hidden = false;
   }
 
+  function countReveal() {
+    if (!current || counted) return;
+    counted = true;
+    const turn = Number.isFinite(set.turn) ? set.turn : 0;
+    set.turn = markSeen(current.card, turn);
+    set.updatedAt = new Date().toISOString();
+    persist();
+    syncProgress();
+  }
+
   function reveal() {
     if (!current || revealed) return;
+    takeAnswerTime();
+    countReveal();
     revealed = true;
     flashcard.classList.add("revealed");
     questionFace.hidden = true;
@@ -637,6 +989,7 @@ function renderConjugation(setId) {
   document.querySelector(".conj-study .back").href = "#/conjugation";
   document.getElementById("conj-title").textContent = set.title;
   const progressEl = document.getElementById("conj-progress");
+  const mastery = document.getElementById("conj-mastery");
   const focusEl = document.getElementById("conj-focus");
   const glossEl = document.getElementById("conj-gloss");
   const altsEl = document.getElementById("conj-alts");
@@ -654,6 +1007,9 @@ function renderConjugation(setId) {
   let current = null;
   let orderCache = null;
   let allRevealed = false;
+  let counted = false;
+  let answerStarted = 0;
+  let answerOpen = false;
 
   resetConjugationOrder = () => {
     orderCache = null;
@@ -662,6 +1018,19 @@ function renderConjugation(setId) {
   function syncProgress() {
     const seen = set.cards.filter((card) => timesSeen(card) > 0).length;
     progressEl.textContent = `${seen} gesehen · ${set.cards.length} gesamt`;
+    paintMastery(mastery, set.cards);
+  }
+
+  function armAnswerTimer() {
+    answerStarted = performance.now();
+    answerOpen = true;
+  }
+
+  function takeAnswerTime() {
+    if (!answerOpen || !current?.card) return;
+    answerOpen = false;
+    if (!recordSample(current.card, performance.now() - answerStarted)) return;
+    persist();
   }
 
   function personSequence(cardId) {
@@ -676,7 +1045,10 @@ function renderConjugation(setId) {
     const paradigm = card.paradigm || {};
     const mode = state.conjugation.mode;
     if (mode === "ger") {
-      return paradigm.ger ? [{ id: "ger", label: "gerundio", form: paradigm.ger }] : [];
+      const forms = [];
+      if (paradigm.ger) forms.push({ id: "ger", label: "gerundio", form: paradigm.ger });
+      if (paradigm.ptcp) forms.push({ id: "ptcp", label: "participio perfecto", form: paradigm.ptcp });
+      return forms;
     }
     const persons = personSequence(card.id);
     if (mode === "imp") {
@@ -732,6 +1104,8 @@ function renderConjugation(setId) {
     dock.hidden = false;
     statusEl.textContent = forms.length ? "" : "Für diese Zeit gibt es keine Formen.";
     nowEl.textContent = focusLabel();
+    if (forms.length) armAnswerTimer();
+    else answerOpen = false;
   }
 
   function showCard() {
@@ -741,9 +1115,7 @@ function renderConjugation(setId) {
     }
     const turn = Number.isFinite(set.turn) ? set.turn : 0;
     current = pickCard(set.cards, turn);
-    set.turn = markSeen(set.cards[current.index], turn);
-    set.updatedAt = new Date().toISOString();
-    persist();
+    counted = false;
     const card = current.card;
     focusEl.textContent = card.source || "";
     paintMeanings(card);
@@ -775,6 +1147,16 @@ function renderConjugation(setId) {
     altsEl.hidden = false;
   }
 
+  function countReveal() {
+    if (!current || counted) return;
+    counted = true;
+    const turn = Number.isFinite(set.turn) ? set.turn : 0;
+    set.turn = markSeen(current.card, turn);
+    set.updatedAt = new Date().toISOString();
+    persist();
+    syncProgress();
+  }
+
   function revealCard(btn) {
     if (!current || btn.classList.contains("revealed")) return;
     btn.classList.add("revealed");
@@ -783,6 +1165,8 @@ function renderConjugation(setId) {
     if (form) form.removeAttribute("aria-hidden");
     if (!stack.querySelector(".conj-card:not(.revealed)")) {
       allRevealed = true;
+      takeAnswerTime();
+      countReveal();
       revealBtn.hidden = true;
       nextBtn.hidden = false;
       hint.classList.add("is-reserved");
@@ -833,7 +1217,10 @@ function renderConjugation(setId) {
   document.addEventListener("keydown", onStudyKey);
   unbindStudyKeys = () => document.removeEventListener("keydown", onStudyKey);
 
-  showCard();
+  refreshConjugationParadigms(set).finally(() => {
+    if (openStudySet()?.id !== set.id) return;
+    showCard();
+  });
 }
 
 // Touch emulation (and real touch) follows a tap with a compatibility mouse click.
@@ -940,13 +1327,24 @@ function syncConjugationControls() {
   }
 }
 
+function onHomeRoute() {
+  const { parts } = parseRoute();
+  return parts[0] !== "new" && parts[0] !== "study" && parts[0] !== "stats";
+}
+
 function syncSettingsScope() {
   const set = openStudySet();
   const conj = set?.kind === "conjugation";
+  const home = onHomeRoute();
   const direction = document.getElementById("settings-direction");
   const conjugation = document.getElementById("settings-conj");
+  const io = settingsPop.querySelector(".settings-io");
   if (direction) direction.hidden = !set || conj;
   if (conjugation) conjugation.hidden = !conj;
+  if (io) io.hidden = !home;
+  const hasSettings = home || !!set;
+  settingsBtn.hidden = !hasSettings;
+  if (!hasSettings) setSettingsOpen(false);
   syncConjugationControls();
 }
 
@@ -1018,12 +1416,18 @@ settingsPop.addEventListener("change", (e) => {
 document.addEventListener("click", () => {
   if (!settingsPop.hidden) setSettingsOpen(false);
   if (!infoPop.hidden) setInfoOpen(false);
+  closeOpenSetMenu();
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (!settingsPop.hidden) setSettingsOpen(false);
   if (!infoPop.hidden) setInfoOpen(false);
+  if (openMenuButton) {
+    const button = openMenuButton;
+    closeOpenSetMenu();
+    button.focus();
+  }
 });
 
 const snackbar = document.getElementById("snackbar");

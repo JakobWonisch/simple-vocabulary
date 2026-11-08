@@ -52,6 +52,7 @@ func (s *Server) Handler() http.Handler {
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 	s.mux.HandleFunc("GET /api/dict/lookup", s.handleLookup)
+	s.mux.HandleFunc("POST /api/conj/paradigms", s.handleConjParadigms)
 	s.mux.HandleFunc("GET /api/initial", s.handleInitial)
 	s.mux.HandleFunc("POST /api/sets/generate", s.handleGenerate)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
@@ -113,10 +114,46 @@ func (s *Server) handleLookup(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, entry)
 }
 
+type conjParadigmsRequest struct {
+	Lemmas []string `json:"lemmas"`
+}
+
+// handleConjParadigms returns current paradigms for the requested infinitives.
+// Study sets store a copy at generation time; this lets them pick up forms
+// added later, such as the past participle.
+func (s *Server) handleConjParadigms(w http.ResponseWriter, r *http.Request) {
+	var body conjParadigmsRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	out := map[string]conjugation.Paradigm{}
+	if s.Conj != nil {
+		n := 0
+		for _, lemma := range body.Lemmas {
+			if n == 200 {
+				break
+			}
+			lemma = strings.TrimSpace(lemma)
+			if lemma == "" {
+				continue
+			}
+			n++
+			p, ok := s.Conj.Lookup(lemma)
+			if !ok {
+				continue
+			}
+			out[lemma] = p
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"paradigms": out})
+}
+
 type generateRequest struct {
-	Topic string `json:"topic"`
-	Count int    `json:"count"`
-	Kind  string `json:"kind"`
+	Topic      string `json:"topic"`
+	Count      int    `json:"count"`
+	Kind       string `json:"kind"`
+	Difficulty string `json:"difficulty"`
 }
 
 // conjugationCard is a dictionary verb plus the paradigm the study view quizzes.
@@ -159,15 +196,21 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	difficulty, ok := ai.NormalizeDifficulty(body.Difficulty)
+	if !ok {
+		writeError(w, http.StatusBadRequest, "difficulty must be easy, medium, or hard")
+		return
+	}
+
 	var (
 		cards     any
 		suggested int
 		err       error
 	)
 	if kind == ai.KindConjugation {
-		cards, suggested, err = s.conjugationCards(r.Context(), body.Topic, body.Count)
+		cards, suggested, err = s.conjugationCards(r.Context(), body.Topic, body.Count, difficulty)
 	} else {
-		cards, suggested, err = s.dictionaryCards(r.Context(), body.Topic, body.Count)
+		cards, suggested, err = s.dictionaryCards(r.Context(), body.Topic, body.Count, difficulty)
 	}
 	if err != nil {
 		log.Printf("generate: %v", err)
@@ -193,13 +236,14 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"topic":     body.Topic,
-		"kind":      kindOrVocab(kind),
-		"requested": body.Count,
-		"suggested": suggested,
-		"cards":     cards,
-		"ai":        s.AI.Name(),
-		"createdAt": time.Now().UTC().Format(time.RFC3339),
+		"topic":      body.Topic,
+		"kind":       kindOrVocab(kind),
+		"difficulty": difficulty,
+		"requested":  body.Count,
+		"suggested":  suggested,
+		"cards":      cards,
+		"ai":         s.AI.Name(),
+		"createdAt":  time.Now().UTC().Format(time.RFC3339),
 	})
 }
 
@@ -213,12 +257,12 @@ func kindOrVocab(kind string) string {
 // dictionaryCards asks the model for more lemmas than the set needs, keeps only
 // dictionary headwords, and uses the spare suggestions to replace misses.
 // Follow-up requests use the same spare when one batch cannot fill the set.
-func (s *Server) dictionaryCards(ctx context.Context, topic string, want int) ([]dictionary.Card, int, error) {
-	return s.fill(ctx, topic, want, "", func(dictionary.Card) bool { return true })
+func (s *Server) dictionaryCards(ctx context.Context, topic string, want int, difficulty string) ([]dictionary.Card, int, error) {
+	return s.fill(ctx, topic, want, "", difficulty, func(dictionary.Card) bool { return true })
 }
 
-func (s *Server) conjugationCards(ctx context.Context, topic string, want int) ([]conjugationCard, int, error) {
-	raw, suggested, err := s.fill(ctx, topic, want, ai.KindConjugation, func(card dictionary.Card) bool {
+func (s *Server) conjugationCards(ctx context.Context, topic string, want int, difficulty string) ([]conjugationCard, int, error) {
+	raw, suggested, err := s.fill(ctx, topic, want, ai.KindConjugation, difficulty, func(card dictionary.Card) bool {
 		if s.Conj == nil || (card.POS != "" && card.POS != "v") {
 			return false
 		}
@@ -242,7 +286,7 @@ func (s *Server) conjugationCards(ctx context.Context, topic string, want int) (
 	return cards, suggested, nil
 }
 
-func (s *Server) fill(ctx context.Context, topic string, want int, kind string, keep func(dictionary.Card) bool) ([]dictionary.Card, int, error) {
+func (s *Server) fill(ctx context.Context, topic string, want int, kind, difficulty string, keep func(dictionary.Card) bool) ([]dictionary.Card, int, error) {
 	cards := make([]dictionary.Card, 0, want)
 	seen := map[string]struct{}{}
 	var exclude []string
@@ -257,6 +301,7 @@ func (s *Server) fill(ctx context.Context, topic string, want int, kind string, 
 			TargetLang: s.Dict.TargetLang,
 			Exclude:    exclude,
 			Kind:       kind,
+			Difficulty: difficulty,
 		})
 		if err != nil {
 			return nil, suggested, err

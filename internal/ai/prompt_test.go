@@ -23,4 +23,21 @@ func TestVocabularyPromptStaysMixed(t *testing.T) {
 	if !strings.Contains(p, "mix of nouns") {
 		t.Fatal(p)
 	}
+	if !strings.Contains(p, "intermediate level") {
+		t.Fatal(p)
+	}
+}
+
+func TestPromptDifficultyChangesLemmaLevel(t *testing.T) {
+	easy := buildPrompt(GenerateRequest{Topic: "cocina", Count: 8, SourceLang: "es", Difficulty: DifficultyEasy})
+	hard := buildPrompt(GenerateRequest{Topic: "cocina", Count: 8, SourceLang: "es", Kind: KindConjugation, Difficulty: DifficultyHard})
+	if !strings.Contains(easy, "beginner") || strings.Contains(easy, "proficient learner") {
+		t.Fatalf("easy prompt:\n%s", easy)
+	}
+	if !strings.Contains(hard, "proficient learner") || !strings.Contains(hard, "verbs") {
+		t.Fatalf("hard prompt:\n%s", hard)
+	}
+	if strings.Contains(hard, "mix of nouns") {
+		t.Fatal("hard conjugation prompt reused the vocabulary prompt")
+	}
 }

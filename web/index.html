@@ -28,6 +28,9 @@
         <p>Um eine neue Sammlung zu erstellen, nennst du ein Thema. Eine KI schlägt spanische Wörter vor, und übernommen werden nur die, die im eingebauten Wörterbuch stehen. Die deutschen Bedeutungen kommen aus diesem Wörterbuch.</p>
         <h2>Lernen</h2>
         <p>Wörter werden zufällig ausgewählt. Ein Wort, das du gerade gesehen hast, kommt danach mit höherer Wahrscheinlichkeit wieder, um es gleich zu festigen. Je öfter du ein Wort gesehen hast, desto seltener wird es wiederholt.</p>
+        <p>Der Balken ist voll, wenn jedes Wort viermal aufgedeckt wurde. Jedes Aufdecken rückt ihn vor. Danach bleibt er voll, und die Prozentzahl zählt weitere Wiederholungen mit.</p>
+        <h2>Statistik</h2>
+        <p>Im Menü einer Sammlung siehst du, wie oft jedes Wort gezeigt wurde und wie lange du im Schnitt bis zur Antwort brauchst.</p>
         <h2>Vokabeln und Konjugation</h2>
         <p>Vokabeln sind Karteikarten: ein Wort, dann die Übersetzung. Die Richtung (Deutsch zu Spanisch oder Spanisch zu Deutsch) stellst du in den Einstellungen auf der Übungsseite ein.</p>
         <p>Konjugation sammelt Verben zum Thema. Du übst die Formen zu Modus und Zeit, in fester oder zufälliger Reihenfolge.</p>
@@ -59,7 +62,7 @@
               <option value="ind">Indikativ</option>
               <option value="sbjv">Subjuntivo</option>
               <option value="imp">Imperativ</option>
-              <option value="ger">Gerundium</option>
+              <option value="ger">Gerundium &amp; Partizip</option>
             </select>
           </label>
           <label class="settings-field" id="settings-tense">
@@ -91,6 +94,10 @@
   </header>
 
   <main id="app"></main>
+
+  <footer class="site-credit">
+    <a href="https://github.com/JakobWonisch/simple-vocabulary" target="_blank" rel="noopener noreferrer" aria-label="made with love by Jakob Wonisch">made with <span aria-hidden="true">♥</span> by Jakob Wonisch</a>
+  </footer>
 
   <template id="tpl-home">
     <section class="view home">
@@ -139,10 +146,27 @@
           <span>Thema</span>
           <input name="topic" type="text" required maxlength="200" placeholder="z. B. Essen im Restaurant bestellen" autocomplete="off" />
         </label>
-        <label class="field inline">
-          <span id="create-count-label">Wortanzahl</span>
-          <input name="count" type="number" min="10" max="100" value="50" />
-        </label>
+        <div class="options-row">
+            <div class="field">
+              <span id="difficulty-label">Schwierigkeit</span>
+              <div class="pick">
+                <button type="button" class="pick-toggle" aria-labelledby="difficulty-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="difficulty-list">
+                  <span class="pick-value">Mittel</span>
+                  <svg class="pick-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                <div class="pick-menu" id="difficulty-list" role="listbox" aria-labelledby="difficulty-label" hidden>
+                  <button type="button" class="pick-option" role="option" data-value="easy">Einfach</button>
+                  <button type="button" class="pick-option" role="option" data-value="medium" aria-selected="true">Mittel</button>
+                  <button type="button" class="pick-option" role="option" data-value="hard">Schwierig</button>
+                </div>
+                <input type="hidden" name="difficulty" value="medium" />
+              </div>
+            </div>
+            <label class="field">
+              <span id="create-count-label">Wortanzahl</span>
+              <input name="count" type="number" min="10" max="100" value="50" />
+            </label>
+        </div>
         <button type="submit" class="btn primary" id="create-submit">Sammlung erzeugen</button>
         <p class="status" id="create-status" role="status" aria-live="polite"></p>
       </form>
@@ -157,6 +181,10 @@
           <h1 class="set-title" id="study-title"></h1>
           <span class="progress" id="study-progress"></span>
         </div>
+      </div>
+      <div class="mastery" id="study-mastery" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Fortschritt, 100 % sind 4 Wiederholungen pro Wort">
+        <span class="mastery-track"><span class="mastery-fill"></span></span>
+        <span class="mastery-pct">0 %</span>
       </div>
       <div class="flashcard" id="flashcard" role="button" tabindex="0" aria-live="polite">
         <div class="card-tools">
@@ -224,6 +252,10 @@
           <span class="progress" id="conj-progress"></span>
         </div>
       </div>
+      <div class="mastery" id="conj-mastery" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Fortschritt, 100 % sind 4 Wiederholungen pro Wort">
+        <span class="mastery-track"><span class="mastery-fill"></span></span>
+        <span class="mastery-pct">0 %</span>
+      </div>
       <div class="conj-head">
         <p class="conj-focus" id="conj-focus"></p>
         <button type="button" class="card-tool remove-card" id="conj-remove" hidden aria-label="Verb aus der Sammlung entfernen">
@@ -251,6 +283,25 @@
         <button type="button" class="btn primary show-answer" id="conj-next" hidden>Weiter</button>
       </div>
       <p class="status" id="conj-status"></p>
+    </section>
+  </template>
+
+  <template id="tpl-stats">
+    <section class="view stats">
+      <a class="back" id="stats-back" href="#/" data-link>← Sammlungen</a>
+      <h1 id="stats-title"></h1>
+      <p class="lede" id="stats-note"></p>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th aria-sort="none"><button type="button" class="stats-sort" data-sort="word" data-first="asc">Wort</button></th>
+            <th class="num" aria-sort="none"><button type="button" class="stats-sort" data-sort="seen" data-first="desc">Gesehen</button></th>
+            <th class="num" aria-sort="none"><button type="button" class="stats-sort" data-sort="time" data-first="desc">Ø Zeit</button></th>
+          </tr>
+        </thead>
+        <tbody id="stats-body"></tbody>
+      </table>
+      <p class="empty" id="stats-empty" hidden>Diese Sammlung hat noch keine Wörter.</p>
     </section>
   </template>
 

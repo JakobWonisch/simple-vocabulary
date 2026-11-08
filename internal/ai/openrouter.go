@@ -338,23 +338,24 @@ func uniqModels(in []string) []string {
 func buildPrompt(req GenerateRequest) string {
 	lang := langName(req.SourceLang)
 	var prompt string
+	level := difficultyInstruction(req.Kind, req.Difficulty)
 	if req.Kind == KindConjugation {
 		prompt = fmt.Sprintf(`You are a vocabulary list generator for language learners.
 Topic: %q
 Produce exactly %d useful %s verbs related to that topic.
 Every item must be one verb in the infinitive (citation form ending in -ar, -er, or -ir). No nouns, no adjectives, no phrases, and no conjugated forms.
 Do not attach reflexive pronouns (enviar, not enviarse).
-Prefer concrete, high-frequency verbs a beginner or intermediate learner would use for that topic.
+%s
 
 Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
 [{"lemma":"...","pos":"v"}]
 - lemma: %s infinitive
-- pos: always v`, req.Topic, req.Count, lang, lang)
+- pos: always v`, req.Topic, req.Count, lang, level, lang)
 	} else {
 		prompt = fmt.Sprintf(`You are a vocabulary list generator for language learners.
 Topic: %q
 Produce exactly %d useful %s lemmas (base forms) related to that topic.
-Prefer concrete, high-frequency words a beginner/intermediate learner would want.
+%s
 Each lemma must be a single dictionary headword in citation form: singular noun, infinitive verb, or base adjective. No phrases and no inflected forms.
 Include a mix of nouns (with gender when known), verbs (infinitive), and adjectives when natural.
 
@@ -362,12 +363,37 @@ Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
 [{"lemma":"...","gender":"m|f|n|","pos":"n|v|adj|adv"}]
 - lemma: word in %s
 - gender: only for nouns; omit or empty otherwise
-- pos: part of speech`, req.Topic, req.Count, lang, lang)
+- pos: part of speech`, req.Topic, req.Count, lang, level, lang)
 	}
 	if len(req.Exclude) > 0 {
 		prompt += "\nDo not include any of these lemmas: " + strings.Join(req.Exclude, ", ")
 	}
 	return prompt
+}
+
+func difficultyInstruction(kind, difficulty string) string {
+	level, ok := NormalizeDifficulty(difficulty)
+	if !ok {
+		level = DifficultyMedium
+	}
+	verbs := kind == KindConjugation
+	switch level {
+	case DifficultyEasy:
+		if verbs {
+			return "Choose only common, high-frequency verbs a beginner would meet in the first months of study. Prefer everyday concrete verbs. Avoid uncommon, formal, technical, or literary verbs."
+		}
+		return "Choose only common, high-frequency words a beginner would meet in the first months of study. Prefer everyday concrete words. Avoid uncommon, formal, technical, or literary vocabulary."
+	case DifficultyHard:
+		if verbs {
+			return "Choose less common, precise, or advanced verbs a proficient learner would study. Prefer lower-frequency, nuanced, formal, or topic-specific verbs over the most basic everyday ones."
+		}
+		return "Choose less common, precise, or advanced words a proficient learner would study. Prefer lower-frequency, nuanced, formal, or topic-specific vocabulary over the most basic everyday words."
+	default:
+		if verbs {
+			return "Choose useful verbs at an intermediate level: common enough to study, beyond the most basic beginner verbs, and not rare, technical, or literary."
+		}
+		return "Choose useful words at an intermediate level: common enough to study, beyond the most basic beginner words, and not rare, technical, or literary."
+	}
 }
 
 func langName(code string) string {

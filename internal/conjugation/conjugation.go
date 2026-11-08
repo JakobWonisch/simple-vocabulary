@@ -20,17 +20,19 @@ const PersonCount = 6
 // Indicative tenses: prs, ipfv, pfv, fut, cond.
 // Subjunctive tenses: prs, ra, se, fut.
 // Imp is the affirmative imperative in person-slot order (yo is usually empty).
-// Ger is the gerund.
+// Ger is the gerund. Ptcp is the masculine singular past participle
+// (participio perfecto), used with haber but stored on its own.
 type Paradigm struct {
 	Ind  map[string][]string `json:"ind,omitempty"`
 	Sbjv map[string][]string `json:"sbjv,omitempty"`
 	Imp  []string            `json:"imp,omitempty"`
 	Ger  string              `json:"ger,omitempty"`
+	Ptcp string              `json:"ptcp,omitempty"`
 }
 
 // HasForms reports whether any quiz form was extracted.
 func (p Paradigm) HasForms() bool {
-	if p.Ger != "" || len(p.Imp) > 0 {
+	if p.Ger != "" || p.Ptcp != "" || len(p.Imp) > 0 {
 		return true
 	}
 	for _, row := range p.Ind {
@@ -154,7 +156,8 @@ var dropTag = map[string]struct{}{
 }
 
 // ParseUniMorph reads a UniMorph Spanish TSV (lemma, form, features)
-// and keeps the finite forms, affirmative imperative, and gerund this app shows.
+// and keeps the finite forms, affirmative imperative, gerund, and masculine
+// singular past participle this app shows.
 // When several spellings share a slot, tuteo wins over voseo.
 func ParseUniMorph(r io.Reader) (map[string]Paradigm, error) {
 	sc := bufio.NewScanner(r)
@@ -176,6 +179,10 @@ func ParseUniMorph(r io.Reader) (map[string]Paradigm, error) {
 		}
 		if feats == "V;V.CVB;PRS" {
 			d.ger = better(d.ger, form)
+			continue
+		}
+		if feats == "V;V.PTCP;PST;MASC;SG" {
+			d.ptcp = better(d.ptcp, form)
 			continue
 		}
 		b, ok := bundles[bundleKey(feats)]
@@ -274,6 +281,7 @@ type verbDraft struct {
 	sbjv map[string]*formRow
 	imp  *formRow
 	ger  string
+	ptcp string
 }
 
 func newVerbDraft() *verbDraft {
@@ -303,7 +311,7 @@ func (d *verbDraft) row(b bundle) *formRow {
 }
 
 func (d *verbDraft) paradigm() Paradigm {
-	p := Paradigm{Ger: d.ger}
+	p := Paradigm{Ger: d.ger, Ptcp: d.ptcp}
 	if row, ok := d.imp.forms(); ok {
 		p.Imp = row
 	}

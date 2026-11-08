@@ -16,6 +16,10 @@ func TestParseUniMorphPrefersTuteo(t *testing.T) {
 		"hablar\thabláis\tV;IND;PRS;2;PL\n" +
 		"hablar\thablan\tV;IND;PRS;3;PL\n" +
 		"hablar\thablando\tV;V.CVB;PRS\n" +
+		"hablar\thablado\tV;V.PTCP;PST;MASC;SG\n" +
+		"hablar\thablada\tV;V.PTCP;PST;FEM;SG\n" +
+		"freír\tfreído\tV;V.PTCP;PST;MASC;SG\n" +
+		"freír\tfrito\tV;V.PTCP;PST;MASC;SG\n" +
 		"hablar\thablándote\tV;V.CVB;PRS;DAT;PRO;2;SG\n" +
 		"hablar\thabla\tV;POS;IMP;2;SG;INFM\n" +
 		"hablar\thablá\tV;POS;IMP;2;SG;INFM\n" +
@@ -48,8 +52,11 @@ func TestParseUniMorphPrefersTuteo(t *testing.T) {
 	if strings.Join(hablar.Ind["prs"], ",") != strings.Join(want, ",") {
 		t.Fatalf("present %v", hablar.Ind["prs"])
 	}
-	if hablar.Ger != "hablando" {
-		t.Fatalf("ger %q", hablar.Ger)
+	if hablar.Ger != "hablando" || hablar.Ptcp != "hablado" {
+		t.Fatalf("ger %q ptcp %q", hablar.Ger, hablar.Ptcp)
+	}
+	if got["freír"].Ptcp != "frito" {
+		t.Fatalf("freír ptcp %q", got["freír"].Ptcp)
 	}
 	if hablar.Imp[0] != "" || hablar.Imp[1] != "habla" || hablar.Imp[2] != "hable" || hablar.Imp[4] != "hablad" || hablar.Imp[5] != "hablen" {
 		t.Fatalf("imp %v", hablar.Imp)

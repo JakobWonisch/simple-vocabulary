@@ -258,7 +258,8 @@
               "celebrad",
               "celebren"
             ],
-            "ger": "celebrando"
+            "ger": "celebrando",
+            "ptcp": "celebrado"
           }
         },
         {
@@ -357,7 +358,8 @@
               "festejad",
               "festejen"
             ],
-            "ger": "festejando"
+            "ger": "festejando",
+            "ptcp": "festejado"
           }
         },
         {
@@ -456,7 +458,8 @@
               "invitad",
               "inviten"
             ],
-            "ger": "invitando"
+            "ger": "invitando",
+            "ptcp": "invitado"
           }
         },
         {
@@ -557,7 +560,8 @@
               "salid",
               "salgan"
             ],
-            "ger": "saliendo"
+            "ger": "saliendo",
+            "ptcp": "salido"
           }
         },
         {
@@ -658,7 +662,8 @@
               "quedad",
               "queden"
             ],
-            "ger": "quedando"
+            "ger": "quedando",
+            "ptcp": "quedado"
           }
         },
         {
@@ -759,7 +764,8 @@
               "reunid",
               "reúnan"
             ],
-            "ger": "reuniendo"
+            "ger": "reuniendo",
+            "ptcp": "reunido"
           }
         },
         {
@@ -858,7 +864,8 @@
               "visitad",
               "visiten"
             ],
-            "ger": "visitando"
+            "ger": "visitando",
+            "ptcp": "visitado"
           }
         },
         {
@@ -959,7 +966,8 @@
               "saludad",
               "saluden"
             ],
-            "ger": "saludando"
+            "ger": "saludando",
+            "ptcp": "saludado"
           }
         },
         {
@@ -1060,7 +1068,8 @@
               "despedid",
               "despidan"
             ],
-            "ger": "despidiendo"
+            "ger": "despidiendo",
+            "ptcp": "despedido"
           }
         },
         {
@@ -1161,7 +1170,8 @@
               "presentad",
               "presenten"
             ],
-            "ger": "presentando"
+            "ger": "presentando",
+            "ptcp": "presentado"
           }
         },
         {
@@ -1261,7 +1271,8 @@
               "conoced",
               "conozcan"
             ],
-            "ger": "conociendo"
+            "ger": "conociendo",
+            "ptcp": "conocido"
           }
         },
         {
@@ -1360,7 +1371,8 @@
               "charlad",
               "charlen"
             ],
-            "ger": "charlando"
+            "ger": "charlando",
+            "ptcp": "charlado"
           }
         },
         {
@@ -1460,7 +1472,8 @@
               "conversad",
               "conversen"
             ],
-            "ger": "conversando"
+            "ger": "conversando",
+            "ptcp": "conversado"
           }
         },
         {
@@ -1559,7 +1572,8 @@
               "hablad",
               "hablen"
             ],
-            "ger": "hablando"
+            "ger": "hablando",
+            "ptcp": "hablado"
           }
         },
         {
@@ -1658,7 +1672,8 @@
               "comentad",
               "comenten"
             ],
-            "ger": "comentando"
+            "ger": "comentando",
+            "ptcp": "comentado"
           }
         },
         {
@@ -1759,7 +1774,8 @@
               "contad",
               "cuenten"
             ],
-            "ger": "contando"
+            "ger": "contando",
+            "ptcp": "contado"
           }
         },
         {
@@ -1858,7 +1874,8 @@
               "reíd",
               "rían"
             ],
-            "ger": "riendo"
+            "ger": "riendo",
+            "ptcp": "reído"
           }
         },
         {
@@ -1957,7 +1974,8 @@
               "bailad",
               "bailen"
             ],
-            "ger": "bailando"
+            "ger": "bailando",
+            "ptcp": "bailado"
           }
         },
         {
@@ -2057,7 +2075,8 @@
               "tocad",
               "toquen"
             ],
-            "ger": "tocando"
+            "ger": "tocando",
+            "ptcp": "tocado"
           }
         },
         {
@@ -2158,7 +2177,8 @@
               "escuchad",
               "escuchen"
             ],
-            "ger": "escuchando"
+            "ger": "escuchando",
+            "ptcp": "escuchado"
           }
         },
         {
@@ -2257,7 +2277,8 @@
               "brindad",
               "brinden"
             ],
-            "ger": "brindando"
+            "ger": "brindando",
+            "ptcp": "brindado"
           }
         },
         {
@@ -2356,7 +2377,8 @@
               "bebed",
               "beban"
             ],
-            "ger": "bebiendo"
+            "ger": "bebiendo",
+            "ptcp": "bebido"
           }
         },
         {
@@ -2457,7 +2479,8 @@
               "tomad",
               "tomen"
             ],
-            "ger": "tomando"
+            "ger": "tomando",
+            "ptcp": "tomado"
           }
         },
         {
@@ -2558,7 +2581,8 @@
               "pedid",
               "pidan"
             ],
-            "ger": "pidiendo"
+            "ger": "pidiendo",
+            "ptcp": "pedido"
           }
         },
         {
@@ -2659,7 +2683,8 @@
               "reservad",
               "reserven"
             ],
-            "ger": "reservando"
+            "ger": "reservando",
+            "ptcp": "reservado"
           }
         },
         {
@@ -2758,7 +2783,8 @@
               "cenad",
               "cenen"
             ],
-            "ger": "cenando"
+            "ger": "cenando",
+            "ptcp": "cenado"
           }
         },
         {
@@ -2857,7 +2883,8 @@
               "comed",
               "coman"
             ],
-            "ger": "comiendo"
+            "ger": "comiendo",
+            "ptcp": "comido"
           }
         },
         {
@@ -2956,7 +2983,8 @@
               "almorzad",
               "almuercen"
             ],
-            "ger": "almorzando"
+            "ger": "almorzando",
+            "ptcp": "almorzado"
           }
         },
         {
@@ -3055,7 +3083,8 @@
               "desayunad",
               "desayunen"
             ],
-            "ger": "desayunando"
+            "ger": "desayunando",
+            "ptcp": "desayunado"
           }
         },
         {
@@ -3155,7 +3184,8 @@
               "merendad",
               "merienden"
             ],
-            "ger": "merendando"
+            "ger": "merendando",
+            "ptcp": "merendado"
           }
         },
         {
@@ -3256,7 +3286,8 @@
               "probad",
               "prueben"
             ],
-            "ger": "probando"
+            "ger": "probando",
+            "ptcp": "probado"
           }
         },
         {
@@ -3357,7 +3388,8 @@
               "degustad",
               "degusten"
             ],
-            "ger": "degustando"
+            "ger": "degustando",
+            "ptcp": "degustado"
           }
         },
         {
@@ -3457,7 +3489,8 @@
               "cocinad",
               "cocinen"
             ],
-            "ger": "cocinando"
+            "ger": "cocinando",
+            "ptcp": "cocinado"
           }
         },
         {
@@ -3558,7 +3591,8 @@
               "pagad",
               "paguen"
             ],
-            "ger": "pagando"
+            "ger": "pagando",
+            "ptcp": "pagado"
           }
         },
         {
@@ -3658,7 +3692,8 @@
               "compartid",
               "compartan"
             ],
-            "ger": "compartiendo"
+            "ger": "compartiendo",
+            "ptcp": "compartido"
           }
         },
         {
@@ -3759,7 +3794,8 @@
               "organizad",
               "organicen"
             ],
-            "ger": "organizando"
+            "ger": "organizando",
+            "ptcp": "organizado"
           }
         },
         {
@@ -3860,7 +3896,8 @@
               "planead",
               "planeen"
             ],
-            "ger": "planeando"
+            "ger": "planeando",
+            "ptcp": "planeado"
           }
         },
         {
@@ -3960,7 +3997,8 @@
               "asistid",
               "asistan"
             ],
-            "ger": "asistiendo"
+            "ger": "asistiendo",
+            "ptcp": "asistido"
           }
         },
         {
@@ -4061,7 +4099,8 @@
               "acudid",
               "acudan"
             ],
-            "ger": "acudiendo"
+            "ger": "acudiendo",
+            "ptcp": "acudido"
           }
         },
         {
@@ -4161,7 +4200,8 @@
               "llegad",
               "lleguen"
             ],
-            "ger": "llegando"
+            "ger": "llegando",
+            "ptcp": "llegado"
           }
         },
         {
@@ -4262,7 +4302,8 @@
               "entrad",
               "entren"
             ],
-            "ger": "entrando"
+            "ger": "entrando",
+            "ptcp": "entrado"
           }
         },
         {
@@ -4363,7 +4404,8 @@
               "esperad",
               "esperen"
             ],
-            "ger": "esperando"
+            "ger": "esperando",
+            "ptcp": "esperado"
           }
         },
         {
@@ -4462,7 +4504,8 @@
               "abrazad",
               "abracen"
             ],
-            "ger": "abrazando"
+            "ger": "abrazando",
+            "ptcp": "abrazado"
           }
         },
         {
@@ -4561,7 +4604,8 @@
               "besad",
               "besen"
             ],
-            "ger": "besando"
+            "ger": "besando",
+            "ptcp": "besado"
           }
         },
         {
@@ -4660,7 +4704,8 @@
               "sonreíd",
               "sonrían"
             ],
-            "ger": "sonriendo"
+            "ger": "sonriendo",
+            "ptcp": "sonreído"
           }
         },
         {
@@ -4759,7 +4804,8 @@
               "disfrutad",
               "disfruten"
             ],
-            "ger": "disfrutando"
+            "ger": "disfrutando",
+            "ptcp": "disfrutado"
           }
         },
         {
@@ -4858,7 +4904,8 @@
               "gozad",
               "gocen"
             ],
-            "ger": "gozando"
+            "ger": "gozando",
+            "ptcp": "gozado"
           }
         },
         {
@@ -4958,7 +5005,8 @@
               "descansad",
               "descansen"
             ],
-            "ger": "descansando"
+            "ger": "descansando",
+            "ptcp": "descansado"
           }
         },
         {
@@ -5057,7 +5105,8 @@
               "fumad",
               "fumen"
             ],
-            "ger": "fumando"
+            "ger": "fumando",
+            "ptcp": "fumado"
           }
         },
         {
@@ -5158,7 +5207,8 @@
               "discutid",
               "discutan"
             ],
-            "ger": "discutiendo"
+            "ger": "discutiendo",
+            "ptcp": "discutido"
           }
         }
       ]

@@ -98,6 +98,9 @@ func TestGenerateKeepsExactDictionaryCount(t *testing.T) {
 	if len(stub.calls) != 1 || stub.calls[0].Count != 13 {
 		t.Fatalf("calls %+v", stub.calls)
 	}
+	if stub.calls[0].Difficulty != ai.DifficultyMedium {
+		t.Fatalf("difficulty %q", stub.calls[0].Difficulty)
+	}
 }
 
 func TestGenerateRefillsFromSpareRequest(t *testing.T) {
@@ -107,7 +110,7 @@ func TestGenerateRefillsFromSpareRequest(t *testing.T) {
 	}}
 	srv := New(testDict(t), stub, t.TempDir())
 
-	cards, _, err := srv.dictionaryCards(context.Background(), "home", 3)
+	cards, _, err := srv.dictionaryCards(context.Background(), "home", 3, ai.DifficultyMedium)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +139,7 @@ func TestGenerateFailsWhenDictionaryCannotFillSet(t *testing.T) {
 	stub := &scriptedAI{batches: [][]ai.WordSuggestion{misses, misses, misses}}
 	srv := New(testDict(t), stub, t.TempDir())
 
-	_, _, err := srv.dictionaryCards(context.Background(), "nowhere", 2)
+	_, _, err := srv.dictionaryCards(context.Background(), "nowhere", 2, "")
 	if err != errNotEnoughMatches {
 		t.Fatalf("err %v", err)
 	}
@@ -173,15 +176,16 @@ func TestGenerateConjugationDropsNonVerbsAndMissingParadigms(t *testing.T) {
 		"comer":  {Ger: "comiendo"},
 	})
 
-	req := httptest.NewRequest(http.MethodPost, "/api/sets/generate", strings.NewReader(`{"topic":"reden","count":2,"kind":"conjugation"}`))
+	req := httptest.NewRequest(http.MethodPost, "/api/sets/generate", strings.NewReader(`{"topic":"reden","count":2,"kind":"conjugation","difficulty":"hard"}`))
 	rec := httptest.NewRecorder()
 	srv.Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d body %s", rec.Code, rec.Body.String())
 	}
 	var resp struct {
-		Kind  string `json:"kind"`
-		Cards []struct {
+		Kind       string `json:"kind"`
+		Difficulty string `json:"difficulty"`
+		Cards      []struct {
 			Source   string `json:"source"`
 			POS      string `json:"pos"`
 			Paradigm struct {
@@ -192,13 +196,48 @@ func TestGenerateConjugationDropsNonVerbsAndMissingParadigms(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		t.Fatal(err)
 	}
-	if resp.Kind != "conjugation" || len(resp.Cards) != 2 || resp.Cards[0].Source != "comer" || resp.Cards[1].Source != "hablar" {
+	if resp.Kind != "conjugation" || resp.Difficulty != ai.DifficultyHard || len(resp.Cards) != 2 || resp.Cards[0].Source != "comer" || resp.Cards[1].Source != "hablar" {
 		t.Fatalf("resp %+v", resp)
 	}
 	if resp.Cards[1].Paradigm.Ger != "hablando" || resp.Cards[1].POS != "v" {
 		t.Fatalf("paradigm %+v", resp.Cards[1])
 	}
-	if len(stub.calls) != 1 || stub.calls[0].Kind != ai.KindConjugation {
+	if len(stub.calls) != 1 || stub.calls[0].Difficulty != ai.DifficultyHard || stub.calls[0].Kind != ai.KindConjugation {
 		t.Fatalf("calls %+v", stub.calls)
+	}
+}
+
+func TestConjParadigmsLookup(t *testing.T) {
+	srv := New(testDict(t), &scriptedAI{}, t.TempDir())
+	srv.Conj = conjugation.New(map[string]conjugation.Paradigm{
+		"hablar": {Ger: "hablando", Ptcp: "hablado"},
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/conj/paradigms", strings.NewReader(`{"lemmas":["hablar","nada"]}`))
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d body %s", rec.Code, rec.Body.String())
+	}
+	var resp struct {
+		Paradigms map[string]conjugation.Paradigm `json:"paradigms"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if resp.Paradigms["hablar"].Ptcp != "hablado" || resp.Paradigms["hablar"].Ger != "hablando" {
+		t.Fatalf("paradigms %+v", resp.Paradigms)
+	}
+	if _, ok := resp.Paradigms["nada"]; ok {
+		t.Fatal("unknown lemma returned")
+	}
+}
+
+func TestGenerateRejectsUnknownDifficulty(t *testing.T) {
+	srv := New(testDict(t), &scriptedAI{}, t.TempDir())
+	req := httptest.NewRequest(http.MethodPost, "/api/sets/generate", strings.NewReader(`{"topic":"home","count":3,"difficulty":"brutal"}`))
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status %d body %s", rec.Code, rec.Body.String())
 	}
 }
