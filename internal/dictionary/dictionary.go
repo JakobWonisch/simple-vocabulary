@@ -152,8 +152,8 @@ const (
 
 // Search finds dictionary headwords by Spanish lemma prefix (diacritic-soft)
 // and, with lower priority, by German translation prefix. Results are ranked
-// and capped at limit. If keep is non-nil, only matching cards are returned;
-// the scan continues until limit keepers are found.
+// and capped at limit. If keep is non-nil, only matching cards are kept before
+// ranking and truncation.
 func (d *Dictionary) Search(query string, limit int, keep func(Card) bool) []Card {
 	q := normalizeKey(query)
 	if q == "" || limit <= 0 || d == nil {
