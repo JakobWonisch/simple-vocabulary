@@ -1,4 +1,6 @@
-// Package conjugation loads Spanish verb paradigms derived from UniMorph.
+// Package conjugation loads Spanish verb paradigms for the study UI.
+// Preferred source is Kaikki/Wiktextract (ParseKaikki); UniMorph (ParseUniMorph)
+// remains supported for older TSV inputs.
 // Person slots are fixed:
 //
 //	0 yo, 1 tú, 2 él/ella/usted, 3 nosotros, 4 vosotros, 5 ellos/ellas/ustedes

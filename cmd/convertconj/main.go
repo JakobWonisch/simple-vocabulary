@@ -1,10 +1,13 @@
-// convertconj turns a UniMorph Spanish TSV into the compact paradigm file.
+// convertconj turns Kaikki/Wiktextract Spanish verb JSONL (or UniMorph TSV)
+// into the compact paradigm file the app loads.
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -19,22 +22,37 @@ type file struct {
 }
 
 func main() {
-	inPath := flag.String("in", "", "UniMorph Spanish TSV (lemma, form, features)")
+	inPath := flag.String("in", "", "Kaikki Spanish verb JSONL (.jsonl or .jsonl.gz), or UniMorph TSV")
+	format := flag.String("format", "kaikki", "input format: kaikki (default) or unimorph")
 	dictPath := flag.String("dict", "", "optional spa-deu.json; keep only verbs that are dictionary headwords")
 	outPath := flag.String("out", "", "compact JSON output")
 	flag.Parse()
 	if *inPath == "" || *outPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: convertconj -in spa -dict data/spa-deu.json -out data/spa-conj.json")
+		fmt.Fprintln(os.Stderr, "usage: convertconj -in kaikki.org-dictionary-Spanish-by-pos-verb.jsonl.gz -dict data/spa-deu.json -out data/spa-conj.json")
+		fmt.Fprintln(os.Stderr, "       convertconj -format unimorph -in spa -dict data/spa-deu.json -out data/spa-conj.json")
 		os.Exit(1)
 	}
 
-	f, err := os.Open(*inPath)
+	rc, err := openInput(*inPath)
 	if err != nil {
 		fatal(err)
 	}
-	defer f.Close()
+	defer rc.Close()
 
-	parsed, err := conjugation.ParseUniMorph(f)
+	var parsed map[string]conjugation.Paradigm
+	var source, license string
+	switch strings.ToLower(strings.TrimSpace(*format)) {
+	case "kaikki", "wiktextract":
+		parsed, err = conjugation.ParseKaikki(rc)
+		source = "Kaikki.org Spanish verbs (Wiktextract extract of English Wiktionary). See data/LICENSE.conjugation."
+		license = "CC BY-SA 4.0"
+	case "unimorph":
+		parsed, err = conjugation.ParseUniMorph(rc)
+		source = "UniMorph Spanish (unimorph/spa), from English Wiktionary. See data/LICENSE.conjugation."
+		license = "CC BY-SA 3.0"
+	default:
+		fatal(fmt.Errorf("unknown -format %q (want kaikki or unimorph)", *format))
+	}
 	if err != nil {
 		fatal(err)
 	}
@@ -48,9 +66,7 @@ func main() {
 		verbs = map[string]conjugation.Paradigm{}
 		for lemma, p := range parsed {
 			entry, ok := dict.Lookup(lemma)
-			// Untagged headwords stay when UniMorph has a paradigm. Explicit
-			// non-verbs (nouns, adjectives, …) are dropped.
-			if !ok || (entry.POS != "" && entry.POS != "v") {
+			if !ok || !keepDictLemma(lemma, entry) {
 				continue
 			}
 			key := strings.ToLower(strings.TrimSpace(lemma))
@@ -67,14 +83,66 @@ func main() {
 	enc := json.NewEncoder(out)
 	enc.SetEscapeHTML(false)
 	if err := enc.Encode(file{
-		Source:  "UniMorph Spanish (unimorph/spa), from English Wiktionary. See data/LICENSE.conjugation.",
-		License: "CC BY-SA 3.0",
+		Source:  source,
+		License: license,
 		Verbs:   verbs,
 	}); err != nil {
 		fatal(err)
 	}
-	fmt.Printf("wrote %d verbs to %s (parsed %d)\n", len(verbs), *outPath, len(parsed))
+	fmt.Printf("wrote %d verbs to %s (parsed %d, format %s)\n", len(verbs), *outPath, len(parsed), *format)
 }
+
+// keepDictLemma mirrors the UniMorph filter (empty or verb POS) and also keeps
+// infinitive-shaped headwords FreeDict tagged only as nouns (e.g. poder).
+func keepDictLemma(lemma string, entry dictionary.Entry) bool {
+	if entry.POS == "" || entry.POS == "v" {
+		return true
+	}
+	return looksLikeInfinitive(lemma)
+}
+
+func looksLikeInfinitive(s string) bool {
+	s = strings.ToLower(strings.TrimSpace(s))
+	if s == "" || strings.Contains(s, " ") {
+		return false
+	}
+	for _, suf := range []string{"ar", "er", "ir", "ár", "ér", "ír"} {
+		if strings.HasSuffix(s, suf) {
+			return true
+		}
+	}
+	return false
+}
+
+func openInput(path string) (io.ReadCloser, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	if strings.HasSuffix(strings.ToLower(path), ".gz") {
+		zr, err := gzip.NewReader(f)
+		if err != nil {
+			f.Close()
+			return nil, err
+		}
+		return chained{Reader: zr, closer: func() error {
+			err1 := zr.Close()
+			err2 := f.Close()
+			if err1 != nil {
+				return err1
+			}
+			return err2
+		}}, nil
+	}
+	return f, nil
+}
+
+type chained struct {
+	io.Reader
+	closer func() error
+}
+
+func (c chained) Close() error { return c.closer() }
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, err)
