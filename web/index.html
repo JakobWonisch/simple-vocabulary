@@ -84,6 +84,9 @@
             </label>
           </fieldset>
         </fieldset>
+        <div class="settings-add" id="settings-add" hidden>
+          <button type="button" class="btn ghost" id="btn-add-word">Wort hinzufügen</button>
+        </div>
         <div class="settings-io">
           <button type="button" class="btn ghost" id="btn-export">Exportieren</button>
           <label class="btn ghost file-btn">
@@ -95,6 +98,27 @@
     </div>
     <p class="snackbar" id="snackbar" role="status" aria-live="polite" hidden></p>
   </header>
+
+  <div class="add-word-dialog" id="add-word-dialog" hidden>
+    <div class="add-word-backdrop" data-add-word-close tabindex="-1"></div>
+    <div class="add-word-panel" role="dialog" aria-modal="true" aria-labelledby="add-word-title">
+      <div class="add-word-head">
+        <p class="settings-title" id="add-word-title">Wort hinzufügen</p>
+        <button type="button" class="icon-btn add-word-close" id="add-word-close" aria-label="Schließen" data-add-word-close>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6l12 12" />
+            <path d="M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <label class="field add-word-field">
+        <span id="add-word-label">Im Wörterbuch suchen</span>
+        <input type="search" id="add-word-input" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+      </label>
+      <p class="add-word-status" id="add-word-status" role="status" aria-live="polite"></p>
+      <ul class="add-word-results" id="add-word-results"></ul>
+    </div>
+  </div>
 
   <main id="app"></main>
 

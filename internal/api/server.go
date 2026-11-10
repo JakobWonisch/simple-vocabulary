@@ -52,6 +52,7 @@ func (s *Server) Handler() http.Handler {
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 	s.mux.HandleFunc("GET /api/dict/lookup", s.handleLookup)
+	s.mux.HandleFunc("GET /api/dict/search", s.handleSearch)
 	s.mux.HandleFunc("POST /api/conj/paradigms", s.handleConjParadigms)
 	s.mux.HandleFunc("GET /api/initial", s.handleInitial)
 	s.mux.HandleFunc("POST /api/sets/generate", s.handleGenerate)
@@ -112,6 +113,67 @@ func (s *Server) handleLookup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, entry)
+}
+
+const (
+	defaultSearchLimit = 20
+	maxSearchLimit     = 50
+)
+
+// handleSearch returns card-ready dictionary matches for typeahead add-to-set.
+// kind=conjugation keeps only verbs that also have a conjugation paradigm and
+// includes that paradigm on each result.
+func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	kind := strings.TrimSpace(r.URL.Query().Get("kind"))
+	if kind != "" && kind != "vocab" && kind != ai.KindConjugation {
+		writeError(w, http.StatusBadRequest, "kind must be vocab or conjugation")
+		return
+	}
+	limit := defaultSearchLimit
+	if raw := strings.TrimSpace(r.URL.Query().Get("limit")); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil || n < 1 {
+			writeError(w, http.StatusBadRequest, "limit must be a positive integer")
+			return
+		}
+		limit = n
+	}
+	if limit > maxSearchLimit {
+		limit = maxSearchLimit
+	}
+	if q == "" {
+		writeJSON(w, http.StatusOK, map[string]any{"results": []any{}})
+		return
+	}
+
+	if kind == ai.KindConjugation {
+		if s.Conj == nil {
+			writeError(w, http.StatusServiceUnavailable, "conjugation data is not loaded")
+			return
+		}
+		cards := s.Dict.Search(q, limit, func(card dictionary.Card) bool {
+			if card.POS != "" && card.POS != "v" {
+				return false
+			}
+			_, ok := s.Conj.Lookup(card.Source)
+			return ok
+		})
+		results := make([]conjugationCard, 0, len(cards))
+		for _, card := range cards {
+			p, ok := s.Conj.Lookup(card.Source)
+			if !ok {
+				continue
+			}
+			results = append(results, conjugationCard{Card: card, Paradigm: p})
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"results": results})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"results": s.Dict.Search(q, limit, nil),
+	})
 }
 
 type conjParadigmsRequest struct {

@@ -431,19 +431,173 @@ body:has(.view.home) main {
   font-weight: 700;
 }
 
+.settings-add,
 .settings-io {
   display: grid;
   gap: 0.45rem;
 }
 
-.settings-pop fieldset:not([hidden]) ~ .settings-io {
+.settings-pop fieldset:not([hidden]) ~ .settings-add,
+.settings-pop fieldset:not([hidden]) ~ .settings-io,
+.settings-pop .settings-add:not([hidden]) ~ .settings-io {
   margin-top: 0.9rem;
   padding-top: 0.9rem;
   border-top: 1px solid var(--line);
 }
 
+.settings-add .btn,
 .settings-io .btn {
   width: 100%;
+}
+
+.add-word-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.add-word-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 32, 28, 0.38);
+  backdrop-filter: blur(2px);
+}
+
+.add-word-panel {
+  position: relative;
+  z-index: 1;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: min(78vh, 36rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.05rem 1.05rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow);
+}
+
+.add-word-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.add-word-head .settings-title {
+  margin: 0;
+}
+
+.add-word-close {
+  flex: none;
+}
+
+.add-word-field {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.add-word-field span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.add-word-field input {
+  font: inherit;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+
+.add-word-field input:focus {
+  outline: 2px solid rgba(15, 110, 86, 0.35);
+  outline-offset: 1px;
+  border-color: rgba(15, 110, 86, 0.45);
+}
+
+.add-word-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.add-word-status.error {
+  color: var(--danger);
+}
+
+.add-word-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.add-word-results li {
+  margin: 0;
+}
+
+.add-word-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: rgba(15, 110, 86, 0.04);
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.add-word-row:hover:not(:disabled) {
+  border-color: rgba(15, 110, 86, 0.18);
+  background: rgba(15, 110, 86, 0.09);
+}
+
+.add-word-row:disabled {
+  cursor: default;
+  opacity: 0.72;
+  background: rgba(26, 36, 33, 0.04);
+}
+
+.add-word-row .lemma {
+  display: block;
+  font-weight: 700;
+}
+
+.add-word-row .gloss {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.add-word-row .meta {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.add-word-row .meta.addable {
+  color: var(--accent);
 }
 
 .btn {

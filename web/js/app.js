@@ -8,6 +8,13 @@ const settingsPop = document.getElementById("settings-pop");
 const infoBtn = document.getElementById("info-btn");
 const infoPop = document.getElementById("info-pop");
 const directionInputs = settingsPop.querySelectorAll('input[name="direction"]');
+const addWordDialog = document.getElementById("add-word-dialog");
+const addWordInput = document.getElementById("add-word-input");
+const addWordResults = document.getElementById("add-word-results");
+const addWordStatus = document.getElementById("add-word-status");
+const addWordTitle = document.getElementById("add-word-title");
+const addWordLabel = document.getElementById("add-word-label");
+const btnAddWord = document.getElementById("btn-add-word");
 
 const knownErrors = {
   "Generation failed": "Erzeugung fehlgeschlagen",
@@ -269,6 +276,7 @@ function route() {
   difficultyPickAbort?.abort();
   difficultyPickAbort = null;
   closeOpenSetMenu();
+  if (!addWordDialog.hidden) setAddWordOpen(false);
   unbindStudyKeys();
   unbindStudyKeys = () => {};
   refreshConjugation = () => {};
@@ -952,7 +960,7 @@ function renderStudy(setId) {
     if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target?.isContentEditable) return;
-    if (!current || !settingsPop.hidden || !infoPop.hidden) return;
+    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden) return;
     if (e.key === "Escape" && !dictPop.hidden) {
       e.preventDefault();
       setDictOpen(false);
@@ -1208,7 +1216,7 @@ function renderConjugation(setId) {
     if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) return;
-    if (!current || !settingsPop.hidden || !infoPop.hidden) return;
+    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden) return;
     if (modifierKeys.has(e.key)) return;
     e.preventDefault();
     if (!allRevealed) revealNext();
@@ -1298,6 +1306,46 @@ function openStudySet() {
   return state.sets.find((s) => s.id === parts[1]) || null;
 }
 
+function openSet() {
+  const { parts } = parseRoute();
+  if ((parts[0] !== "study" && parts[0] !== "stats") || !parts[1]) return null;
+  return state.sets.find((s) => s.id === parts[1]) || null;
+}
+
+function sourceKey(value) {
+  return String(value || "").trim().toLocaleLowerCase();
+}
+
+function setHasSource(set, source) {
+  const key = sourceKey(source);
+  if (!key) return false;
+  return (set.cards || []).some((card) => sourceKey(card.source) === key);
+}
+
+function cardFromSearchResult(hit) {
+  return {
+    id: uid(),
+    source: hit.source,
+    sourceArticle: hit.sourceArticle || "",
+    target: hit.target,
+    targetArticle: hit.targetArticle || "",
+    translations: meaningList(hit).slice(0, 3),
+    pos: hit.pos || "",
+    foundInDict: !!hit.foundInDict,
+    paradigm: hit.paradigm || null,
+  };
+}
+
+function updateOpenSetProgress(set) {
+  const progressEl = document.getElementById("study-progress") || document.getElementById("conj-progress");
+  const masteryEl = document.getElementById("study-mastery") || document.getElementById("conj-mastery");
+  if (progressEl) {
+    const seen = set.cards.filter((card) => timesSeen(card) > 0).length;
+    progressEl.textContent = `${seen} gesehen · ${set.cards.length} gesamt`;
+  }
+  if (masteryEl) paintMastery(masteryEl, set.cards);
+}
+
 function syncConjugationControls() {
   const modeSel = document.getElementById("conj-mode");
   const tenseSel = document.getElementById("conj-tense");
@@ -1333,14 +1381,21 @@ function onHomeRoute() {
 }
 
 function syncSettingsScope() {
-  const set = openStudySet();
-  const conj = set?.kind === "conjugation";
+  const studying = openStudySet();
+  const set = openSet();
+  const conj = studying?.kind === "conjugation";
   const home = onHomeRoute();
   const direction = document.getElementById("settings-direction");
   const conjugation = document.getElementById("settings-conj");
+  const addWrap = document.getElementById("settings-add");
+  const addBtn = document.getElementById("btn-add-word");
   const io = settingsPop.querySelector(".settings-io");
-  if (direction) direction.hidden = !set || conj;
+  if (direction) direction.hidden = !studying || conj;
   if (conjugation) conjugation.hidden = !conj;
+  if (addWrap) addWrap.hidden = !set;
+  if (addBtn && set) {
+    addBtn.textContent = set.kind === "conjugation" ? "Verb hinzufügen" : "Wort hinzufügen";
+  }
   if (io) io.hidden = !home;
   const hasSettings = home || !!set;
   settingsBtn.hidden = !hasSettings;
@@ -1421,12 +1476,190 @@ document.addEventListener("click", () => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
+  if (!addWordDialog.hidden) {
+    setAddWordOpen(false);
+    return;
+  }
   if (!settingsPop.hidden) setSettingsOpen(false);
   if (!infoPop.hidden) setInfoOpen(false);
   if (openMenuButton) {
     const button = openMenuButton;
     closeOpenSetMenu();
     button.focus();
+  }
+});
+
+let addWordSearchTimer = 0;
+let addWordSearchToken = 0;
+let addWordHits = [];
+
+function setAddWordOpen(open) {
+  const set = openSet();
+  if (open && !set) return;
+  addWordDialog.hidden = !open;
+  if (!open) {
+    clearTimeout(addWordSearchTimer);
+    addWordSearchToken += 1;
+    addWordInput.value = "";
+    addWordHits = [];
+    addWordResults.replaceChildren();
+    addWordStatus.textContent = "";
+    addWordStatus.classList.remove("error");
+    return;
+  }
+  const conj = set.kind === "conjugation";
+  addWordTitle.textContent = conj ? "Verb hinzufügen" : "Wort hinzufügen";
+  addWordLabel.textContent = conj
+    ? "Verb im Wörterbuch suchen"
+    : "Wort im Wörterbuch suchen";
+  addWordInput.placeholder = conj ? "z. B. hablar" : "z. B. casa";
+  addWordStatus.textContent = "Tippe, um zu suchen…";
+  setSettingsOpen(false);
+  setInfoOpen(false);
+  requestAnimationFrame(() => addWordInput.focus());
+}
+
+function paintAddWordResults(set, hits) {
+  addWordHits = hits;
+  addWordResults.replaceChildren();
+  for (const hit of hits) {
+    const already = setHasSource(set, hit.source);
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "add-word-row";
+    btn.disabled = already;
+    btn.dataset.source = hit.source;
+    const text = document.createElement("span");
+    const lemma = document.createElement("span");
+    lemma.className = "lemma";
+    lemma.textContent = formatWithArticle(hit.source, hit.sourceArticle);
+    const gloss = document.createElement("span");
+    gloss.className = "gloss";
+    gloss.textContent = meaningList(hit)[0] || hit.target || "";
+    text.append(lemma, gloss);
+    const meta = document.createElement("span");
+    meta.className = already ? "meta" : "meta addable";
+    meta.textContent = already ? "bereits in Sammlung" : "Hinzufügen";
+    btn.append(text, meta);
+    li.append(btn);
+    addWordResults.append(li);
+  }
+}
+
+async function runAddWordSearch(query) {
+  const set = openSet();
+  if (!set) {
+    setAddWordOpen(false);
+    return;
+  }
+  const q = String(query || "").trim();
+  const token = ++addWordSearchToken;
+  if (!q) {
+    addWordHits = [];
+    addWordResults.replaceChildren();
+    addWordStatus.classList.remove("error");
+    addWordStatus.textContent = "Tippe, um zu suchen…";
+    return;
+  }
+  addWordStatus.classList.remove("error");
+  addWordStatus.textContent = "Suche…";
+  const kind = set.kind === "conjugation" ? "conjugation" : "vocab";
+  try {
+    const res = await fetch(
+      `/api/dict/search?q=${encodeURIComponent(q)}&kind=${encodeURIComponent(kind)}&limit=20`,
+    );
+    const data = await res.json().catch(() => ({}));
+    if (token !== addWordSearchToken) return;
+    if (!res.ok) throw new Error(uiMessage(data.error, "Something went wrong"));
+    const hits = Array.isArray(data.results) ? data.results : [];
+    paintAddWordResults(set, hits);
+    if (!hits.length) {
+      addWordStatus.textContent = kind === "conjugation"
+        ? "Kein passendes Verb gefunden."
+        : "Kein Treffer im Wörterbuch.";
+    } else {
+      addWordStatus.textContent = `${hits.length} Treffer`;
+    }
+  } catch (err) {
+    if (token !== addWordSearchToken) return;
+    addWordHits = [];
+    addWordResults.replaceChildren();
+    addWordStatus.classList.add("error");
+    addWordStatus.textContent = uiMessage(err.message, "Something went wrong");
+  }
+}
+
+function scheduleAddWordSearch() {
+  clearTimeout(addWordSearchTimer);
+  addWordSearchTimer = setTimeout(() => {
+    runAddWordSearch(addWordInput.value);
+  }, 180);
+}
+
+function addSearchHitToSet(hit) {
+  const set = openSet();
+  if (!set || !hit?.source) return false;
+  if (set.kind === "conjugation" && !hit.paradigm) {
+    showSnackbar("Keine Konjugation für dieses Verb", { error: true });
+    return false;
+  }
+  if (setHasSource(set, hit.source)) {
+    paintAddWordResults(set, addWordHits);
+    return false;
+  }
+  const wasEmpty = !(set.cards || []).length;
+  set.cards.push(cardFromSearchResult(hit));
+  set.updatedAt = new Date().toISOString();
+  persist();
+  updateOpenSetProgress(set);
+  const { parts } = parseRoute();
+  const addedLabel = set.kind === "conjugation" ? "Verb hinzugefügt" : "Wort hinzugefügt";
+  if (parts[0] === "stats" && parts[1] === set.id) {
+    renderStats(set.id);
+    paintAddWordResults(set, addWordHits);
+    showSnackbar(addedLabel);
+    return true;
+  }
+  if (wasEmpty && parts[0] === "study" && parts[1] === set.id) {
+    // Remount study so an empty "Keine Karten" view picks up the first card.
+    const keepQuery = addWordInput.value;
+    route();
+    setAddWordOpen(true);
+    addWordInput.value = keepQuery;
+    runAddWordSearch(keepQuery);
+    showSnackbar(addedLabel);
+    return true;
+  }
+  paintAddWordResults(set, addWordHits);
+  showSnackbar(addedLabel);
+  return true;
+}
+
+btnAddWord.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setAddWordOpen(true);
+});
+
+addWordDialog.addEventListener("click", (e) => {
+  if (e.target.closest("[data-add-word-close]")) {
+    setAddWordOpen(false);
+    return;
+  }
+  e.stopPropagation();
+  const row = e.target.closest(".add-word-row");
+  if (!row || row.disabled) return;
+  const hit = addWordHits.find((item) => item.source === row.dataset.source);
+  if (!hit) return;
+  addSearchHitToSet(hit);
+});
+
+addWordInput.addEventListener("input", () => scheduleAddWordSearch());
+addWordInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    clearTimeout(addWordSearchTimer);
+    runAddWordSearch(addWordInput.value);
   }
 });
 

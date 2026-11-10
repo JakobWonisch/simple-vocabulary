@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -133,21 +134,115 @@ func (d *Dictionary) EnrichWords(lemmas []string) []Card {
 		}
 		seen[key] = struct{}{}
 
-		translations := topTranslations(e.Translations, maxCardTranslations)
-		if len(translations) == 0 {
+		card, ok := cardFromEntry(e, lemma)
+		if !ok {
 			continue
 		}
-		cards = append(cards, Card{
-			Source:        displayLemma(e.Lemma, lemma),
-			SourceArticle: Article("es", e.Gender, e.POS),
-			Target:        translations[0],
-			TargetArticle: Article("de", e.TargetGender, e.POS),
-			Translations:  translations,
-			POS:           e.POS,
-			FoundInDict:   true,
-		})
+		cards = append(cards, card)
 	}
 	return cards
+}
+
+const (
+	searchScoreExactLemma = iota
+	searchScoreLemmaPrefix
+	searchScoreLemmaFolded
+	searchScoreTranslation
+)
+
+// Search finds dictionary headwords by Spanish lemma prefix (diacritic-soft)
+// and, with lower priority, by German translation prefix. Results are ranked
+// and capped at limit. If keep is non-nil, only matching cards are returned;
+// the scan continues until limit keepers are found.
+func (d *Dictionary) Search(query string, limit int, keep func(Card) bool) []Card {
+	q := normalizeKey(query)
+	if q == "" || limit <= 0 || d == nil {
+		return nil
+	}
+	qFold := stripDiacritics(q)
+
+	type hit struct {
+		card  Card
+		score int
+		key   string
+	}
+	hits := make([]hit, 0, limit)
+
+	for _, e := range d.forward {
+		score, key := searchScore(e, q, qFold)
+		if score < 0 {
+			continue
+		}
+		card, ok := cardFromEntry(e, e.Lemma)
+		if !ok {
+			continue
+		}
+		if keep != nil && !keep(card) {
+			continue
+		}
+		hits = append(hits, hit{card: card, score: score, key: key})
+	}
+
+	sort.SliceStable(hits, func(i, j int) bool {
+		if hits[i].score != hits[j].score {
+			return hits[i].score < hits[j].score
+		}
+		if len(hits[i].key) != len(hits[j].key) {
+			return len(hits[i].key) < len(hits[j].key)
+		}
+		return hits[i].key < hits[j].key
+	})
+
+	if len(hits) > limit {
+		hits = hits[:limit]
+	}
+	out := make([]Card, len(hits))
+	for i, h := range hits {
+		out[i] = h.card
+	}
+	return out
+}
+
+func searchScore(e Entry, q, qFold string) (score int, key string) {
+	lemma := normalizeKey(e.Lemma)
+	if lemma == "" {
+		return -1, ""
+	}
+	lemmaFold := stripDiacritics(lemma)
+	switch {
+	case lemma == q || lemmaFold == qFold:
+		return searchScoreExactLemma, lemma
+	case strings.HasPrefix(lemma, q):
+		return searchScoreLemmaPrefix, lemma
+	case strings.HasPrefix(lemmaFold, qFold):
+		return searchScoreLemmaFolded, lemma
+	}
+	for _, tr := range e.Translations {
+		tn := normalizeKey(tr)
+		if tn == "" {
+			continue
+		}
+		if strings.HasPrefix(tn, q) || strings.HasPrefix(stripDiacritics(tn), qFold) {
+			return searchScoreTranslation, lemma
+		}
+	}
+	return -1, ""
+}
+
+func cardFromEntry(e Entry, requested string) (Card, bool) {
+	translations := topTranslations(e.Translations, maxCardTranslations)
+	if len(translations) == 0 {
+		return Card{}, false
+	}
+	return Card{
+		Source:        displayLemma(e.Lemma, requested),
+		SourceArticle: Article("es", e.Gender, e.POS),
+		Target:        translations[0],
+		TargetArticle: Article("de", e.TargetGender, e.POS),
+		Translations:  translations,
+		POS:           e.POS,
+		FoundInDict:   true,
+	}, true
 }
 
 // Size returns number of forward entries.
