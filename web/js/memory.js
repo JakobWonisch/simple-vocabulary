@@ -17,14 +17,14 @@
 export const UNSEEN_WEIGHT = 1;
 
 export const LEVELS = [
-  { after: 5, slope: 1 },
   { after: 10, slope: 1 },
   { after: 20, slope: 1 },
-  { after: 45, slope: 1 },
-  { after: 100, slope: 1 },
-  { after: 220, slope: 1 },
-  { after: 480, slope: 1 },
-  { after: 1050, slope: 1 },
+  { after: 40, slope: 1 },
+  { after: 80, slope: 1 },
+  { after: 125, slope: 1 },
+  { after: 250, slope: 1 },
+  { after: 500, slope: 1 },
+  { after: 1000, slope: 1 },
 ];
 
 export function levelConfig(seen) {
