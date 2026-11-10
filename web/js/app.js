@@ -1323,13 +1323,19 @@ function setHasSource(set, source) {
 }
 
 function cardFromSearchResult(hit) {
+  const translations = meaningList(hit).slice(0, 3);
+  const matched = String(hit.matched || "").trim();
+  if (matched) {
+    const rest = translations.filter((t) => t.toLowerCase() !== matched.toLowerCase());
+    translations.splice(0, translations.length, matched, ...rest.slice(0, 2));
+  }
   return {
     id: uid(),
     source: hit.source,
     sourceArticle: hit.sourceArticle || "",
-    target: hit.target,
+    target: translations[0] || hit.target || "",
     targetArticle: hit.targetArticle || "",
-    translations: meaningList(hit).slice(0, 3),
+    translations,
     pos: hit.pos || "",
     foundInDict: !!hit.foundInDict,
     paradigm: hit.paradigm || null,
@@ -1510,9 +1516,9 @@ function setAddWordOpen(open) {
   const conj = set.kind === "conjugation";
   addWordTitle.textContent = conj ? "Verb hinzufügen" : "Wort hinzufügen";
   addWordLabel.textContent = conj
-    ? "Verb im Wörterbuch suchen"
-    : "Wort im Wörterbuch suchen";
-  addWordInput.placeholder = conj ? "z. B. hablar" : "z. B. casa";
+    ? "Spanisch oder Deutsch suchen"
+    : "Spanisch oder Deutsch suchen";
+  addWordInput.placeholder = conj ? "z. B. hablar oder sprechen" : "z. B. casa oder Haus";
   addWordStatus.textContent = "Tippe, um zu suchen…";
   setSettingsOpen(false);
   setInfoOpen(false);
@@ -1536,7 +1542,7 @@ function paintAddWordResults(set, hits) {
     lemma.textContent = formatWithArticle(hit.source, hit.sourceArticle);
     const gloss = document.createElement("span");
     gloss.className = "gloss";
-    gloss.textContent = meaningList(hit)[0] || hit.target || "";
+    gloss.textContent = hit.matched || meaningList(hit)[0] || hit.target || "";
     text.append(lemma, gloss);
     const meta = document.createElement("span");
     meta.className = already ? "meta" : "meta addable";

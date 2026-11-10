@@ -467,10 +467,14 @@ body:has(.view.home) main {
 }
 
 .add-word-panel {
+  --add-word-row: 3.55rem;
+  --add-word-results-gap: 0.35rem;
+  --add-word-results-min: calc(3 * var(--add-word-row) + 2 * var(--add-word-results-gap));
   position: relative;
   z-index: 1;
   width: min(26rem, calc(100vw - 2rem));
-  max-height: min(78vh, 36rem);
+  /* Fixed height so typing/searching never resizes the dialog. */
+  height: min(28rem, calc(100dvh - 2.5rem));
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -479,6 +483,7 @@ body:has(.view.home) main {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.97);
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .add-word-head {
@@ -540,18 +545,22 @@ body:has(.view.home) main {
   margin: 0;
   padding: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
-  gap: 0.35rem;
-  flex: 1;
-  min-height: 0;
+  align-content: start;
+  gap: var(--add-word-results-gap);
+  flex: 1 1 auto;
+  min-height: var(--add-word-results-min);
 }
 
 .add-word-results li {
   margin: 0;
+  min-height: var(--add-word-row);
 }
 
 .add-word-row {
   width: 100%;
+  min-height: var(--add-word-row);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
