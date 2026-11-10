@@ -28,6 +28,11 @@ func TestParseUniMorphPrefersTuteo(t *testing.T) {
 		"hablar\thablad\tV;POS;IMP;2;PL;INFM\n" +
 		"hablar\thablen\tV;POS;IMP;2;PL;FORM\n" +
 		"hablar\tno hables\tV;NEG;IMP;2;SG;INFM\n" +
+		"hablar\tno hable\tV;NEG;IMP;2;SG;FORM\n" +
+		"hablar\tno hablemos\tV;NEG;IMP;1;PL\n" +
+		"hablar\tno habléis\tV;NEG;IMP;2;PL;INFM\n" +
+		"hablar\tno hablen\tV;NEG;IMP;2;PL;FORM\n" +
+		"hablar\tno me hables\tV;NEG;IMP;2;SG;INFM\n" +
 		"ser\teres\tV;IND;PRS;2;SG;INFM\n" +
 		"ser\tsos\tV;IND;PRS;2;SG;INFM\n" +
 		"hacer\thaz\tV;POS;IMP;2;SG;INFM\n" +
@@ -60,6 +65,9 @@ func TestParseUniMorphPrefersTuteo(t *testing.T) {
 	}
 	if hablar.Imp[0] != "" || hablar.Imp[1] != "habla" || hablar.Imp[2] != "hable" || hablar.Imp[4] != "hablad" || hablar.Imp[5] != "hablen" {
 		t.Fatalf("imp %v", hablar.Imp)
+	}
+	if hablar.Nimp[0] != "" || hablar.Nimp[1] != "hables" || hablar.Nimp[2] != "hable" || hablar.Nimp[3] != "hablemos" || hablar.Nimp[4] != "habléis" || hablar.Nimp[5] != "hablen" {
+		t.Fatalf("nimp %v", hablar.Nimp)
 	}
 	if got["ser"].Ind["prs"][1] != "eres" {
 		t.Fatalf("ser tú %v", got["ser"].Ind["prs"])

@@ -2,7 +2,7 @@ const KEY = "simple-vocabulary:v1";
 
 const defaultConjugation = () => ({
   mode: "ind", // ind | sbjv | imp | ger
-  tense: "prs",
+  tense: "prs", // ind/sbjv tense, or imp polarity: pos | neg
   order: "default", // default | random
 });
 

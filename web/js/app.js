@@ -146,6 +146,10 @@ const TENSE_OPTIONS = {
     ["se", "Imperfecto (-se)"],
     ["fut", "Futuro"],
   ],
+  imp: [
+    ["pos", "Bejahend"],
+    ["neg", "Verneinend"],
+  ],
 };
 
 const MODE_LABEL = {
@@ -1052,8 +1056,13 @@ function renderConjugation(setId) {
     }
     const persons = personSequence(card.id);
     if (mode === "imp") {
+      const neg = state.conjugation.tense === "neg";
+      const row = neg ? paradigm.nimp : paradigm.imp;
       return persons
-        .map((p) => ({ ...p, form: paradigm.imp?.[p.index] || "" }))
+        .map((p) => {
+          const bare = row?.[p.index] || "";
+          return { ...p, form: bare && neg ? `no ${bare}` : bare };
+        })
         .filter((p) => p.form);
     }
     const table = mode === "sbjv" ? paradigm.sbjv : paradigm.ind;
@@ -1063,9 +1072,10 @@ function renderConjugation(setId) {
 
   function focusLabel() {
     const mode = state.conjugation.mode;
-    if (mode === "imp" || mode === "ger") return MODE_LABEL[mode] || "";
+    if (mode === "ger") return MODE_LABEL[mode] || "";
     const tense = TENSE_OPTIONS[mode]?.find(([id]) => id === state.conjugation.tense);
-    return `${MODE_LABEL[mode] || ""} · ${tense ? tense[1] : ""}`;
+    if (!tense) return MODE_LABEL[mode] || "";
+    return `${MODE_LABEL[mode] || ""} · ${tense[1]}`;
   }
 
   function showDone() {
@@ -1307,11 +1317,13 @@ function syncConjugationControls() {
   if (!MODE_LABEL[c.mode]) c.mode = "ind";
   if (c.order !== "random") c.order = "default";
   modeSel.value = c.mode;
-  const needsTense = c.mode === "ind" || c.mode === "sbjv";
+  const opts = TENSE_OPTIONS[c.mode];
+  const needsTense = !!opts;
   tenseWrap.hidden = !needsTense;
+  const tenseLabel = tenseWrap.querySelector("span");
+  if (tenseLabel) tenseLabel.textContent = c.mode === "imp" ? "Form" : "Zeit";
   if (needsTense) {
-    const opts = TENSE_OPTIONS[c.mode];
-    if (!opts.some(([id]) => id === c.tense)) c.tense = "prs";
+    if (!opts.some(([id]) => id === c.tense)) c.tense = opts[0][0];
     tenseSel.replaceChildren(
       ...opts.map(([id, label]) => {
         const opt = document.createElement("option");
@@ -1393,14 +1405,15 @@ settingsPop.addEventListener("change", (e) => {
   if (e.target.id === "conj-mode") {
     state.conjugation.mode = MODE_LABEL[e.target.value] ? e.target.value : "ind";
     const opts = TENSE_OPTIONS[state.conjugation.mode];
-    if (opts && !opts.some(([id]) => id === state.conjugation.tense)) state.conjugation.tense = "prs";
+    if (opts && !opts.some(([id]) => id === state.conjugation.tense)) state.conjugation.tense = opts[0][0];
     persist();
     syncConjugationControls();
     refreshConjugation();
     return;
   }
   if (e.target.id === "conj-tense") {
-    state.conjugation.tense = e.target.value || "prs";
+    const opts = TENSE_OPTIONS[state.conjugation.mode];
+    state.conjugation.tense = e.target.value || opts?.[0]?.[0] || "prs";
     persist();
     refreshConjugation();
     return;

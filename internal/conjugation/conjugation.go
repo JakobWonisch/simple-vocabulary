@@ -20,19 +20,21 @@ const PersonCount = 6
 // Indicative tenses: prs, ipfv, pfv, fut, cond.
 // Subjunctive tenses: prs, ra, se, fut.
 // Imp is the affirmative imperative in person-slot order (yo is usually empty).
+// Nimp is the negative imperative (UniMorph V;NEG;IMP) without the leading "no ".
 // Ger is the gerund. Ptcp is the masculine singular past participle
 // (participio perfecto), used with haber but stored on its own.
 type Paradigm struct {
 	Ind  map[string][]string `json:"ind,omitempty"`
 	Sbjv map[string][]string `json:"sbjv,omitempty"`
 	Imp  []string            `json:"imp,omitempty"`
+	Nimp []string            `json:"nimp,omitempty"`
 	Ger  string              `json:"ger,omitempty"`
 	Ptcp string              `json:"ptcp,omitempty"`
 }
 
 // HasForms reports whether any quiz form was extracted.
 func (p Paradigm) HasForms() bool {
-	if p.Ger != "" || p.Ptcp != "" || len(p.Imp) > 0 {
+	if p.Ger != "" || p.Ptcp != "" || len(p.Imp) > 0 || len(p.Nimp) > 0 {
 		return true
 	}
 	for _, row := range p.Ind {
@@ -147,6 +149,7 @@ var bundles = map[string]bundle{
 	"V;SBJV;PST;LGSPEC2": {group: "sbjv", tense: "se"},
 	"V;SBJV;FUT":         {group: "sbjv", tense: "fut"},
 	"V;POS;IMP":          {group: "imp"},
+	"V;NEG;IMP":          {group: "nimp"},
 }
 
 var dropTag = map[string]struct{}{
@@ -156,8 +159,8 @@ var dropTag = map[string]struct{}{
 }
 
 // ParseUniMorph reads a UniMorph Spanish TSV (lemma, form, features)
-// and keeps the finite forms, affirmative imperative, gerund, and masculine
-// singular past participle this app shows.
+// and keeps the finite forms, affirmative and negative imperative, gerund,
+// and masculine singular past participle this app shows.
 // When several spellings share a slot, tuteo wins over voseo.
 func ParseUniMorph(r io.Reader) (map[string]Paradigm, error) {
 	sc := bufio.NewScanner(r)
@@ -169,7 +172,11 @@ func ParseUniMorph(r io.Reader) (map[string]Paradigm, error) {
 		if !ok || !strings.HasPrefix(feats, "V") {
 			continue
 		}
-		if strings.Contains(form, " ") || strings.Contains(feats, "PRO") || strings.Contains(feats, "ACC") || strings.Contains(feats, "DAT") {
+		if strings.Contains(feats, "PRO") || strings.Contains(feats, "ACC") || strings.Contains(feats, "DAT") {
+			continue
+		}
+		form, ok = surfaceForm(form, feats)
+		if !ok {
 			continue
 		}
 		d := drafts[lemma]
@@ -206,6 +213,22 @@ func ParseUniMorph(r io.Reader) (map[string]Paradigm, error) {
 		}
 	}
 	return out, nil
+}
+
+// surfaceForm drops multi-word forms except negative imperatives, which UniMorph
+// writes as "no " + verb. The leading "no " is stripped so Nimp stores the verb only.
+func surfaceForm(form, feats string) (string, bool) {
+	if !strings.Contains(form, " ") {
+		return form, true
+	}
+	if bundleKey(feats) != "V;NEG;IMP" {
+		return "", false
+	}
+	rest, ok := strings.CutPrefix(form, "no ")
+	if !ok || rest == "" || strings.Contains(rest, " ") {
+		return "", false
+	}
+	return rest, true
 }
 
 func splitTSV(line string) (lemma, form, feats string, ok bool) {
@@ -280,6 +303,7 @@ type verbDraft struct {
 	ind  map[string]*formRow
 	sbjv map[string]*formRow
 	imp  *formRow
+	nimp *formRow
 	ger  string
 	ptcp string
 }
@@ -292,11 +316,17 @@ func newVerbDraft() *verbDraft {
 }
 
 func (d *verbDraft) row(b bundle) *formRow {
-	if b.group == "imp" {
+	switch b.group {
+	case "imp":
 		if d.imp == nil {
 			d.imp = &formRow{}
 		}
 		return d.imp
+	case "nimp":
+		if d.nimp == nil {
+			d.nimp = &formRow{}
+		}
+		return d.nimp
 	}
 	table := d.ind
 	if b.group == "sbjv" {
@@ -314,6 +344,9 @@ func (d *verbDraft) paradigm() Paradigm {
 	p := Paradigm{Ger: d.ger, Ptcp: d.ptcp}
 	if row, ok := d.imp.forms(); ok {
 		p.Imp = row
+	}
+	if row, ok := d.nimp.forms(); ok {
+		p.Nimp = row
 	}
 	p.Ind = publish(d.ind)
 	p.Sbjv = publish(d.sbjv)
