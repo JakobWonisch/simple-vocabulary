@@ -15,11 +15,13 @@ WORKDIR /app
 COPY --from=build /out/server /app/server
 COPY web /app/web
 COPY data /app/data
+RUN mkdir -p /app/data/shared && chown -R app:app /app/data/shared
 USER app
 ENV PORT=8080 \
     WEB_DIR=/app/web \
     DICT_PATH=/app/data/spa-deu.json \
     CONJ_PATH=/app/data/spa-conj.json \
+    SHARED_DIR=/app/data/shared \
     APP_ROOT=/app
 EXPOSE 8080
 CMD ["/app/server"]

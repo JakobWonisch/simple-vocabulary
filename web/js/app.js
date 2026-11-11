@@ -39,6 +39,11 @@ const knownErrors = {
     "Die KI-Anbieter sind gerade ausgelastet. Warte eine Minute und versuche es erneut, oder setze OPENROUTER_MODEL auf ein anderes Modell.",
   "AI rate limit hit. Retry shortly, or change OPENROUTER_MODEL.":
     "KI-Limit erreicht. Versuche es gleich erneut oder ändere OPENROUTER_MODEL.",
+  "sharing is not configured": "Teilen ist auf dem Server nicht eingerichtet",
+  "shared set not found": "Geteilte Sammlung nicht gefunden",
+  "could not store shared set": "Sammlung konnte nicht veröffentlicht werden",
+  "could not load shared set": "Geteilte Sammlung konnte nicht geladen werden",
+  "invalid shared set": "Ungültige geteilte Sammlung",
 };
 
 function meaningList(card) {
@@ -195,6 +200,7 @@ function difficultyLabel(value) {
 }
 
 let difficultyPickAbort = null;
+let unbindShareDock = () => {};
 
 function bindDifficultyPick(form) {
   difficultyPickAbort?.abort();
@@ -280,6 +286,8 @@ function route() {
   difficultyPickAbort?.abort();
   difficultyPickAbort = null;
   closeOpenSetMenu();
+  unbindShareDock();
+  unbindShareDock = () => {};
   if (!addWordDialog.hidden) setAddWordOpen(false);
   unbindStudyKeys();
   unbindStudyKeys = () => {};
@@ -296,6 +304,8 @@ function route() {
     else renderStudy(parts[1]);
   } else if (parts[0] === "stats" && parts[1]) {
     renderStats(parts[1]);
+  } else if (parts[0] === "share" && parts[1]) {
+    renderShare(parts[1]);
   } else {
     renderHome();
   }
@@ -421,7 +431,7 @@ function fillSetList(list, empty, sets, kind) {
     const li = document.createElement("li");
     const count = set.cards?.length ?? 0;
     const seen = (set.cards || []).filter((card) => timesSeen(card) > 0).length;
-    const kindLabel = kind === "conjugation" ? `${count} Verben` : `${count} Karten`;
+    const kindLabel = kind === "conjugation" ? `${count} Verben` : `${count} Wörter`;
     const level = difficultyLabel(set.difficulty);
     const meta = level ? `${kindLabel} · ${level} · ${seen} gesehen` : `${kindLabel} · ${seen} gesehen`;
     const btn = document.createElement("button");
@@ -455,6 +465,9 @@ function fillSetList(list, empty, sets, kind) {
     pop.append(
       menuButton("Statistik", "", () => {
         location.hash = `#/stats/${set.id}`;
+      }),
+      menuButton("Teilen", "", () => {
+        shareSet(set);
       }),
       menuButton("Löschen", "danger", () => {
         if (!confirm(`Sammlung „${set.title}“ löschen?`)) return;
@@ -1395,7 +1408,282 @@ function syncConjugationControls() {
 
 function onHomeRoute() {
   const { parts } = parseRoute();
-  return parts[0] !== "new" && parts[0] !== "study" && parts[0] !== "stats";
+  return parts[0] !== "new" && parts[0] !== "study" && parts[0] !== "stats" && parts[0] !== "share";
+}
+
+function shareUrlFor(id) {
+  return `${location.origin}${location.pathname}${location.search}#/share/${id}`;
+}
+
+function sanitizeSetForShare(set) {
+  const payload = {
+    id: set.id,
+    title: set.title,
+    kind: set.kind === "conjugation" ? "conjugation" : "vocab",
+    createdAt: set.createdAt || "",
+    cards: (set.cards || []).map((card) => ({
+      id: card.id,
+      source: card.source || "",
+      sourceArticle: card.sourceArticle || "",
+      target: card.target || "",
+      targetArticle: card.targetArticle || "",
+      translations: meaningList(card).slice(0, 3),
+      pos: card.pos || "",
+      foundInDict: !!card.foundInDict,
+      paradigm: set.kind === "conjugation" ? card.paradigm || null : null,
+    })),
+  };
+  if (difficultyLabels[set.difficulty]) payload.difficulty = set.difficulty;
+  return payload;
+}
+
+function setFromShared(shared) {
+  const now = new Date().toISOString();
+  const set = {
+    id: shared.id,
+    title: shared.title,
+    kind: shared.kind === "conjugation" ? "conjugation" : "vocab",
+    createdAt: shared.createdAt || now,
+    updatedAt: now,
+    cards: (shared.cards || []).map((card) => ({
+      id: card.id || uid(),
+      source: card.source || "",
+      sourceArticle: card.sourceArticle || "",
+      target: card.target || "",
+      targetArticle: card.targetArticle || "",
+      translations: meaningList(card).slice(0, 3),
+      pos: card.pos || "",
+      foundInDict: !!card.foundInDict,
+      paradigm: shared.kind === "conjugation" ? card.paradigm || null : null,
+    })),
+  };
+  if (difficultyLabels[shared.difficulty]) set.difficulty = shared.difficulty;
+  return set;
+}
+
+async function copyShareLink(id) {
+  const url = shareUrlFor(id);
+  try {
+    await navigator.clipboard.writeText(url);
+    showSnackbar("Link kopiert");
+    return true;
+  } catch {
+    window.prompt("Link zum Teilen kopieren:", url);
+    return false;
+  }
+}
+
+async function nativeShareLink(setOrTitle, id) {
+  const url = shareUrlFor(id);
+  const title = typeof setOrTitle === "string" ? setOrTitle : setOrTitle?.title || "Sammlung";
+  if (!navigator.share) return false;
+  try {
+    await navigator.share({ title, text: `Sammlung „${title}“`, url });
+    return true;
+  } catch (err) {
+    if (err?.name === "AbortError") return true;
+    return false;
+  }
+}
+
+async function shareSet(set) {
+  if (!set?.id) return;
+  if (!(set.cards || []).length) {
+    showSnackbar("Sammlung hat noch keine Wörter", { error: true });
+    return;
+  }
+  try {
+    const res = await fetch("/api/sets/share", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sanitizeSetForShare(set)),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(uiMessage(data.error, "could not store shared set"));
+    if (await nativeShareLink(set, set.id)) return;
+    await copyShareLink(set.id);
+  } catch (err) {
+    showSnackbar(uiMessage(err.message, "could not store shared set"), { error: true });
+  }
+}
+
+function shareKindLabel(kind, count) {
+  if (kind === "conjugation") return count === 1 ? "1 Verb" : `${count} Verben`;
+  return count === 1 ? "1 Wort" : `${count} Wörter`;
+}
+
+function paintShareTable(cards, kind) {
+  const table = document.getElementById("share-table");
+  const body = document.getElementById("share-body");
+  if (!table || !body) return;
+  const list = Array.isArray(cards) ? cards : [];
+  body.replaceChildren();
+  table.hidden = list.length === 0;
+  const conj = kind === "conjugation";
+  for (const card of list) {
+    const row = document.createElement("tr");
+    const es = document.createElement("td");
+    const esWord = document.createElement("span");
+    esWord.className = "stats-word";
+    esWord.textContent = conj
+      ? card.source || ""
+      : formatWithArticle(card.source, card.sourceArticle);
+    es.append(esWord);
+    const de = document.createElement("td");
+    const meanings = meaningList(card);
+    if (meanings.length) {
+      const primary = document.createElement("span");
+      primary.className = "stats-word";
+      primary.textContent = conj
+        ? meanings[0]
+        : formatWithArticle(meanings[0], card.targetArticle);
+      de.append(primary);
+      if (meanings.length > 1) {
+        const alts = document.createElement("span");
+        alts.className = "stats-gloss";
+        alts.textContent = meanings.slice(1).join(", ");
+        de.append(alts);
+      }
+    }
+    row.append(es, de);
+    body.append(row);
+  }
+}
+
+function bindShareImportDock(inlineBtn, onImport) {
+  const view = document.querySelector(".view.share");
+  const dock = document.getElementById("share-dock");
+  const dockBtn = document.getElementById("share-dock-import");
+  if (!view || !dock || !dockBtn || !inlineBtn) return;
+
+  view.classList.add("is-importing");
+  dock.hidden = false;
+  dock.classList.remove("is-visible");
+  dockBtn.onclick = onImport;
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      dock.classList.toggle("is-visible", !entry.isIntersecting);
+    },
+    { threshold: 0 },
+  );
+  observer.observe(inlineBtn);
+
+  unbindShareDock = () => {
+    observer.disconnect();
+    dockBtn.onclick = null;
+    dock.classList.remove("is-visible");
+    dock.hidden = true;
+    view.classList.remove("is-importing");
+    unbindShareDock = () => {};
+  };
+}
+
+function renderShare(shareId) {
+  app.replaceChildren(cloneTemplate("tpl-share"));
+  const titleEl = document.getElementById("share-title");
+  const ledeEl = document.getElementById("share-lede");
+  const barEl = document.getElementById("share-bar");
+  const metaEl = document.getElementById("share-meta");
+  const statusEl = document.getElementById("share-status");
+  const actionsEl = document.getElementById("share-actions");
+
+  const existing = state.sets.find((s) => s.id === shareId);
+  if (existing) {
+    titleEl.textContent = existing.title;
+    ledeEl.textContent = "Diese Sammlung ist bei dir schon gespeichert. Es wird nichts geändert.";
+    const count = existing.cards?.length ?? 0;
+    const level = difficultyLabel(existing.difficulty);
+    barEl.hidden = false;
+    metaEl.textContent = level
+      ? `${shareKindLabel(existing.kind, count)} · ${level}`
+      : shareKindLabel(existing.kind, count);
+    statusEl.textContent = "";
+    actionsEl.replaceChildren(
+      Object.assign(document.createElement("a"), {
+        className: "btn primary",
+        href: `#/study/${existing.id}`,
+        textContent: "Öffnen",
+      }),
+      (() => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn ghost";
+        btn.textContent = "Link kopieren";
+        btn.addEventListener("click", () => copyShareLink(existing.id));
+        return btn;
+      })(),
+      ...(navigator.share
+        ? [(() => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn ghost";
+            btn.textContent = "Weitergeben";
+            btn.addEventListener("click", () => nativeShareLink(existing, existing.id));
+            return btn;
+          })()]
+        : []),
+    );
+    paintShareTable(existing.cards, existing.kind);
+    return;
+  }
+
+  titleEl.textContent = "Geteilte Sammlung";
+  ledeEl.textContent = "Sammlung wird geladen…";
+  statusEl.textContent = "";
+  barEl.hidden = true;
+
+  fetch(`/api/sets/share/${encodeURIComponent(shareId)}`)
+    .then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(uiMessage(data.error, "shared set not found"));
+      return data;
+    })
+    .then((shared) => {
+      if (state.sets.some((s) => s.id === shareId)) {
+        renderShare(shareId);
+        return;
+      }
+      const count = shared.cards?.length ?? 0;
+      const kind = shared.kind === "conjugation" ? "conjugation" : "vocab";
+      const level = difficultyLabel(shared.difficulty);
+      titleEl.textContent = shared.title || "Geteilte Sammlung";
+      ledeEl.textContent =
+        "Du kannst diese Sammlung importieren. Dabei werden nur die Wörter" +
+        (kind === "conjugation" ? " und Konjugationen" : "") +
+        " übernommen, nicht der Lernfortschritt oder andere Statistiken der teilenden Person. Nach dem Import startest du mit eigenem Fortschritt.";
+      barEl.hidden = false;
+      metaEl.textContent = level
+        ? `${shareKindLabel(kind, count)} · ${level}`
+        : shareKindLabel(kind, count);
+      statusEl.textContent = "";
+      const doImport = () => {
+        if (state.sets.some((s) => s.id === shareId)) {
+          renderShare(shareId);
+          return;
+        }
+        const set = setFromShared(shared);
+        state.sets.unshift(set);
+        persist();
+        showSnackbar("Sammlung importiert");
+        location.hash = `#/study/${set.id}`;
+      };
+      const importBtn = document.createElement("button");
+      importBtn.type = "button";
+      importBtn.className = "btn primary";
+      importBtn.textContent = "Importieren";
+      importBtn.addEventListener("click", doImport);
+      actionsEl.replaceChildren(importBtn);
+      paintShareTable(shared.cards, kind);
+      bindShareImportDock(importBtn, doImport);
+    })
+    .catch((err) => {
+      titleEl.textContent = "Nicht verfügbar";
+      ledeEl.textContent = "Diese geteilte Sammlung konnte nicht geladen werden.";
+      statusEl.classList.add("error");
+      statusEl.textContent = uiMessage(err.message, "shared set not found");
+      barEl.hidden = true;
+    });
 }
 
 function syncSettingsScope() {

@@ -34,6 +34,8 @@
         <p>Der Balken ist voll, wenn jedes Wort viermal aufgedeckt wurde. Jedes Aufdecken rückt ihn vor. Danach bleibt er voll, und die Prozentzahl zählt weitere Wiederholungen mit.</p>
         <h2>Statistik</h2>
         <p>Im Menü einer Sammlung siehst du, wie oft jedes Wort gezeigt wurde und wie lange du im Schnitt bis zur Antwort brauchst.</p>
+        <h2>Teilen</h2>
+        <p>Über „Teilen“ im Menü einer Sammlung legst du die Wörter (ohne Fortschritt) auf dem Server ab und kannst einen Link kopieren oder weitergeben. Wer den Link öffnet, kann die Sammlung bei sich importieren.</p>
         <h2>Vokabeln und Konjugation</h2>
         <p>Vokabeln sind Karteikarten: ein Wort, dann die Übersetzung. Die Richtung (Deutsch zu Spanisch oder Spanisch zu Deutsch) stellst du in den Einstellungen auf der Übungsseite ein.</p>
         <p>Konjugation sammelt Verben zum Thema. Du übst die Formen zu Modus und Zeit, in fester oder zufälliger Reihenfolge.</p>
@@ -329,6 +331,32 @@
         <tbody id="stats-body"></tbody>
       </table>
       <p class="empty" id="stats-empty" hidden>Diese Sammlung hat noch keine Wörter.</p>
+    </section>
+  </template>
+
+
+  <template id="tpl-share">
+    <section class="view share">
+      <a class="back" href="#/" data-link>← Sammlungen</a>
+      <h1 id="share-title">Geteilte Sammlung</h1>
+      <p class="lede" id="share-lede"></p>
+      <div class="share-bar" id="share-bar" hidden>
+        <p class="share-meta" id="share-meta"></p>
+        <div class="share-actions" id="share-actions"></div>
+      </div>
+      <p class="status" id="share-status" role="status" aria-live="polite"></p>
+      <table class="stats-table share-table" id="share-table" hidden>
+        <thead>
+          <tr>
+            <th>Spanisch</th>
+            <th>Deutsch</th>
+          </tr>
+        </thead>
+        <tbody id="share-body"></tbody>
+      </table>
+      <div class="share-dock" id="share-dock" hidden>
+        <button type="button" class="btn primary" id="share-dock-import">Importieren</button>
+      </div>
     </section>
   </template>
 

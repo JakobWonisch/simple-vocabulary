@@ -332,6 +332,74 @@ body:has(.view.home) main {
   max-width: 38rem;
 }
 
+.share-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  max-width: 38rem;
+  margin: 0 0 1rem;
+}
+
+.share-meta {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 560;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin: 0;
+  flex: none;
+}
+
+.view.share.is-importing {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+.share-table {
+  margin-top: 0.35rem;
+}
+
+.share-table th {
+  padding: 0.35rem 0.45rem 0.55rem;
+}
+
+.share-dock {
+  position: fixed;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0.55rem 1rem calc(2.05rem + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    rgba(238, 243, 239, 0) 0,
+    rgba(238, 243, 239, 0) 1.6rem,
+    rgba(238, 243, 239, 0.97) 55%,
+    rgba(238, 243, 239, 0) 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.85rem);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.share-dock.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.share-dock.is-visible .btn {
+  pointer-events: auto;
+}
+
 .view.home {
   flex: 1;
   min-height: 0;
@@ -400,13 +468,14 @@ body:has(.view.home) main {
   right: 0;
   bottom: 0;
   margin: 0;
-  padding: 0.15rem 1rem calc(0.35rem + env(safe-area-inset-bottom));
+  padding: 1.15rem 1rem calc(0.35rem + env(safe-area-inset-bottom));
   text-align: center;
   font-size: 0.72rem;
   line-height: 1.3;
   letter-spacing: 0.01em;
   color: rgba(90, 107, 100, 0.5);
   pointer-events: none;
+  background: linear-gradient(to top, rgba(238, 243, 239, 0.98) 42%, rgba(238, 243, 239, 0));
 }
 
 .site-credit a {

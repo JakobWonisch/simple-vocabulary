@@ -12,4 +12,10 @@ services:
       OPENROUTER_MAX_ATTEMPTS: "${OPENROUTER_MAX_ATTEMPTS:-3}"
       OPENROUTER_SITE_NAME: "${OPENROUTER_SITE_NAME:-simple-vocabulary}"
       OPENROUTER_SITE_URL: "${OPENROUTER_SITE_URL:-}"
+      SHARED_DIR: /app/data/shared
+    volumes:
+      - shared-sets:/app/data/shared
     restart: unless-stopped
+
+volumes:
+  shared-sets:

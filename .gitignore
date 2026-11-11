@@ -10,3 +10,5 @@ result-*
 .vscode/
 *.swp
 .DS_Store
+data/shared/*
+!data/shared/.gitkeep

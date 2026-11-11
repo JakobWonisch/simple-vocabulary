@@ -11,6 +11,7 @@ Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`loc
 - Semi-random order: unseen words are equal, then a word stays quiet for a per-level number of turns and becomes steadily more likely
 - Direction toggle: Spanish→German / German→Spanish
 - Export / import JSON for other devices
+- Publish a set to the server and share a link (words only, no progress)
 
 ## Quick start (Nix)
 
@@ -39,6 +40,7 @@ docker compose up --build
 | `OPENROUTER_PER_MODEL_TIMEOUT_SEC` | `25` | Per-model attempt timeout |
 | `OPENROUTER_MAX_ATTEMPTS` | `3` | Max models tried per generate |
 | `DICT_PATH` | `data/spa-deu.json` | Dictionary JSON |
+| `SHARED_DIR` | `data/shared` | Published shareable sets |
 | `WEB_DIR` | `web` | Static frontend |
 
 Without an API key the app still runs for studying existing/imported sets; generation returns 503.
@@ -63,3 +65,5 @@ Implement `ai.Provider` in `internal/ai` and wire it in `cmd/server/main.go`. Op
 - `GET /api/health`
 - `GET /api/dict/lookup?q=casa`
 - `POST /api/sets/generate` `{ "topic": "…", "count": 50 }`
+- `POST /api/sets/share` — publish a set (content only) under its UUID
+- `GET /api/sets/share/{id}` — fetch a published set

@@ -10,6 +10,7 @@ import (
 	"github.com/jakob/simple-vocabulary/internal/api"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
+	"github.com/jakob/simple-vocabulary/internal/shared"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 	conjPath := envOr("CONJ_PATH", filepath.Join(root, "data", "spa-conj.json"))
 	webDir := envOr("WEB_DIR", filepath.Join(root, "web"))
 	initialPath := envOr("INITIAL_PATH", filepath.Join(root, "data", "simple-vocabulary-initial.json"))
+	sharedDir := envOr("SHARED_DIR", filepath.Join(root, "data", "shared"))
 
 	dict, err := dictionary.LoadJSON(dictPath)
 	if err != nil {
@@ -39,9 +41,16 @@ func main() {
 		log.Printf("AI provider: %s", provider.Name())
 	}
 
+	shareStore, err := shared.NewStore(sharedDir)
+	if err != nil {
+		log.Fatalf("shared store: %v", err)
+	}
+	log.Printf("shared sets: %s", sharedDir)
+
 	srv := api.New(dict, provider, webDir)
 	srv.Conj = conj
 	srv.InitialPath = initialPath
+	srv.Shared = shareStore
 	if _, err := os.Stat(initialPath); err != nil {
 		log.Printf("initial configuration not found: %s", initialPath)
 	} else {

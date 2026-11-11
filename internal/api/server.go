@@ -15,6 +15,7 @@ import (
 	"github.com/jakob/simple-vocabulary/internal/ai"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
+	"github.com/jakob/simple-vocabulary/internal/shared"
 )
 
 const (
@@ -34,6 +35,7 @@ type Server struct {
 	Dict        *dictionary.Dictionary
 	Conj        *conjugation.Table
 	AI          ai.Provider
+	Shared      *shared.Store
 	WebDir      string
 	InitialPath string
 	mux         *http.ServeMux
@@ -56,6 +58,8 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /api/conj/paradigms", s.handleConjParadigms)
 	s.mux.HandleFunc("GET /api/initial", s.handleInitial)
 	s.mux.HandleFunc("POST /api/sets/generate", s.handleGenerate)
+	s.mux.HandleFunc("POST /api/sets/share", s.handleSharePut)
+	s.mux.HandleFunc("GET /api/sets/share/{id}", s.handleShareGet)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
 }
 
@@ -314,6 +318,49 @@ func kindOrVocab(kind string) string {
 		return ai.KindConjugation
 	}
 	return "vocab"
+}
+
+func (s *Server) handleSharePut(w http.ResponseWriter, r *http.Request) {
+	if s.Shared == nil {
+		writeError(w, http.StatusServiceUnavailable, "sharing is not configured")
+		return
+	}
+	var body shared.Set
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	set, err := s.Shared.Put(body)
+	if err != nil {
+		if errors.Is(err, shared.ErrInvalid) {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		log.Printf("share put: %v", err)
+		writeError(w, http.StatusInternalServerError, "could not store shared set")
+		return
+	}
+	writeJSON(w, http.StatusOK, set)
+}
+
+func (s *Server) handleShareGet(w http.ResponseWriter, r *http.Request) {
+	if s.Shared == nil {
+		writeError(w, http.StatusServiceUnavailable, "sharing is not configured")
+		return
+	}
+	id := r.PathValue("id")
+	set, err := s.Shared.Get(id)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) || errors.Is(err, shared.ErrInvalid) {
+			writeError(w, http.StatusNotFound, "shared set not found")
+			return
+		}
+		log.Printf("share get: %v", err)
+		writeError(w, http.StatusInternalServerError, "could not load shared set")
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	writeJSON(w, http.StatusOK, set)
 }
 
 // dictionaryCards asks the model for more lemmas than the set needs, keeps only
