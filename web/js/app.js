@@ -1112,7 +1112,10 @@ function renderConjugation(setId) {
       return persons
         .map((p) => {
           const bare = row?.[p.index] || "";
-          return { ...p, form: bare && neg ? `no ${bare}` : bare };
+          let label = p.label;
+          if (p.index === 2) label = "usted";
+          else if (p.index === 5) label = "ustedes";
+          return { ...p, label, form: bare && neg ? `no ${bare}` : bare };
         })
         .filter((p) => p.form);
     }
