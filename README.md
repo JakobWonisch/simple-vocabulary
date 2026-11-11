@@ -47,14 +47,23 @@ Without an API key the app still runs for studying existing/imported sets; gener
 
 ## Dictionary
 
-`data/spa-deu.json` is converted from FreeDict **spa-deu** (~21k headwords). Rebuild:
+`data/spa-deu.json` is FreeDict **spa-deu**, optionally supplemented with WikDict
+**es-de** lemmas FreeDict lacks (FreeDict wins on conflicts). Rebuild:
 
 ```bash
-# after extracting freedict-spa-deu-*.src.tar.xz
+# FreeDict only (after extracting freedict-spa-deu-*.src.tar.xz)
 go run ./cmd/convertdict -in path/to/spa-deu.tei -out data/spa-deu.json
+
+# FreeDict + WikDict (needs sqlite3 on PATH)
+curl -L -o es-de.sqlite3 \
+  https://download.wikdict.com/dictionaries/sqlite/2/es-de.sqlite3
+go run ./cmd/convertdict \
+  -base data/spa-deu.json \
+  -wikdict es-de.sqlite3 \
+  -out data/spa-deu.json
 ```
 
-See `data/LICENSE.dictionary`.
+Do not commit the raw WikDict SQLite file. See `data/LICENSE.dictionary`.
 
 ## Swapping the AI provider
 

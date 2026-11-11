@@ -12,3 +12,13 @@ result-*
 .DS_Store
 data/shared/*
 !data/shared/.gitkeep
+
+# dictionary rebuild inputs
+es-de.sqlite3
+es-de.sqlite3.gz
+wikdict-es-de.tsv
+wikdict-es-de.jsonl
+kaikki-es-verbs.jsonl
+kaikki-es-verbs.jsonl.gz
+spa
+spa.gz

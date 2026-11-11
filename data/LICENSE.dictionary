@@ -1,8 +1,20 @@
-The Spanish–German dictionary data in spa-deu.json is derived from the FreeDict
-spa-deu dictionary (Ding-based), available from https://freedict.org/.
+The Spanish–German dictionary data in spa-deu.json is derived from:
 
-FreeDict dictionaries are free software; see the upstream COPYING file from the
-spa-deu source package for the precise license terms of the original TEI data.
+1. FreeDict spa-deu (Ding-based), available from https://freedict.org/
+   Upstream source used for conversion:
+     https://download.freedict.org/dictionaries/spa-deu/
+   FreeDict dictionaries are free software; see the upstream COPYING file from
+   the spa-deu source package for the precise license terms of the original TEI
+   data.
 
-Upstream source used for conversion:
-  https://download.freedict.org/dictionaries/spa-deu/
+2. WikDict español→Deutsch (es-de), available from https://www.wikdict.com/
+   Download (SQLite):
+     https://download.wikdict.com/dictionaries/sqlite/2/es-de.sqlite3
+   License: Creative Commons Attribution-ShareAlike 3.0
+     https://creativecommons.org/licenses/by-sa/3.0/
+   WikDict is built from Wiktionary; attribute WikDict and the Wiktionary
+   contributors. Share adaptations under the same CC BY-SA terms.
+
+Merge policy used by cmd/convertdict: FreeDict entries win on shared lemmas;
+WikDict contributes only lemmas FreeDict does not already contain. Affix rows
+(headwords starting or ending with "-") from WikDict are dropped.

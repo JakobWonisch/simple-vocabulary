@@ -54,6 +54,7 @@
             docker-compose
             curl
             jq
+            sqlite
           ];
 
           shellHook = ''

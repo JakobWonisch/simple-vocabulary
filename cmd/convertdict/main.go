@@ -1,4 +1,5 @@
-// convertdict converts FreeDict TEI (spa-deu) into a compact JSON dictionary.
+// convertdict converts FreeDict TEI (spa-deu) into a compact JSON dictionary,
+// optionally supplemented with WikDict es-de lemmas FreeDict lacks.
 package main
 
 import (
@@ -14,11 +15,11 @@ import (
 )
 
 type Entry struct {
-	Lemma        string             `json:"lemma"`
-	Gender       string             `json:"gender,omitempty"` // m, f, n
+	Lemma        string            `json:"lemma"`
+	Gender       string            `json:"gender,omitempty"` // m, f, n
 	POS          dictionary.PosTags `json:"pos,omitempty"`
-	Translations []string           `json:"translations"`
-	TargetGender string             `json:"targetGender,omitempty"`
+	Translations []string          `json:"translations"`
+	TargetGender string            `json:"targetGender,omitempty"`
 }
 
 type DictFile struct {
@@ -29,29 +30,68 @@ type DictFile struct {
 }
 
 func main() {
-	inPath := flag.String("in", "", "path to spa-deu.tei")
-	outPath := flag.String("out", "", "path to output JSON")
+	inPath := flag.String("in", "", "FreeDict spa-deu TEI (optional if -base is set)")
+	basePath := flag.String("base", "", "existing spa-deu.json to start from (optional if -in is set)")
+	wikdictPath := flag.String("wikdict", "", "optional WikDict es-de .sqlite3 / .tsv / .jsonl to merge")
+	outPath := flag.String("out", "", "output spa-deu.json")
 	flag.Parse()
-	if *inPath == "" || *outPath == "" {
-		fmt.Fprintln(os.Stderr, "usage: convertdict -in spa-deu.tei -out spa-deu.json")
+	if *outPath == "" {
+		fmt.Fprintln(os.Stderr, "usage: convertdict -in spa-deu.tei [-wikdict es-de.sqlite3] -out data/spa-deu.json")
+		fmt.Fprintln(os.Stderr, "       convertdict -base data/spa-deu.json -wikdict es-de.sqlite3 -out data/spa-deu.json")
 		os.Exit(1)
 	}
-
-	f, err := os.Open(*inPath)
-	if err != nil {
+	if err := mustHaveSource(*inPath, *basePath); err != nil {
 		fatal(err)
 	}
-	defer f.Close()
 
-	entries, err := parseTEI(f)
-	if err != nil {
-		fatal(err)
+	entries := map[string]Entry{}
+	fromFreeDict := false
+	fromWikdict := false
+
+	if *basePath != "" {
+		base, _, err := loadBaseJSON(*basePath)
+		if err != nil {
+			fatal(err)
+		}
+		entries = base
+		fromFreeDict = true
+	}
+
+	if *inPath != "" {
+		f, err := os.Open(*inPath)
+		if err != nil {
+			fatal(err)
+		}
+		tei, err := parseTEI(f)
+		f.Close()
+		if err != nil {
+			fatal(err)
+		}
+		if *basePath == "" {
+			entries = tei
+		} else {
+			// TEI replaces/extends the base (FreeDict rebuild wins on shared keys).
+			for k, e := range tei {
+				entries[k] = e
+			}
+		}
+		fromFreeDict = true
+	}
+
+	if *wikdictPath != "" {
+		rows, err := loadWikdict(*wikdictPath)
+		if err != nil {
+			fatal(err)
+		}
+		added, skipped := mergeWikdictInto(entries, rows)
+		fromWikdict = true
+		fmt.Printf("wikdict: +%d lemmas (%d rows skipped/existing)\n", added, skipped)
 	}
 
 	dict := DictFile{
 		SourceLang: "es",
 		TargetLang: "de",
-		License:    "FreeDict spa-deu — see data/LICENSE.dictionary",
+		License:    licenseFor(fromFreeDict, fromWikdict),
 		Entries:    entries,
 	}
 
