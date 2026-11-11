@@ -151,7 +151,6 @@ const TENSE_OPTIONS = {
     ["pfv", "Pretérito indefinido"],
     ["ipfv", "Imperfecto"],
     ["fut", "Futuro"],
-    ["cond", "Condicional"],
   ],
   sbjv: [
     ["prs", "Presente"],
@@ -160,16 +159,17 @@ const TENSE_OPTIONS = {
     ["fut", "Futuro"],
   ],
   imp: [
-    ["pos", "Bejahend"],
-    ["neg", "Verneinend"],
+    ["pos", "Afirmativo/Bejahend"],
+    ["neg", "Negativo/Verneinend"],
   ],
 };
 
 const MODE_LABEL = {
-  ind: "Indikativ",
-  sbjv: "Subjuntivo",
-  imp: "Imperativ",
-  ger: "Gerundium & Partizip",
+  ind: "Indicativo/Indikativ",
+  cond: "Condicional/Konditional",
+  sbjv: "Subjuntivo/Subjunktiv",
+  imp: "Imperativo/Imperativ",
+  ger: "Gerundio y participio/Gerundium & Partizip",
 };
 
 function persist() {
@@ -1113,6 +1113,10 @@ function renderConjugation(setId) {
         })
         .filter((p) => p.form);
     }
+    if (mode === "cond") {
+      const row = paradigm.ind?.cond || [];
+      return persons.map((p) => ({ ...p, form: row[p.index] || "" })).filter((p) => p.form);
+    }
     const table = mode === "sbjv" ? paradigm.sbjv : paradigm.ind;
     const row = table?.[state.conjugation.tense] || [];
     return persons.map((p) => ({ ...p, form: row[p.index] || "" })).filter((p) => p.form);
@@ -1120,7 +1124,7 @@ function renderConjugation(setId) {
 
   function focusLabel() {
     const mode = state.conjugation.mode;
-    if (mode === "ger") return MODE_LABEL[mode] || "";
+    if (mode === "ger" || mode === "cond") return MODE_LABEL[mode] || "";
     const tense = TENSE_OPTIONS[mode]?.find(([id]) => id === state.conjugation.tense);
     if (!tense) return MODE_LABEL[mode] || "";
     return `${MODE_LABEL[mode] || ""} · ${tense[1]}`;
@@ -1408,6 +1412,7 @@ function syncConjugationControls() {
   const tenseWrap = document.getElementById("settings-tense");
   if (!modeSel || !tenseSel || !tenseWrap) return;
   const c = state.conjugation;
+  if (c.mode === "ind" && c.tense === "cond") c.mode = "cond";
   if (!MODE_LABEL[c.mode]) c.mode = "ind";
   if (c.order !== "random") c.order = "default";
   modeSel.value = c.mode;

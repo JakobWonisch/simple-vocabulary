@@ -47,10 +47,10 @@ func main() {
 		}
 		verbs = map[string]conjugation.Paradigm{}
 		for lemma, p := range parsed {
-			entry, ok := dict.Lookup(lemma)
-			// Untagged headwords stay when UniMorph has a paradigm. Explicit
-			// non-verbs (nouns, adjectives, …) are dropped.
-			if !ok || (entry.POS != "" && entry.POS != "v") {
+			// Keep UniMorph paradigms for any FreeDict headword. Dual-POS lemmas
+			// (poder n+v) and noun-tagged verbs whose TEI verb entries omit POS
+			// (cantar) must not be dropped — UniMorph already selects verbs.
+			if _, ok := dict.Lookup(lemma); !ok {
 				continue
 			}
 			key := strings.ToLower(strings.TrimSpace(lemma))

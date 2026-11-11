@@ -26,6 +26,9 @@ func TestVocabularyPromptStaysMixed(t *testing.T) {
 	if !strings.Contains(p, "intermediate level") {
 		t.Fatal(p)
 	}
+	if !strings.Contains(p, `"translation"`) {
+		t.Fatal("vocab prompt should ask for a German gloss in the same response")
+	}
 }
 
 func TestPromptDifficultyChangesLemmaLevel(t *testing.T) {

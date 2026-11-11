@@ -360,8 +360,9 @@ Each lemma must be a single dictionary headword in citation form: singular noun,
 Include a mix of nouns (with gender when known), verbs (infinitive), and adjectives when natural.
 
 Respond with ONLY a JSON array of objects, no markdown, no commentary. Schema:
-[{"lemma":"...","gender":"m|f|n|","pos":"n|v|adj|adv"}]
+[{"lemma":"...","translation":"...","gender":"m|f|n|","pos":"n|v|adj|adv"}]
 - lemma: word in %s
+- translation: best German gloss for this topic (single word or short phrase)
 - gender: only for nouns; omit or empty otherwise
 - pos: part of speech`, req.Topic, req.Count, lang, level, lang)
 	}

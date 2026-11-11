@@ -8,8 +8,8 @@ import (
 func TestEnrichWordsUsesDictionaryOnly(t *testing.T) {
 	d := &Dictionary{
 		forward: map[string]Entry{
-			"casa":  {Lemma: "casa", Gender: "f", POS: "n", Translations: []string{"Haus"}, TargetGender: "n"},
-			"perro": {Lemma: "perro", Gender: "m", POS: "n", Translations: []string{"Hund"}, TargetGender: "m"},
+			"casa":  {Lemma: "casa", Gender: "f", POS: PosTags{"n"}, Translations: []string{"Haus"}, TargetGender: "n"},
+			"perro": {Lemma: "perro", Gender: "m", POS: PosTags{"n"}, Translations: []string{"Hund"}, TargetGender: "m"},
 		},
 	}
 
@@ -31,7 +31,7 @@ func TestEnrichWordsKeepsThreeTranslations(t *testing.T) {
 			"banco": {
 				Lemma:        "banco",
 				Gender:       "m",
-				POS:          "n",
+				POS:          PosTags{"n"},
 				Translations: []string{"Bank", " bank ", "Kreditinstitut", "Geldinstitut", "Sitzbank"},
 				TargetGender: "f",
 			},
@@ -54,27 +54,108 @@ func TestEnrichWordsKeepsThreeTranslations(t *testing.T) {
 	}
 }
 
+func TestEnrichLemmaGlossesPromotesMatchingDictSense(t *testing.T) {
+	d := &Dictionary{
+		forward: map[string]Entry{
+			"casa": {
+				Lemma:        "casa",
+				Gender:       "f",
+				POS:          PosTags{"n"},
+				Translations: []string{"Haus", "Gebäude", "Heim"},
+				TargetGender: "n",
+			},
+			"querer": {
+				Lemma:        "querer",
+				POS:          PosTags{"v"},
+				Translations: []string{"lieben", "möchten", "wollen"},
+			},
+		},
+	}
+
+	cards := d.EnrichLemmaGlosses([]LemmaGloss{
+		{Lemma: "casa", Gloss: "Gebäude"},
+		{Lemma: "querer", Gloss: "WOLLEN"},
+		{Lemma: "casa", Gloss: "invented"},
+	})
+	if len(cards) != 2 {
+		t.Fatalf("got %d cards", len(cards))
+	}
+	if cards[0].Target != "Gebäude" || cards[0].Translations[0] != "Gebäude" || cards[0].Translations[1] != "Haus" {
+		t.Fatalf("casa promoted: %+v", cards[0])
+	}
+	if cards[1].Target != "wollen" || cards[1].Matched != "wollen" {
+		t.Fatalf("querer case-insensitive match: %+v", cards[1])
+	}
+
+	miss := d.EnrichLemmaGlosses([]LemmaGloss{{Lemma: "casa", Gloss: "Villa"}})
+	if len(miss) != 1 || miss[0].Target != "Haus" || miss[0].Matched != "" {
+		t.Fatalf("unmatched gloss must keep FreeDict order: %+v", miss[0])
+	}
+}
+
+func TestArticleStressedAFeminines(t *testing.T) {
+	n := PosTags{"n"}
+	if got := Article("es", "f", n, "agua"); got != "el" {
+		t.Fatalf("agua: %q", got)
+	}
+	if got := Article("es", "f", n, "alma"); got != "el" {
+		t.Fatalf("alma: %q", got)
+	}
+	if got := Article("es", "f", n, "águila"); got != "el" {
+		t.Fatalf("águila: %q", got)
+	}
+	if got := Article("es", "f", n, "casa"); got != "la" {
+		t.Fatalf("casa: %q", got)
+	}
+	if got := Article("es", "f", n, "a"); got != "la" {
+		t.Fatalf("letter a: %q", got)
+	}
+	if got := Article("es", "f", PosTags{"v"}, "agua"); got != "" {
+		t.Fatalf("verb POS should skip article: %q", got)
+	}
+	if got := Article("es", "f", PosTags{"n", "v"}, "agua"); got != "el" {
+		t.Fatalf("dual POS noun+verb still articles: %q", got)
+	}
+}
+
+func TestPosTagsAllowsVerb(t *testing.T) {
+	if !(PosTags{"n", "v"}).AllowsVerb() {
+		t.Fatal("n+v should allow verb")
+	}
+	if (PosTags{"n"}).AllowsVerb() {
+		t.Fatal("noun-only should not allow verb")
+	}
+	if !PosTags(nil).AllowsVerb() {
+		t.Fatal("untagged should allow verb")
+	}
+	card := Card{POS: "n", posTags: PosTags{"n", "v"}}
+	if !card.AllowsVerb() || !card.HasPOS("v") || card.POS != "n" {
+		t.Fatalf("card dual POS: %+v allows=%v", card, card.AllowsVerb())
+	}
+}
+
 func TestSearchRanksLemmaPrefixAndTranslations(t *testing.T) {
 	d := &Dictionary{
 		forward: map[string]Entry{
-			"casa":     {Lemma: "casa", Gender: "f", POS: "n", Translations: []string{"Haus"}, TargetGender: "n"},
-			"casar":    {Lemma: "casar", POS: "v", Translations: []string{"heiraten"}},
-			"casi":     {Lemma: "casi", POS: "adv", Translations: []string{"fast"}},
-			"perro":    {Lemma: "perro", Gender: "m", POS: "n", Translations: []string{"Hund"}, TargetGender: "m"},
-			"hablar":   {Lemma: "hablar", POS: "v", Translations: []string{"sprechen", "reden"}},
-			"niño":     {Lemma: "niño", Gender: "m", POS: "n", Translations: []string{"Kind"}, TargetGender: "n"},
-			"banco":    {Lemma: "banco", Gender: "m", POS: "n", Translations: []string{"Bank", "Kreditinstitut"}, TargetGender: "f"},
-			"hundir":   {Lemma: "hundir", POS: "v", Translations: []string{"versenken"}},
-			"haber":    {Lemma: "haber", POS: "v", Translations: []string{"haben"}},
-			"hallar":   {Lemma: "hallar", POS: "v", Translations: []string{"finden"}},
-			"querer":    {Lemma: "querer", POS: "v", Translations: []string{"lieben", "möchten", "mögen", "wollen", "wünschen"}},
-			"pretender": {Lemma: "pretender", POS: "v", Translations: []string{"behaupten", "wollen", "beabsichtigen"}},
-			"saltar":    {Lemma: "saltar", POS: "v", Translations: []string{"springen"}},
-			"brincar":  {Lemma: "brincar", POS: "v", Translations: []string{"springen", "überspringen"}},
-			"botar":    {Lemma: "botar", Translations: []string{"wegwerfen", "auswerfen", "springen"}},
-			"rajarse":  {Lemma: "rajarse", POS: "v", Translations: []string{"aufreißen", "einen ausgeben", "einladen", "reißen", "springen"}},
-			"prueba":   {Lemma: "prueba", Gender: "f", POS: "n", Translations: []string{"Beweis", "Probe", "Test"}, TargetGender: "n"},
-			"brincador": {Lemma: "brincador", POS: "adj", Translations: []string{"springend"}},
+			"casa":      {Lemma: "casa", Gender: "f", POS: PosTags{"n"}, Translations: []string{"Haus"}, TargetGender: "n"},
+			"casar":     {Lemma: "casar", POS: PosTags{"v"}, Translations: []string{"heiraten"}},
+			"casi":      {Lemma: "casi", POS: PosTags{"adv"}, Translations: []string{"fast"}},
+			"perro":     {Lemma: "perro", Gender: "m", POS: PosTags{"n"}, Translations: []string{"Hund"}, TargetGender: "m"},
+			"hablar":    {Lemma: "hablar", POS: PosTags{"v"}, Translations: []string{"sprechen", "reden"}},
+			"niño":      {Lemma: "niño", Gender: "m", POS: PosTags{"n"}, Translations: []string{"Kind"}, TargetGender: "n"},
+			"banco":     {Lemma: "banco", Gender: "m", POS: PosTags{"n"}, Translations: []string{"Bank", "Kreditinstitut"}, TargetGender: "f"},
+			"hundir":    {Lemma: "hundir", POS: PosTags{"v"}, Translations: []string{"versenken"}},
+			"haber":     {Lemma: "haber", POS: PosTags{"v"}, Translations: []string{"haben"}},
+			"hallar":    {Lemma: "hallar", POS: PosTags{"v"}, Translations: []string{"finden"}},
+			"querer":    {Lemma: "querer", POS: PosTags{"v"}, Translations: []string{"lieben", "möchten", "mögen", "wollen", "wünschen"}},
+			"pretender": {Lemma: "pretender", POS: PosTags{"v"}, Translations: []string{"behaupten", "wollen", "beabsichtigen"}},
+			"saltar":    {Lemma: "saltar", POS: PosTags{"v"}, Translations: []string{"springen"}},
+			"brincar":   {Lemma: "brincar", POS: PosTags{"v"}, Translations: []string{"springen", "überspringen"}},
+			"botar":     {Lemma: "botar", Translations: []string{"wegwerfen", "auswerfen", "springen"}},
+			"rajarse":   {Lemma: "rajarse", POS: PosTags{"v"}, Translations: []string{"aufreißen", "einen ausgeben", "einladen", "reißen", "springen"}},
+			"prueba":    {Lemma: "prueba", Gender: "f", POS: PosTags{"n"}, Translations: []string{"Beweis", "Probe", "Test"}, TargetGender: "n"},
+			"brincador": {Lemma: "brincador", POS: PosTags{"adj"}, Translations: []string{"springend"}},
+			"poder":     {Lemma: "poder", Gender: "m", POS: PosTags{"n", "v"}, Translations: []string{"Macht", "können"}, TargetGender: "f"},
 		},
 	}
 
@@ -159,14 +240,19 @@ func TestSearchRanksLemmaPrefixAndTranslations(t *testing.T) {
 		t.Fatalf("limit: got %d", len(limited))
 	}
 
-	verbs := d.Search("ha", 10, func(c Card) bool { return c.POS == "v" })
+	verbs := d.Search("ha", 10, func(c Card) bool { return c.AllowsVerb() && c.HasPOS("v") })
 	if len(verbs) == 0 {
 		t.Fatalf("keep filter empty")
 	}
 	for _, c := range verbs {
-		if c.POS != "v" {
+		if !c.HasPOS("v") {
 			t.Fatalf("keep filter leaked %+v", c)
 		}
+	}
+
+	poder := d.Search("poder", 5, func(c Card) bool { return c.AllowsVerb() })
+	if len(poder) == 0 || poder[0].Source != "poder" || !poder[0].AllowsVerb() {
+		t.Fatalf("dual-POS poder should pass verb filter: %+v", poder)
 	}
 
 	empty := d.Search("  ", 10, nil)

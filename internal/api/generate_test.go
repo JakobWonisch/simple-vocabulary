@@ -82,7 +82,9 @@ func TestGenerateKeepsExactDictionaryCount(t *testing.T) {
 		t.Fatalf("requested %d cards %d", resp.Requested, len(resp.Cards))
 	}
 	got := []string{resp.Cards[0].Target, resp.Cards[1].Target, resp.Cards[2].Target}
-	want := []string{"Haus", "Hund", "Katze"}
+	// AI gloss "Gebäude" matches a dict sense and is promoted; unmatched AI
+	// glosses keep FreeDict order ("Hund", "Katze").
+	want := []string{"Gebäude", "Hund", "Katze"}
 	for i := range want {
 		if got[i] != want[i] {
 			t.Fatalf("targets %v, want %v", got, want)
@@ -92,7 +94,7 @@ func TestGenerateKeepsExactDictionaryCount(t *testing.T) {
 		}
 	}
 	casa := resp.Cards[0].Translations
-	if len(casa) != 3 || casa[0] != "Haus" || casa[1] != "Gebäude" || casa[2] != "Heim" {
+	if len(casa) != 3 || casa[0] != "Gebäude" || casa[1] != "Haus" || casa[2] != "Heim" {
 		t.Fatalf("casa translations %v", casa)
 	}
 	if len(stub.calls) != 1 || stub.calls[0].Count != 13 {

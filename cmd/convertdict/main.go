@@ -9,14 +9,16 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/jakob/simple-vocabulary/internal/dictionary"
 )
 
 type Entry struct {
-	Lemma        string   `json:"lemma"`
-	Gender       string   `json:"gender,omitempty"` // m, f, n
-	POS          string   `json:"pos,omitempty"`
-	Translations []string `json:"translations"`
-	TargetGender string   `json:"targetGender,omitempty"`
+	Lemma        string             `json:"lemma"`
+	Gender       string             `json:"gender,omitempty"` // m, f, n
+	POS          dictionary.PosTags `json:"pos,omitempty"`
+	Translations []string           `json:"translations"`
+	TargetGender string             `json:"targetGender,omitempty"`
 }
 
 type DictFile struct {
@@ -104,9 +106,7 @@ func parseTEI(r io.Reader) (map[string]Entry, error) {
 			if existing.Gender == "" {
 				existing.Gender = e.Gender
 			}
-			if existing.POS == "" {
-				existing.POS = e.POS
-			}
+			existing.POS = mergePOS(existing.POS, e.POS...)
 			if existing.TargetGender == "" {
 				existing.TargetGender = e.TargetGender
 			}
@@ -151,7 +151,9 @@ func (e entryXML) toEntry() Entry {
 		gram = e.Gram
 	}
 	if gram != nil {
-		out.POS = normalizePOS(gram.POS)
+		if pos := normalizePOS(gram.POS); pos != "" {
+			out.POS = dictionary.PosTags{pos}
+		}
 		out.Gender = normalizeGender(gram.Gen)
 	}
 
@@ -206,6 +208,29 @@ func normalizePOS(p string) string {
 	default:
 		return p
 	}
+}
+
+func mergePOS(dst dictionary.PosTags, add ...string) dictionary.PosTags {
+	out := append(dictionary.PosTags(nil), dst...)
+	seen := map[string]struct{}{}
+	for _, t := range out {
+		seen[t] = struct{}{}
+	}
+	for _, t := range add {
+		t = strings.TrimSpace(t)
+		if t == "" {
+			continue
+		}
+		if _, ok := seen[t]; ok {
+			continue
+		}
+		seen[t] = struct{}{}
+		out = append(out, t)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func uniqAppend(dst []string, add ...string) []string {

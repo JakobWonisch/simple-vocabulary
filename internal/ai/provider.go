@@ -6,8 +6,9 @@ import (
 )
 
 // WordSuggestion is a lemma proposed by an AI provider.
-// Translation, gender, and part of speech are accepted from the model response
-// but are not used for cards. Card text comes from the dictionary.
+// Gender and POS are accepted but not applied to cards. Translation is used only
+// to pick among dictionary senses when it matches a FreeDict gloss; card text
+// always comes from the dictionary.
 type WordSuggestion struct {
 	Lemma       string `json:"lemma"`
 	Translation string `json:"translation,omitempty"`

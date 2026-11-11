@@ -157,9 +157,6 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cards := s.Dict.Search(q, limit, func(card dictionary.Card) bool {
-			if card.POS != "" && card.POS != "v" {
-				return false
-			}
 			_, ok := s.Conj.Lookup(card.Source)
 			return ok
 		})
@@ -372,7 +369,7 @@ func (s *Server) dictionaryCards(ctx context.Context, topic string, want int, di
 
 func (s *Server) conjugationCards(ctx context.Context, topic string, want int, difficulty string) ([]conjugationCard, int, error) {
 	raw, suggested, err := s.fill(ctx, topic, want, ai.KindConjugation, difficulty, func(card dictionary.Card) bool {
-		if s.Conj == nil || (card.POS != "" && card.POS != "v") {
+		if s.Conj == nil {
 			return false
 		}
 		_, ok := s.Conj.Lookup(card.Source)
@@ -417,17 +414,20 @@ func (s *Server) fill(ctx context.Context, topic string, want int, kind, difficu
 		}
 		suggested += len(batch)
 
-		lemmas := make([]string, 0, len(batch))
+		pairs := make([]dictionary.LemmaGloss, 0, len(batch))
 		for _, sug := range batch {
 			lemma := strings.TrimSpace(sug.Lemma)
 			if lemma == "" {
 				continue
 			}
 			exclude = append(exclude, lemma)
-			lemmas = append(lemmas, lemma)
+			pairs = append(pairs, dictionary.LemmaGloss{
+				Lemma: lemma,
+				Gloss: sug.Translation,
+			})
 		}
 
-		for _, card := range s.Dict.EnrichWords(lemmas) {
+		for _, card := range s.Dict.EnrichLemmaGlosses(pairs) {
 			if !keep(card) {
 				continue
 			}

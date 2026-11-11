@@ -13,7 +13,7 @@ import (
 type Entry struct {
 	Lemma        string   `json:"lemma"`
 	Gender       string   `json:"gender,omitempty"`
-	POS          string   `json:"pos,omitempty"`
+	POS          PosTags  `json:"pos,omitempty"`
 	Translations []string `json:"translations"`
 	TargetGender string   `json:"targetGender,omitempty"`
 }
@@ -32,10 +32,36 @@ type Card struct {
 	Target        string   `json:"target"`
 	TargetArticle string   `json:"targetArticle,omitempty"`
 	Translations  []string `json:"translations,omitempty"`
-	POS           string   `json:"pos,omitempty"`
+	POS           string   `json:"pos,omitempty"` // primary tag for display/storage
 	FoundInDict   bool     `json:"foundInDict"`
 	// Matched is the German gloss that matched a DE-side search, when any.
 	Matched string `json:"matched,omitempty"`
+
+	posTags PosTags // full FreeDict tag set; used for verb filters in-process
+}
+
+// HasPOS reports whether the underlying entry carries the given POS tag.
+// Untagged cards (no tags) are treated as compatible with any tag filter that
+// historically allowed empty POS through.
+func (c Card) HasPOS(tag string) bool {
+	if len(c.posTags) == 0 {
+		return c.POS == "" || c.POS == tag
+	}
+	return c.posTags.Has(tag)
+}
+
+// AllowsVerb reports whether this card may be used in conjugation flows.
+func (c Card) AllowsVerb() bool {
+	if len(c.posTags) == 0 {
+		return c.POS == "" || c.POS == "v"
+	}
+	return c.posTags.AllowsVerb()
+}
+
+// LemmaGloss pairs a lemma with an optional preferred German gloss (e.g. from AI).
+type LemmaGloss struct {
+	Lemma string
+	Gloss string
 }
 
 type fileShape struct {
@@ -87,7 +113,7 @@ func LoadJSON(path string) (*Dictionary, error) {
 			d.reverse[rk] = Entry{
 				Lemma:        e.Translations[0],
 				Gender:       e.TargetGender,
-				POS:          e.POS,
+				POS:          append(PosTags(nil), e.POS...),
 				Translations: []string{e.Lemma},
 				TargetGender: e.Gender,
 			}
@@ -121,10 +147,21 @@ func (d *Dictionary) LookupReverse(lemma string) (Entry, bool) {
 // Lemmas with no dictionary entry are omitted. Translations always come from
 // the dictionary entry, never from an external suggestion.
 func (d *Dictionary) EnrichWords(lemmas []string) []Card {
-	cards := make([]Card, 0, len(lemmas))
-	seen := map[string]struct{}{}
+	pairs := make([]LemmaGloss, 0, len(lemmas))
 	for _, lemma := range lemmas {
-		lemma = strings.TrimSpace(lemma)
+		pairs = append(pairs, LemmaGloss{Lemma: lemma})
+	}
+	return d.EnrichLemmaGlosses(pairs)
+}
+
+// EnrichLemmaGlosses is EnrichWords with optional preferred glosses. A gloss is
+// promoted to the card target only when it matches a dictionary translation;
+// otherwise FreeDict order is kept and other senses still appear below.
+func (d *Dictionary) EnrichLemmaGlosses(pairs []LemmaGloss) []Card {
+	cards := make([]Card, 0, len(pairs))
+	seen := map[string]struct{}{}
+	for _, pair := range pairs {
+		lemma := strings.TrimSpace(pair.Lemma)
 		if lemma == "" {
 			continue
 		}
@@ -141,7 +178,7 @@ func (d *Dictionary) EnrichWords(lemmas []string) []Card {
 		}
 		seen[key] = struct{}{}
 
-		card, ok := cardFromEntry(e, lemma, "")
+		card, ok := cardFromEntry(e, lemma, pair.Gloss)
 		if !ok {
 			continue
 		}
@@ -433,24 +470,55 @@ func translationWords(s string) []string {
 	return out
 }
 
-func cardFromEntry(e Entry, requested, matchedGloss string) (Card, bool) {
+func cardFromEntry(e Entry, requested, preferredGloss string) (Card, bool) {
+	matched := matchDictionaryGloss(e.Translations, preferredGloss)
 	translations := topTranslations(e.Translations, maxCardTranslations)
-	if matchedGloss != "" {
-		translations = promoteTranslation(translations, e.Translations, matchedGloss)
+	if matched != "" {
+		translations = promoteTranslation(translations, e.Translations, matched)
 	}
 	if len(translations) == 0 {
 		return Card{}, false
 	}
 	return Card{
 		Source:        displayLemma(e.Lemma, requested),
-		SourceArticle: Article("es", e.Gender, e.POS),
+		SourceArticle: Article("es", e.Gender, e.POS, displayLemma(e.Lemma, requested)),
 		Target:        translations[0],
-		TargetArticle: Article("de", e.TargetGender, e.POS),
+		TargetArticle: Article("de", e.TargetGender, e.POS, ""),
 		Translations:  translations,
-		POS:           e.POS,
+		POS:           e.POS.Primary(),
 		FoundInDict:   true,
-		Matched:       strings.TrimSpace(matchedGloss),
+		Matched:       matched,
+		posTags:       append(PosTags(nil), e.POS...),
 	}, true
+}
+
+// matchDictionaryGloss returns the dictionary's own gloss string when preferred
+// matches a sense (case-insensitive, diacritic-soft). Empty if no dict sense matches.
+func matchDictionaryGloss(all []string, preferred string) string {
+	g := strings.TrimSpace(preferred)
+	if g == "" {
+		return ""
+	}
+	gFold := stripDiacritics(strings.ToLower(g))
+	for _, item := range all {
+		t := strings.TrimSpace(item)
+		if t == "" {
+			continue
+		}
+		if strings.EqualFold(t, g) {
+			return t
+		}
+	}
+	for _, item := range all {
+		t := strings.TrimSpace(item)
+		if t == "" {
+			continue
+		}
+		if stripDiacritics(strings.ToLower(t)) == gFold {
+			return t
+		}
+	}
+	return ""
 }
 
 func promoteTranslation(top, all []string, gloss string) []string {
@@ -494,8 +562,9 @@ func (d *Dictionary) Size() int {
 }
 
 // Article returns the definite article for a language/gender/pos, or empty.
-func Article(lang, gender, pos string) string {
-	if pos != "" && pos != "n" {
+// lemma is used only for Spanish feminine nouns that take el before stressed á.
+func Article(lang, gender string, pos PosTags, lemma string) string {
+	if len(pos) > 0 && !pos.Has("n") {
 		return ""
 	}
 	switch lang {
@@ -504,6 +573,9 @@ func Article(lang, gender, pos string) string {
 		case "m":
 			return "el"
 		case "f":
+			if feminineTakesEl(lemma) {
+				return "el"
+			}
 			return "la"
 		}
 	case "de":
@@ -517,6 +589,36 @@ func Article(lang, gender, pos string) string {
 		}
 	}
 	return ""
+}
+
+// Feminine nouns whose citation form begins with stressed /a/ (or /ha/) take
+// the article el while remaining feminine (el agua fría).
+var feminineElAllowlist = map[string]struct{}{
+	"agua": {}, "aguas": {},
+	"alma": {}, "almas": {},
+	"arma": {}, "armas": {},
+	"arpa": {}, "arpas": {},
+	"aula": {}, "aulas": {},
+	"ave": {}, "aves": {},
+	"ancla": {}, "anclas": {},
+	"asa": {}, "asas": {},
+	"asma": {},
+	"habla": {},
+	"hada": {}, "hadas": {},
+	"hacha": {}, "hachas": {},
+	"hambre": {},
+	"haya": {}, "hayas": {},
+}
+
+func feminineTakesEl(lemma string) bool {
+	w := strings.ToLower(strings.TrimSpace(lemma))
+	if w == "" || w == "a" || w == "hache" {
+		return false
+	}
+	if _, ok := feminineElAllowlist[w]; ok {
+		return true
+	}
+	return strings.HasPrefix(w, "á") || strings.HasPrefix(w, "há")
 }
 
 func normalizeKey(s string) string {
