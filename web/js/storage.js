@@ -11,8 +11,13 @@ const defaultGenerate = () => ({
   difficulty: "easy", // easy | medium | hard
 });
 
+function normalizeTheme(raw) {
+  return raw === "dark" || raw === "light" ? raw : null;
+}
+
 const defaultState = () => ({
   version: 1,
+  theme: null, // light | dark | null (follow early/system choice until set)
   direction: "es-de", // es-de | de-es
   conjugation: defaultConjugation(),
   generate: defaultGenerate(),
@@ -36,6 +41,7 @@ function normalizeState(parsed) {
   return {
     ...defaultState(),
     ...parsed,
+    theme: normalizeTheme(parsed.theme),
     conjugation: {
       ...defaultConjugation(),
       ...(parsed.conjugation || {}),

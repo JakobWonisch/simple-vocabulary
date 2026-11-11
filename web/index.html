@@ -7,6 +7,22 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="theme-color" content="#eef3ef" />
+  <script>
+    (() => {
+      const key = "simple-vocabulary:v1";
+      let theme = null;
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) theme = JSON.parse(raw)?.theme;
+      } catch {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = theme;
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = theme === "dark" ? "#1a1510" : "#eef3ef";
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;560;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet" />
@@ -48,16 +64,31 @@
       </button>
       <div class="settings-pop" id="settings-pop" role="dialog" aria-labelledby="settings-title" hidden>
         <p class="settings-title" id="settings-title">Einstellungen</p>
+        <fieldset id="settings-theme">
+          <legend>Darstellung</legend>
+          <div class="kind-switch" role="radiogroup" aria-label="Darstellung">
+            <label class="kind-option">
+              <input type="radio" name="theme" value="light" />
+              <span>Hell</span>
+            </label>
+            <label class="kind-option">
+              <input type="radio" name="theme" value="dark" />
+              <span>Dunkel</span>
+            </label>
+          </div>
+        </fieldset>
         <fieldset id="settings-direction" hidden>
           <legend>Fragerichtung</legend>
-          <label>
-            <input type="radio" name="direction" value="es-de" />
-            <span class="dir-option">ES<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>DE</span>
-          </label>
-          <label>
-            <input type="radio" name="direction" value="de-es" />
-            <span class="dir-option">DE<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>ES</span>
-          </label>
+          <div class="kind-switch" role="radiogroup" aria-label="Fragerichtung">
+            <label class="kind-option">
+              <input type="radio" name="direction" value="es-de" />
+              <span class="dir-option">ES<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>DE</span>
+            </label>
+            <label class="kind-option">
+              <input type="radio" name="direction" value="de-es" />
+              <span class="dir-option">DE<svg class="dir-arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>ES</span>
+            </label>
+          </div>
         </fieldset>
         <fieldset id="settings-conj" hidden>
           <legend>Konjugation</legend>
@@ -77,14 +108,16 @@
           </label>
           <fieldset class="order-set">
             <legend>Reihenfolge</legend>
-            <label>
-              <input type="radio" name="conj-order" value="default" checked />
-              <span>Standard</span>
-            </label>
-            <label>
-              <input type="radio" name="conj-order" value="random" />
-              <span>Zufällig</span>
-            </label>
+            <div class="kind-switch" role="radiogroup" aria-label="Reihenfolge">
+              <label class="kind-option">
+                <input type="radio" name="conj-order" value="default" checked />
+                <span>Standard</span>
+              </label>
+              <label class="kind-option">
+                <input type="radio" name="conj-order" value="random" />
+                <span>Zufällig</span>
+              </label>
+            </div>
           </fieldset>
         </fieldset>
         <div class="settings-add" id="settings-add" hidden>

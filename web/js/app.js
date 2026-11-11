@@ -8,6 +8,8 @@ const settingsPop = document.getElementById("settings-pop");
 const infoBtn = document.getElementById("info-btn");
 const infoPop = document.getElementById("info-pop");
 const directionInputs = settingsPop.querySelectorAll('input[name="direction"]');
+const themeInputs = settingsPop.querySelectorAll('input[name="theme"]');
+const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 const addWordDialog = document.getElementById("add-word-dialog");
 const addWordInput = document.getElementById("add-word-input");
 const addWordResults = document.getElementById("add-word-results");
@@ -123,6 +125,7 @@ function uiMessage(message, fallback) {
 
 let state = {
   version: 1,
+  theme: null,
   direction: "es-de",
   conjugation: { mode: "ind", tense: "prs", order: "default" },
   generate: { count: 25, difficulty: "easy" },
@@ -1741,10 +1744,27 @@ function syncSettingsScope() {
     addBtn.textContent = set.kind === "conjugation" ? "Verb hinzufügen" : "Wort hinzufügen";
   }
   if (io) io.hidden = !home;
-  const hasSettings = home || !!set;
-  settingsBtn.hidden = !hasSettings;
-  if (!hasSettings) setSettingsOpen(false);
+  settingsBtn.hidden = false;
   syncConjugationControls();
+}
+
+function currentTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+function applyTheme(theme) {
+  const next = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  if (themeColorMeta) {
+    themeColorMeta.content = next === "dark" ? "#1a1510" : "#eef3ef";
+  }
+  for (const input of themeInputs) input.checked = input.value === next;
+}
+
+function syncThemeSetting() {
+  const value = state.theme === "dark" || state.theme === "light" ? state.theme : currentTheme();
+  applyTheme(value);
+  if (state.theme !== value) state.theme = value;
 }
 
 function syncDirectionSetting() {
@@ -1782,6 +1802,13 @@ settingsPop.addEventListener("click", (e) => e.stopPropagation());
 
 settingsPop.addEventListener("change", (e) => {
   if (!stateReady) return;
+  const theme = e.target.closest('input[name="theme"]');
+  if (theme) {
+    state.theme = theme.value === "dark" ? "dark" : "light";
+    applyTheme(state.theme);
+    persist();
+    return;
+  }
   const input = e.target.closest('input[name="direction"]');
   if (input) {
     state.direction = input.value === "de-es" ? "de-es" : "es-de";
@@ -2039,8 +2066,11 @@ document.getElementById("btn-import").addEventListener("change", async (e) => {
       e.target.value = "";
       return;
     }
+    const previousTheme = state.theme;
     state = imported;
+    if (!state.theme) state.theme = previousTheme;
     persist();
+    syncThemeSetting();
     syncDirectionSetting();
     route();
     setSettingsOpen(false);
@@ -2083,6 +2113,8 @@ loadState().then((loaded) => {
   app.removeAttribute("aria-busy");
   state = loaded;
   stateReady = true;
+  syncThemeSetting();
+  persist();
   syncDirectionSetting();
   route();
 });
