@@ -17,7 +17,7 @@
           src = pkgs.lib.cleanSource ./.;
           # No third-party Go deps.
           vendorHash = null;
-          subPackages = [ "cmd/server" "cmd/convertdict" ];
+          subPackages = [ "cmd/server" "cmd/convertdict" "cmd/convertconj" ];
           ldflags = [ "-s" "-w" ];
           # ship dictionary + web next to the binary for nix run convenience
           postInstall = ''

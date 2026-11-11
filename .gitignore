@@ -22,3 +22,10 @@ kaikki-es-verbs.jsonl
 kaikki-es-verbs.jsonl.gz
 spa
 spa.gz
+
+# Raw Kaikki / Wiktextract dumps (regenerate data/spa-conj.json instead).
+# Keep internal/**/testdata fixtures tracked.
+/kaikki*.jsonl
+/kaikki*.jsonl.gz
+**/kaikki.org-dictionary-*.jsonl
+**/kaikki.org-dictionary-*.jsonl.gz

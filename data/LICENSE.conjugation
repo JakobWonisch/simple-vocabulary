@@ -1,15 +1,26 @@
-Spanish verb paradigms in spa-conj.json are derived from the UniMorph Spanish
-dataset (https://github.com/unimorph/spa), extracted from English Wiktionary.
+Spanish verb paradigms in spa-conj.json are derived from the Kaikki.org
+Spanish verb extract (https://kaikki.org/dictionary/Spanish/pos-verb/),
+produced by Wiktextract from English Wiktionary.
 
-License: Creative Commons Attribution-ShareAlike 3.0 Unported
-https://creativecommons.org/licenses/by-sa/3.0/
+Source download (preferred):
+https://kaikki.org/dictionary/Spanish/pos-verb/kaikki.org-dictionary-Spanish-by-pos-verb.jsonl.gz
 
-Adaptations in this file: finite forms, the affirmative and negative
-imperative (leading "no " stripped from negative forms), the gerund, and
-the masculine singular past participle only; voseo duplicates dropped in
-favor of tuteo (tú / vosotros);
-paradigms kept only when the infinitive is also a verb headword in the
-bundled FreeDict spa-deu dictionary.
+License: Creative Commons Attribution-ShareAlike 4.0 International
+https://creativecommons.org/licenses/by-sa/4.0/
 
-Attribute the UniMorph project and the English Wiktionary contributors.
-Share adaptations of this file under the same CC BY-SA 3.0 license.
+(Wiktionary content is dual-licensed CC BY-SA and GFDL; Kaikki redistributes
+the Wiktextract JSON under CC BY-SA.)
+
+Adaptations in this file: finite indicative and subjunctive forms, the
+affirmative and negative imperative, the gerund, and the masculine singular
+past participle only; clitic-combined forms and multiword verbs dropped;
+voseo duplicates dropped in favor of tuteo (tú / vosotros); paradigms kept
+only when the infinitive is also a headword in the bundled FreeDict spa-deu
+dictionary (verb POS, untagged, or infinitive-shaped noun/verb homographs
+such as poder).
+
+Attribute Kaikki.org / Wiktextract and the English Wiktionary contributors.
+Share adaptations of this file under the same CC BY-SA license.
+
+The previous UniMorph-based build (CC BY-SA 3.0) can still be reproduced with
+`go run ./cmd/convertconj -format unimorph …` if needed.

@@ -65,6 +65,25 @@ go run ./cmd/convertdict \
 
 Do not commit the raw WikDict SQLite file. See `data/LICENSE.dictionary`.
 
+## Conjugations
+
+`data/spa-conj.json` is built from the Kaikki.org Spanish **verb** extract (Wiktextract / English Wiktionary), filtered to FreeDict headwords. Rebuild:
+
+```bash
+curl -L -o kaikki-es-verbs.jsonl.gz \
+  https://kaikki.org/dictionary/Spanish/pos-verb/kaikki.org-dictionary-Spanish-by-pos-verb.jsonl.gz
+
+go run ./cmd/convertconj \
+  -format kaikki \
+  -in kaikki-es-verbs.jsonl.gz \
+  -dict data/spa-deu.json \
+  -out data/spa-conj.json
+```
+
+Do not commit the raw JSONL (see `.gitignore`). See `data/LICENSE.conjugation`.
+
+UniMorph TSV remains supported via `-format unimorph` but lacks common irregulars (querer, tener, venir, …).
+
 ## Swapping the AI provider
 
 Implement `ai.Provider` in `internal/ai` and wire it in `cmd/server/main.go`. OpenRouter is the default (`internal/ai/openrouter.go`).
