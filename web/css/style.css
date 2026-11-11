@@ -772,6 +772,10 @@ body:has(.view.home) main {
   z-index: 2;
 }
 
+.set-menu.is-open {
+  z-index: 60;
+}
+
 .set-menu-btn {
   display: grid;
   place-items: center;

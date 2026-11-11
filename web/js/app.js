@@ -410,6 +410,8 @@ function placeSetMenu(pop, anchor) {
 
 function openSetMenu(pop, toggle) {
   closeOpenSetMenu();
+  const menu = toggle.closest(".set-menu");
+  menu?.classList.add("is-open");
   pop.hidden = false;
   toggle.setAttribute("aria-expanded", "true");
   placeSetMenu(pop, toggle);
@@ -423,6 +425,7 @@ function openSetMenu(pop, toggle) {
   closeOpenSetMenu = () => {
     pop.hidden = true;
     toggle.setAttribute("aria-expanded", "false");
+    menu?.classList.remove("is-open");
     scroller?.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onResize);
     openMenuButton = null;
