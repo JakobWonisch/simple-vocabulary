@@ -159,7 +159,7 @@
     <section class="view create">
       <a class="back" href="#/" data-link>← Sammlungen</a>
       <h1>Neue Sammlung</h1>
-      <p class="lede" id="create-lede">Beschreibe ein Thema. Wir erzeugen etwa 50 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.</p>
+      <p class="lede" id="create-lede">Beschreibe ein Thema. Wir erzeugen etwa 25 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.</p>
       <form id="create-form" class="create-form">
         <div class="kind-switch" role="radiogroup" aria-label="Art der Sammlung">
           <label class="kind-option">
@@ -180,20 +180,20 @@
               <span id="difficulty-label">Schwierigkeit</span>
               <div class="pick">
                 <button type="button" class="pick-toggle" aria-labelledby="difficulty-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="difficulty-list">
-                  <span class="pick-value">Mittel</span>
+                  <span class="pick-value">Einfach</span>
                   <svg class="pick-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
                 </button>
                 <div class="pick-menu" id="difficulty-list" role="listbox" aria-labelledby="difficulty-label" hidden>
-                  <button type="button" class="pick-option" role="option" data-value="easy">Einfach</button>
-                  <button type="button" class="pick-option" role="option" data-value="medium" aria-selected="true">Mittel</button>
+                  <button type="button" class="pick-option" role="option" data-value="easy" aria-selected="true">Einfach</button>
+                  <button type="button" class="pick-option" role="option" data-value="medium">Mittel</button>
                   <button type="button" class="pick-option" role="option" data-value="hard">Schwierig</button>
                 </div>
-                <input type="hidden" name="difficulty" value="medium" />
+                <input type="hidden" name="difficulty" value="easy" />
               </div>
             </div>
             <label class="field">
               <span id="create-count-label">Wortanzahl</span>
-              <input name="count" type="number" min="10" max="100" value="50" />
+              <input name="count" type="number" min="10" max="100" value="25" />
             </label>
         </div>
         <button type="submit" class="btn primary" id="create-submit">Sammlung erzeugen</button>

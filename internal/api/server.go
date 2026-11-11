@@ -244,7 +244,7 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if body.Count <= 0 {
-		body.Count = 50
+		body.Count = 25
 	}
 	if body.Count > 100 {
 		body.Count = 100

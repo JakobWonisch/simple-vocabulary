@@ -100,7 +100,7 @@ func (o *OpenRouter) Name() string {
 
 func (o *OpenRouter) GenerateVocabulary(ctx context.Context, req GenerateRequest) ([]WordSuggestion, error) {
 	if req.Count <= 0 {
-		req.Count = 50
+		req.Count = 25
 	}
 	if req.SourceLang == "" {
 		req.SourceLang = "es"

@@ -125,6 +125,7 @@ let state = {
   version: 1,
   direction: "es-de",
   conjugation: { mode: "ind", tense: "prs", order: "default" },
+  generate: { count: 25, difficulty: "easy" },
   sets: [],
 };
 let stateReady = false;
@@ -192,11 +193,29 @@ const difficultyLabels = {
 };
 
 function selectedDifficulty(value) {
-  return difficultyLabels[value] ? value : "medium";
+  return difficultyLabels[value] ? value : "easy";
 }
 
 function difficultyLabel(value) {
   return difficultyLabels[value] || "";
+}
+
+function clampGenerateCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 25;
+  return Math.min(100, Math.max(10, Math.round(n)));
+}
+
+function setDifficultyPick(form, difficulty) {
+  const level = selectedDifficulty(difficulty);
+  const pick = form.querySelector(".pick");
+  const value = pick.querySelector(".pick-value");
+  const hidden = pick.querySelector('input[name="difficulty"]');
+  const options = [...pick.querySelectorAll(".pick-option")];
+  const match = options.find((opt) => opt.dataset.value === level) || options[0];
+  for (const item of options) item.setAttribute("aria-selected", item === match ? "true" : "false");
+  hidden.value = match.dataset.value;
+  value.textContent = match.textContent.trim();
 }
 
 let difficultyPickAbort = null;
@@ -582,6 +601,10 @@ function renderCreate(kindHint) {
   const status = document.getElementById("create-status");
   const submit = document.getElementById("create-submit");
   const back = document.querySelector(".view.create .back");
+  const prefs = state.generate || { count: 25, difficulty: "easy" };
+  const countInput = form.querySelector('input[name="count"]');
+  countInput.value = String(clampGenerateCount(prefs.count));
+  setDifficultyPick(form, prefs.difficulty);
 
   const lede = document.getElementById("create-lede");
   const countLabel = document.getElementById("create-count-label");
@@ -593,14 +616,15 @@ function renderCreate(kindHint) {
   }
   const syncKindCopy = () => {
     const conj = selectedKind() === "conjugation";
+    const count = clampGenerateCount(countInput.value);
     lede.textContent = conj
       ? "Beschreibe ein Thema. Wir erzeugen spanische Verben dazu und behalten nur die, die im Wörterbuch als Verb stehen."
-      : "Beschreibe ein Thema. Wir erzeugen etwa 50 spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.";
+      : `Beschreibe ein Thema. Wir erzeugen etwa ${count} spanische Wörter und schlagen die deutschen Übersetzungen im eingebauten Wörterbuch nach.`;
     countLabel.textContent = conj ? "Verben" : "Wortanzahl";
     if (back) back.href = homeHash(conj ? "conjugation" : "vocab");
   };
   form.addEventListener("change", (e) => {
-    if (e.target.name === "kind") syncKindCopy();
+    if (e.target.name === "kind" || e.target.name === "count") syncKindCopy();
   });
   syncKindCopy();
   bindDifficultyPick(form);
@@ -609,10 +633,13 @@ function renderCreate(kindHint) {
     e.preventDefault();
     const fd = new FormData(form);
     const topic = String(fd.get("topic") || "").trim();
-    const count = Number(fd.get("count") || 50);
+    const count = clampGenerateCount(fd.get("count"));
     const kind = selectedKind();
     const difficulty = selectedDifficulty(fd.get("difficulty"));
     if (!topic) return;
+
+    state.generate = { count, difficulty };
+    persist();
 
     submit.disabled = true;
     status.classList.remove("error");

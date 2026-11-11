@@ -6,12 +6,31 @@ const defaultConjugation = () => ({
   order: "default", // default | random
 });
 
+const defaultGenerate = () => ({
+  count: 25,
+  difficulty: "easy", // easy | medium | hard
+});
+
 const defaultState = () => ({
   version: 1,
   direction: "es-de", // es-de | de-es
   conjugation: defaultConjugation(),
+  generate: defaultGenerate(),
   sets: [],
 });
+
+function normalizeGenerate(raw) {
+  const base = defaultGenerate();
+  const count = Number(raw?.count);
+  if (Number.isFinite(count)) {
+    base.count = Math.min(100, Math.max(10, Math.round(count)));
+  }
+  const difficulty = String(raw?.difficulty || "").toLowerCase();
+  if (difficulty === "easy" || difficulty === "medium" || difficulty === "hard") {
+    base.difficulty = difficulty;
+  }
+  return base;
+}
 
 function normalizeState(parsed) {
   return {
@@ -21,6 +40,7 @@ function normalizeState(parsed) {
       ...defaultConjugation(),
       ...(parsed.conjugation || {}),
     },
+    generate: normalizeGenerate(parsed.generate),
     version: 1,
     sets: parsed.sets,
   };
