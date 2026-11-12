@@ -55,6 +55,24 @@ func TestPageViewsAndVisitors(t *testing.T) {
 		t.Fatalf("names = %v", rep.Names)
 	}
 
+	// A restart (new Store on the same database) keeps today's visitors.
+	s2, err := NewStore(s.db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2.now = s.now
+	_ = s2.PageView("1.2.3.4", "firefox")
+	_ = s2.PageView("5.6.7.8", "firefox")
+	rep, _ = s2.Report(1)
+	if got := rep.Daily[0].Counts; got[Visitors] != 2 || got[PageViews] != 3 {
+		t.Fatalf("after restart = %v", got)
+	}
+	var old int
+	if err := s.db.QueryRow(`SELECT (SELECT count(*) FROM visitor_hashes WHERE day <> '2026-03-11') +
+		(SELECT count(*) FROM visitor_salt WHERE day <> '2026-03-11')`).Scan(&old); err != nil || old != 0 {
+		t.Fatalf("previous day's salt/hashes kept: %d %v", old, err)
+	}
+
 	// Older data falls outside a one-day report.
 	rep, _ = s.Report(1)
 	if rep.Totals["card_studied"] != 0 {

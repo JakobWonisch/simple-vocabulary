@@ -5,8 +5,8 @@ Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`loc
 ## Features
 
 - Vocabulary sets stored locally
-- Optional accounts: sign up with email + verification code; while logged in the complete state (sets, progress, settings) lives server-side and local sets are disregarded. Signup can import the current local data; otherwise new accounts get the same initial collections as local users. Logged-out use is unchanged. Accounts live in SQLite (`ACCOUNTS_DIR/vocab.db`); old JSON account files are imported automatically on first start and moved to `ACCOUNTS_DIR/legacy-json/`.
-- Admin usage page at `/admin` (set `ADMIN_PASSWORD`): users, active/inactive/new in the last n days, collections per user, daily visitors, page views, and action counts. Counting is anonymous and server-side (only daily totals; visitors are deduplicated with an in-memory hash salted daily), so adblockers do not affect it.
+- Optional accounts: sign up with email + verification code; while logged in the complete state (sets, progress, settings) lives server-side and local sets are disregarded. Signup can import the current local data; otherwise new accounts get the same initial collections as local users. Logged-out use is unchanged. Accounts live in SQLite (`ACCOUNTS_DIR/vocab.db`).
+- Admin usage page at `/admin` (set `ADMIN_PASSWORD`): users, active/inactive/new in the last n days, collections per user, daily visitors, page views, and action counts. Counting is anonymous and server-side, so adblockers do not affect it: only daily totals are kept; visitors are deduplicated with a hash of IP + user agent and a daily salt, and the salt and hashes are deleted once the day is over.
 - Topic → ~50 words via OpenRouter (free models supported)
 - Translations + articles (`el`/`la`, `der`/`die`/`das`) from the integrated dictionary
 - Flashcards: tap to reveal, tap again to advance

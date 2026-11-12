@@ -1,7 +1,8 @@
 // Package analytics keeps anonymous daily usage counters: page views, unique
-// visitors, and named actions. Nothing per person is stored; unique visitors
-// are counted with an in-memory hash of IP and user agent salted with a
-// random value that is replaced every day and never written to disk.
+// visitors, and named actions. Unique visitors are counted with a hash of IP
+// and user agent salted with a random value per day. Today's salt and hashes
+// are kept in SQLite so restarts do not double-count; both are deleted once
+// the day is over, leaving only the daily totals.
 package analytics
 
 import (
@@ -45,6 +46,15 @@ CREATE TABLE IF NOT EXISTS daily_counts (
 	count INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY (day, name)
 );
+CREATE TABLE IF NOT EXISTS visitor_salt (
+	day  TEXT PRIMARY KEY,
+	salt BLOB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS visitor_hashes (
+	day  TEXT NOT NULL,
+	hash BLOB NOT NULL,
+	PRIMARY KEY (day, hash)
+);
 `
 
 // Store records counters in the daily_counts table. Days are UTC.
@@ -54,8 +64,7 @@ type Store struct {
 
 	mu   sync.Mutex
 	day  string
-	salt [16]byte
-	seen map[[32]byte]struct{}
+	salt []byte
 }
 
 func NewStore(db *sql.DB) (*Store, error) {
@@ -79,37 +88,60 @@ func (s *Store) Add(name string, n int) error {
 }
 
 // PageView counts a page load and, the first time today, its visitor.
-// A restart forgets today's visitors, so they may be counted twice that day.
 func (s *Store) PageView(ip, userAgent string) error {
 	if err := s.Add(PageViews, 1); err != nil {
 		return err
 	}
-	if s.firstVisitToday(ip, userAgent) {
-		return s.Add(Visitors, 1)
+	first, err := s.firstVisitToday(ip, userAgent)
+	if err != nil || !first {
+		return err
 	}
-	return nil
+	return s.Add(Visitors, 1)
 }
 
-func (s *Store) firstVisitToday(ip, userAgent string) bool {
+func (s *Store) firstVisitToday(ip, userAgent string) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if day := s.today(); day != s.day || s.seen == nil {
-		s.day = day
-		_, _ = rand.Read(s.salt[:])
-		s.seen = map[[32]byte]struct{}{}
+	day := s.today()
+	if day != s.day {
+		salt, err := s.daySalt(day)
+		if err != nil {
+			return false, err
+		}
+		s.day, s.salt = day, salt
 	}
 	h := sha256.New()
-	h.Write(s.salt[:])
+	h.Write(s.salt)
 	h.Write([]byte(ip))
 	h.Write([]byte{0})
 	h.Write([]byte(userAgent))
-	var key [32]byte
-	copy(key[:], h.Sum(nil))
-	if _, ok := s.seen[key]; ok {
-		return false
+	res, err := s.db.Exec(`INSERT OR IGNORE INTO visitor_hashes (day, hash) VALUES (?, ?)`, day, h.Sum(nil))
+	if err != nil {
+		return false, err
 	}
-	s.seen[key] = struct{}{}
-	return true
+	n, err := res.RowsAffected()
+	return n == 1, err
+}
+
+// daySalt loads or creates the salt for day and drops salts and visitor
+// hashes of earlier days. Callers must hold s.mu.
+func (s *Store) daySalt(day string) ([]byte, error) {
+	if _, err := s.db.Exec(`DELETE FROM visitor_salt WHERE day <> ?`, day); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.Exec(`DELETE FROM visitor_hashes WHERE day <> ?`, day); err != nil {
+		return nil, err
+	}
+	fresh := make([]byte, 16)
+	if _, err := rand.Read(fresh); err != nil {
+		return nil, err
+	}
+	if _, err := s.db.Exec(`INSERT OR IGNORE INTO visitor_salt (day, salt) VALUES (?, ?)`, day, fresh); err != nil {
+		return nil, err
+	}
+	var salt []byte
+	err := s.db.QueryRow(`SELECT salt FROM visitor_salt WHERE day = ?`, day).Scan(&salt)
+	return salt, err
 }
 
 // Day is one row of the report: all counters recorded that day.

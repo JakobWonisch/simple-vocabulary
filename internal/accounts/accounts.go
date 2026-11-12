@@ -61,8 +61,7 @@ var (
 	ErrStateTooLarge    = errors.New("state too large")
 )
 
-// Account is one user's credentials plus the full frontend state blob. The
-// JSON tags match the legacy one-file-per-account format for migration.
+// Account is one user's credentials plus the full frontend state blob.
 type Account struct {
 	Email          string          `json:"email"`
 	PasswordHash   string          `json:"passwordHash"`
@@ -108,8 +107,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE INDEX IF NOT EXISTS sessions_email ON sessions(email);
 `
 
-// NewStore opens (or creates) Dir/vocab.db and imports any legacy JSON
-// account files found in Dir.
+// NewStore opens (or creates) Dir/vocab.db.
 func NewStore(dir string) (*Store, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("accounts store directory is required")
@@ -125,12 +123,7 @@ func NewStore(dir string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("create accounts schema: %w", err)
 	}
-	s := &Store{Dir: dir, db: db}
-	if err := s.importLegacyJSON(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("import legacy accounts: %w", err)
-	}
-	return s, nil
+	return &Store{Dir: dir, db: db}, nil
 }
 
 // OpenDB opens a SQLite database with WAL and a busy timeout, limited to one
