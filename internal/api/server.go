@@ -73,6 +73,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/account/state", s.handleAccountStateGet)
 	s.mux.HandleFunc("PUT /api/account/state", s.handleAccountStatePut)
 	s.mux.HandleFunc("POST /api/account/state", s.handleAccountStatePut)
+	s.mux.HandleFunc("GET /api/account/events", s.handleAccountEvents)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
 }
 

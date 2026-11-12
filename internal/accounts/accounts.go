@@ -46,6 +46,7 @@ var (
 	ErrSession          = errors.New("not logged in")
 	ErrInvalidState     = errors.New("invalid state")
 	ErrStateTooLarge    = errors.New("state too large")
+	ErrStateConflict    = errors.New("state changed on another device")
 )
 
 // Account is one user's credentials plus the full frontend state blob.
@@ -58,14 +59,24 @@ type Account struct {
 	VerifyAttempts int             `json:"verifyAttempts,omitempty"`
 	PendingState   json.RawMessage `json:"pendingState,omitempty"`
 	State          json.RawMessage `json:"state,omitempty"`
+	StateRev       uint64          `json:"stateRev,omitempty"`
 	CreatedAt      time.Time       `json:"createdAt"`
 	UpdatedAt      time.Time       `json:"updatedAt"`
 }
 
+// StateEvent is pushed to an account's subscribers whenever its state blob is
+// replaced. Src identifies the writing session so that session's clients can
+// ignore their own echo.
+type StateEvent struct {
+	Rev uint64
+	Src string
+}
+
 // Store keeps accounts as one JSON file per normalized email under Dir.
 type Store struct {
-	Dir string
-	mu  sync.Mutex
+	Dir  string
+	mu   sync.Mutex
+	subs map[string]map[chan StateEvent]struct{}
 }
 
 func NewStore(dir string) (*Store, error) {
@@ -174,6 +185,49 @@ func newToken() string {
 	var b [32]byte
 	_, _ = rand.Read(b[:])
 	return hex.EncodeToString(b[:])
+}
+
+// SessionID returns a short opaque id for a session token. State events carry
+// it so the writing device can ignore its own echo; it cannot be reversed to
+// the token.
+func SessionID(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:8])
+}
+
+// Subscribe registers a listener for state changes of email's account. The
+// returned channel gets the latest event; it holds one pending notification,
+// so bursts collapse into a single pull. Call the unsubscribe func to detach.
+func (s *Store) Subscribe(email string) (<-chan StateEvent, func()) {
+	ch := make(chan StateEvent, 1)
+	s.mu.Lock()
+	if s.subs == nil {
+		s.subs = map[string]map[chan StateEvent]struct{}{}
+	}
+	if s.subs[email] == nil {
+		s.subs[email] = map[chan StateEvent]struct{}{}
+	}
+	s.subs[email][ch] = struct{}{}
+	s.mu.Unlock()
+	return ch, func() {
+		s.mu.Lock()
+		delete(s.subs[email], ch)
+		if len(s.subs[email]) == 0 {
+			delete(s.subs, email)
+		}
+		s.mu.Unlock()
+	}
+}
+
+// notifyState pushes ev to the account's subscribers, dropping the oldest
+// pending notification when one is already queued. Callers must hold s.mu.
+func (s *Store) notifyState(email string, ev StateEvent) {
+	for ch := range s.subs[email] {
+		select {
+		case ch <- ev:
+		default:
+		}
+	}
 }
 
 // pathFor derives the account file name from the normalized email so no
@@ -365,6 +419,7 @@ func (s *Store) Verify(email, code string, initialState json.RawMessage) (*Accou
 	} else {
 		acc.State = initialState
 	}
+	acc.StateRev++
 	acc.PendingState = nil
 	if err := s.write(acc); err != nil {
 		return nil, err
@@ -466,10 +521,13 @@ func (s *Store) AccountBySession(token string) (*Account, error) {
 	return s.load(email)
 }
 
-// PutState replaces the state blob of the account behind the session token.
-func (s *Store) PutState(token string, state json.RawMessage) error {
+// PutState replaces the state blob of the account behind the session token
+// and returns the new revision. baseRev >= 0 makes the write conditional:
+// ErrStateConflict is returned (with the current revision) when another
+// session saved in between. Subscribers are notified of the new revision.
+func (s *Store) PutState(token string, state json.RawMessage, baseRev int64) (uint64, error) {
 	if err := ValidateState(state); err != nil {
-		return err
+		return 0, err
 	}
 
 	s.mu.Lock()
@@ -477,14 +535,22 @@ func (s *Store) PutState(token string, state json.RawMessage) error {
 
 	email, err := s.sessionEmail(token)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	acc, err := s.load(email)
 	if err != nil {
-		return err
+		return 0, err
+	}
+	if baseRev >= 0 && uint64(baseRev) != acc.StateRev {
+		return acc.StateRev, ErrStateConflict
 	}
 	acc.State = append(json.RawMessage(nil), state...)
-	return s.write(acc)
+	acc.StateRev++
+	if err := s.write(acc); err != nil {
+		return 0, err
+	}
+	s.notifyState(email, StateEvent{Rev: acc.StateRev, Src: SessionID(token)})
+	return acc.StateRev, nil
 }
 
 // Logout drops the session token; it is fine if the token is already gone.

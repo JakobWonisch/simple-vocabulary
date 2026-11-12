@@ -89,7 +89,7 @@ func TestSignupVerifyLoginFlow(t *testing.T) {
 	}
 
 	newState := json.RawMessage(`{"version":1,"sets":[{"id":"mine"}],"theme":"dark"}`)
-	if err := s.PutState(token, newState); err != nil {
+	if _, err := s.PutState(token, newState, -1); err != nil {
 		t.Fatalf("PutState: %v", err)
 	}
 	acc, err = s.AccountBySession(token)
@@ -100,7 +100,7 @@ func TestSignupVerifyLoginFlow(t *testing.T) {
 	if err := json.Unmarshal(acc.State, &gotState); err != nil || gotState["theme"] != "dark" {
 		t.Fatalf("state = %s", acc.State)
 	}
-	if err := s.PutState(token, json.RawMessage(`{"noSets":true}`)); !errors.Is(err, ErrInvalidState) {
+	if _, err := s.PutState(token, json.RawMessage(`{"noSets":true}`), -1); !errors.Is(err, ErrInvalidState) {
 		t.Fatalf("PutState invalid: %v", err)
 	}
 
@@ -148,6 +148,59 @@ func TestSignupPendingStateUsedOnVerify(t *testing.T) {
 	}
 	if _, _, err := s.Login(email, "password-456"); err != nil {
 		t.Fatalf("new password: %v", err)
+	}
+}
+
+func TestPutStateRevisionConflictAndNotify(t *testing.T) {
+	s := newStore(t)
+	email := "sync@example.com"
+	pw := "super-secret-pw"
+
+	code, err := s.Signup(email, pw, nil)
+	if err != nil {
+		t.Fatalf("Signup: %v", err)
+	}
+	acc, err := s.Verify(email, code, testInitial)
+	if err != nil {
+		t.Fatalf("Verify: %v", err)
+	}
+	if acc.StateRev != 1 {
+		t.Fatalf("StateRev after verify = %d, want 1", acc.StateRev)
+	}
+	_, token, err := s.Login(email, pw)
+	if err != nil {
+		t.Fatalf("Login: %v", err)
+	}
+	events, unsubscribe := s.Subscribe(email)
+	defer unsubscribe()
+
+	rev, err := s.PutState(token, json.RawMessage(`{"version":1,"sets":[]}`), int64(acc.StateRev))
+	if err != nil {
+		t.Fatalf("PutState: %v", err)
+	}
+	if rev != acc.StateRev+1 {
+		t.Fatalf("rev = %d, want %d", rev, acc.StateRev+1)
+	}
+	select {
+	case ev := <-events:
+		if ev.Rev != rev || ev.Src != SessionID(token) {
+			t.Fatalf("event = %+v, want rev %d src %q", ev, rev, SessionID(token))
+		}
+	default:
+		t.Fatal("subscriber was not notified")
+	}
+
+	// A write based on a stale revision is refused and reports the current one.
+	got, err := s.PutState(token, json.RawMessage(`{"version":1,"sets":[]}`), int64(acc.StateRev))
+	if !errors.Is(err, ErrStateConflict) {
+		t.Fatalf("stale PutState: %v", err)
+	}
+	if got != rev {
+		t.Fatalf("conflict rev = %d, want %d", got, rev)
+	}
+	// Without a base revision the write is unconditional.
+	if _, err := s.PutState(token, json.RawMessage(`{"version":1,"sets":[]}`), -1); err != nil {
+		t.Fatalf("unconditional PutState: %v", err)
 	}
 }
 

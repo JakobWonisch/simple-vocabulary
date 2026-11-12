@@ -108,5 +108,6 @@ Implement `ai.Provider` in `internal/ai` and wire it in `cmd/server/main.go`. Op
 - `POST /api/auth/login` `{ "email", "password" }` — session cookie + account state
 - `POST /api/auth/logout`
 - `GET /api/auth/me` — `{ "email" }` or 401
-- `GET /api/account/state` — full state blob of the session account
-- `PUT|POST /api/account/state` — replace it (POST for `sendBeacon` flush)
+- `GET /api/account/state` — full state blob of the session account (`X-State-Rev` header carries the revision)
+- `PUT|POST /api/account/state` — replace it (POST for `sendBeacon` flush); `?baseRev=N` makes the write compare-and-swap → 409 `{ "error", "rev" }` on a stale base
+- `GET /api/account/events` — SSE stream of `{ "rev", "src" }` state-change events for the session account; the `init` event carries the current rev and this session's `src` id so clients can ignore their own writes

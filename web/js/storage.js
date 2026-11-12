@@ -21,6 +21,7 @@ const defaultState = () => ({
   direction: "es-de", // es-de | de-es
   conjugation: defaultConjugation(),
   generate: defaultGenerate(),
+  setSort: "created", // created | viewed
   sets: [],
 });
 
@@ -42,6 +43,7 @@ export function normalizeState(parsed) {
     ...defaultState(),
     ...parsed,
     theme: normalizeTheme(parsed.theme),
+    setSort: parsed.setSort === "viewed" ? "viewed" : "created",
     conjugation: {
       ...defaultConjugation(),
       ...(parsed.conjugation || {}),

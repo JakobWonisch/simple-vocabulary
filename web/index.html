@@ -129,6 +129,19 @@
         <div class="settings-add" id="settings-add" hidden>
           <button type="button" class="btn ghost" id="btn-add-word">Wort hinzufügen</button>
         </div>
+        <fieldset id="settings-sort" hidden>
+          <legend>Sortierung</legend>
+          <div class="kind-switch" role="radiogroup" aria-label="Sortierung">
+            <label class="kind-option">
+              <input type="radio" name="set-sort" value="created" />
+              <span>Neueste zuerst</span>
+            </label>
+            <label class="kind-option">
+              <input type="radio" name="set-sort" value="viewed" />
+              <span>Zuletzt geöffnet</span>
+            </label>
+          </div>
+        </fieldset>
         <div class="settings-io">
           <button type="button" class="btn ghost" id="btn-export">Exportieren</button>
           <label class="btn ghost file-btn">
@@ -179,7 +192,7 @@
         <p class="account-note">Sammlungen und Statistiken werden in deinem Konto gespeichert und auf jedem Gerät synchronisiert.</p>
         <button type="button" class="btn ghost" id="account-logout">Abmelden</button>
       </div>
-      <form class="account-form" id="account-form-login" hidden>
+      <form class="account-form" id="account-form-login">
         <p class="account-note">Melde dich an, um deine Sammlungen und Statistiken auf allen Geräten zu nutzen.</p>
         <label class="field account-field">
           <span>E-Mail</span>
@@ -192,7 +205,7 @@
         <button type="submit" class="btn primary">Anmelden</button>
         <button type="button" class="account-switch" id="account-to-signup">Noch kein Konto? Erstellen</button>
       </form>
-      <form class="account-form" id="account-form-signup">
+      <form class="account-form" id="account-form-signup" hidden>
         <p class="account-note">Erstelle ein Konto, um deine Sammlungen und Statistiken auf allen Geräten zu nutzen.</p>
         <label class="field account-field">
           <span>E-Mail</span>
