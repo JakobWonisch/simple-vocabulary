@@ -3,10 +3,13 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jakob/simple-vocabulary/internal/accounts"
 	"github.com/jakob/simple-vocabulary/internal/analytics"
@@ -103,7 +106,7 @@ func (s *Server) initialState() json.RawMessage {
 			}
 		}
 	}
-	return json.RawMessage(`{"version":1,"theme":null,"direction":"es-de","conjugation":{"mode":"ind","tense":"prs","order":"default"},"generate":{"count":25,"difficulty":"easy"},"sets":[]}`)
+	return json.RawMessage(`{"version":1,"theme":null,"direction":"es-de","conjugation":{"mode":"ind","tense":"prs","order":"default"},"generate":{"count":25,"difficulty":"easy"},"setSort":"created","sets":[]}`)
 }
 
 func (s *Server) sendCode(r *http.Request, email, code string) bool {
@@ -295,6 +298,7 @@ func (s *Server) startSession(w http.ResponseWriter, r *http.Request, acc *accou
 	writeJSON(w, http.StatusOK, map[string]any{
 		"email": acc.Email,
 		"state": state,
+		"rev":   acc.StateRev,
 	})
 }
 
@@ -338,12 +342,15 @@ func (s *Server) handleAccountStateGet(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("X-State-Rev", strconv.FormatUint(acc.StateRev, 10))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(state)
 }
 
 // handleAccountStatePut accepts PUT (fetch) and POST (sendBeacon flush on
-// pagehide — sendBeacon always POSTs).
+// pagehide — sendBeacon always POSTs). The optional baseRev query parameter
+// makes the write compare-and-swap: a 409 with the current revision is
+// returned when another device saved in between.
 func (s *Server) handleAccountStatePut(w http.ResponseWriter, r *http.Request) {
 	if s.Accounts == nil {
 		writeError(w, http.StatusServiceUnavailable, "accounts are not configured")
@@ -354,12 +361,29 @@ func (s *Server) handleAccountStatePut(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "not logged in")
 		return
 	}
+	baseRev := int64(-1)
+	if raw := r.URL.Query().Get("baseRev"); raw != "" {
+		v, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || v < 0 {
+			writeError(w, http.StatusBadRequest, "invalid baseRev")
+			return
+		}
+		baseRev = v
+	}
 	state, err := readStateBody(w, r)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid state")
 		return
 	}
-	if err := s.Accounts.PutState(token, state); err != nil {
+	rev, err := s.Accounts.PutState(token, state, baseRev)
+	if err != nil {
+		if errors.Is(err, accounts.ErrStateConflict) {
+			writeJSON(w, http.StatusConflict, map[string]any{
+				"error": "state changed on another device",
+				"rev":   rev,
+			})
+			return
+		}
 		if errors.Is(err, accounts.ErrSession) {
 			writeError(w, http.StatusUnauthorized, "not logged in")
 			return
@@ -372,7 +396,58 @@ func (s *Server) handleAccountStatePut(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "could not save state")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
+	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "rev": rev})
+}
+
+// handleAccountEvents streams state-change notifications as Server-Sent
+// Events so a user's other devices can pull fresh state. The init event
+// carries the current revision and this session's id; later events carry
+// {rev, src} where src identifies the writing session.
+func (s *Server) handleAccountEvents(w http.ResponseWriter, r *http.Request) {
+	if s.Accounts == nil {
+		writeError(w, http.StatusServiceUnavailable, "accounts are not configured")
+		return
+	}
+	token := sessionToken(r)
+	if token == "" {
+		writeError(w, http.StatusUnauthorized, "not logged in")
+		return
+	}
+	acc, err := s.Accounts.AccountBySession(token)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "not logged in")
+		return
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		writeError(w, http.StatusServiceUnavailable, "streaming not supported")
+		return
+	}
+	events, unsubscribe := s.Accounts.Subscribe(acc.Email)
+	defer unsubscribe()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(w, "retry: 3000\nevent: init\ndata: {\"rev\":%d,\"src\":%q}\n\n", acc.StateRev, accounts.SessionID(token))
+	flusher.Flush()
+
+	keepAlive := time.NewTicker(25 * time.Second)
+	defer keepAlive.Stop()
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		case ev := <-events:
+			_, _ = fmt.Fprintf(w, "data: {\"rev\":%d,\"src\":%q}\n\n", ev.Rev, ev.Src)
+			flusher.Flush()
+		case <-keepAlive.C:
+			_, _ = fmt.Fprint(w, ": ping\n\n")
+			flusher.Flush()
+		}
+	}
 }
 
 // readStateBody reads a JSON object as raw bytes for storage.

@@ -174,6 +174,7 @@ let state = {
   direction: "es-de",
   conjugation: { mode: "ind", tense: "prs", order: "default" },
   generate: { count: 25, difficulty: "easy" },
+  setSort: "created", // created | viewed
   sets: [],
 };
 let stateReady = false;
@@ -181,6 +182,13 @@ let account = null; // { email } while logged in
 let accountDirty = false;
 let accountSaveTimer = 0;
 let accountSaveInFlight = null; // Promise of the running PUT, if any
+let accountRev = 0; // server revision our state is based on
+let accountEvents = null; // EventSource while logged in
+let accountEventsDone = null; // settles the openEventStream promise
+let ownEventSrc = ""; // session id echoed in state events — filters own writes
+let accountEventErrors = 0;
+let syncWanted = false; // sync loop armed while logged in
+let syncLeaderAbort = null; // cancels a queued stream-leader lock request
 let unbindStudyKeys = () => {};
 let refreshConjugation = () => {};
 let resetConjugationOrder = () => {};
@@ -244,22 +252,36 @@ function persist() {
 
 // One PUT in flight at a time so an older snapshot can never land after a
 // newer one. Changes made while a PUT runs mark the state dirty again and a
-// trailing flush follows right after.
+// trailing flush follows right after. The write is compare-and-swap on
+// accountRev: a 409 means another device saved first, so we pull and merge
+// before flushing again.
 function flushAccountSave() {
   if (!account || !accountDirty) return Promise.resolve();
   if (accountSaveInFlight) return accountSaveInFlight;
   accountDirty = false;
   accountSaveInFlight = (async () => {
     try {
-      const res = await saveAccountState(state);
+      const res = await saveAccountState(state, accountRev);
       if (res.status === 401) {
         // Session expired: keep the data by falling back to local storage.
         account = null;
+        stopAccountSync();
         saveState(state);
         updateAccountUI();
         return;
       }
-      if (!res.ok) accountDirty = true;
+      if (res.status === 409) {
+        await pullRemoteState();
+        accountDirty = true;
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        if (Number.isFinite(data.rev)) accountRev = data.rev;
+        broadcastSync();
+      } else {
+        accountDirty = true;
+      }
     } catch {
       accountDirty = true;
     } finally {
@@ -275,9 +297,222 @@ function flushAccountSave() {
   return accountSaveInFlight;
 }
 
+// --- cross-device sync --------------------------------------------------
+// While logged in, an EventSource on /api/account/events announces state
+// writes from other sessions (devices, browsers). A stream per tab would pin
+// an HTTP/1.1 connection each: ~6 tabs exhaust the per-host pool and every
+// save queues behind them until a tab closes. A Web Lock elects one leader
+// tab per browser profile to hold the stream; followers are woken through
+// the BroadcastChannel. Events carrying our own session id are echoes and
+// skipped. A remote rev pulls the state: applied wholesale when there are
+// no unsaved changes, merged per set (last-writer-wins on updatedAt) when
+// there are.
+
+const syncChannel = "BroadcastChannel" in window ? new BroadcastChannel("sv-sync") : null;
+if (syncChannel) {
+  syncChannel.onmessage = () => {
+    if (account) pullRemoteState().catch(() => {});
+  };
+}
+
+function broadcastSync() {
+  try {
+    syncChannel?.postMessage("state-changed");
+  } catch {
+    // Broadcast is best-effort; the stream already covers other devices.
+  }
+}
+
+function mergeStates(remote, local) {
+  const remoteById = new Map((remote.sets || []).map((s) => [s.id, s]));
+  const localIds = new Set();
+  const sets = (local.sets || []).map((ls) => {
+    localIds.add(ls.id);
+    const rs = remoteById.get(ls.id);
+    if (!rs) return ls;
+    const winner = (rs.updatedAt || "") > (ls.updatedAt || "") ? rs : ls;
+    // viewedAt is a view timestamp, not content: keep the freshest either way.
+    if ((rs.viewedAt || "") > (ls.viewedAt || "")) winner.viewedAt = rs.viewedAt;
+    else if ((ls.viewedAt || "") > (winner.viewedAt || "")) winner.viewedAt = ls.viewedAt;
+    return winner;
+  });
+  for (const rs of remote.sets || []) {
+    if (!localIds.has(rs.id)) sets.push(rs);
+  }
+  return { ...local, sets };
+}
+
+function applyRemoteState(remote, rev) {
+  accountRev = rev;
+  state = normalizeState(remote);
+  syncThemeSetting();
+  syncDirectionSetting();
+  route();
+}
+
+// pullRemoteState fetches the account state and applies or merges it. A
+// fetch that returns the revision we already have (a write that landed
+// between the event and the pull) is a no-op.
+async function pullRemoteState() {
+  const { state: remote, rev } = await fetchAccountState();
+  if (!account || rev === accountRev) return;
+  if (accountDirty || accountSaveInFlight) {
+    state = normalizeState(mergeStates(remote, state));
+    accountRev = rev;
+    syncThemeSetting();
+    syncDirectionSetting();
+    route();
+    // The merge dirtied our copy: push it back out instead of holding it
+    // until the next local change or the pagehide beacon.
+    persist();
+    return;
+  }
+  applyRemoteState(remote, rev);
+}
+
+// dropDeadAccount ends the local session copy when the server rejects it.
+// Network errors never land here — a flaky connection retries via the
+// stream instead of logging the user out.
+function dropDeadAccount() {
+  fetch("/api/auth/me")
+    .then((res) => {
+      if (!res.ok && account) {
+        account = null;
+        accountDirty = false;
+        stopAccountSync();
+        saveState(state);
+        updateAccountUI();
+      }
+    })
+    .catch(() => {
+      // Offline — the stream keeps retrying on its own.
+    });
+}
+
+// openEventStream connects the state stream and resolves when it dies —
+// true when the init event arrived first. The caller decides whether to
+// reconnect; a stop settles the promise immediately.
+function openEventStream() {
+  return new Promise((resolve) => {
+    const es = new EventSource("/api/account/events");
+    accountEvents = es;
+    let done = false;
+    const settle = (sawInit) => {
+      if (done) return;
+      done = true;
+      accountEventsDone = null;
+      if (accountEvents === es) accountEvents = null;
+      es.close();
+      resolve(sawInit);
+    };
+    let sawInit = false;
+    accountEventsDone = () => settle(sawInit);
+    es.addEventListener("init", (e) => {
+      sawInit = true;
+      accountEventErrors = 0;
+      try {
+        const data = JSON.parse(e.data);
+        ownEventSrc = data.src || "";
+        if (Number.isFinite(data.rev) && data.rev !== accountRev) {
+          pullRemoteState().catch(() => {});
+          broadcastSync();
+        }
+      } catch {
+        // A malformed init only costs the echo filter; events still work.
+      }
+    });
+    es.onmessage = (e) => {
+      accountEventErrors = 0;
+      let data;
+      try {
+        data = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (data.src && data.src === ownEventSrc) return;
+      if (Number.isFinite(data.rev) && data.rev !== accountRev) {
+        pullRemoteState().catch(() => {});
+        broadcastSync();
+      }
+    };
+    es.onerror = () => {
+      if (es !== accountEvents) return;
+      if (es.readyState === EventSource.CLOSED) {
+        settle(sawInit);
+        return;
+      }
+      // Persistent failures can mean the session died underneath us.
+      if (++accountEventErrors >= 5) {
+        accountEventErrors = 0;
+        dropDeadAccount();
+      }
+    };
+  });
+}
+
+// syncLeaderHold owns the stream while this tab is leader (or alone when
+// leader election is unsupported). A dead stream is re-opened with backoff
+// so a transient failure cannot silently end sync until reload.
+async function syncLeaderHold() {
+  let backoff = 0;
+  let failures = 0;
+  while (syncWanted && account) {
+    let sawInit = false;
+    try {
+      sawInit = await openEventStream();
+    } catch {
+      // Treat like a stream that never connected; backoff below applies.
+    }
+    if (!syncWanted || !account) break;
+    if (sawInit) {
+      backoff = 1500;
+      failures = 0;
+    } else {
+      backoff = Math.min((backoff || 750) * 2, 15000);
+      if (++failures >= 3) {
+        // Streams dying before init usually mean a dead session.
+        failures = 0;
+        dropDeadAccount();
+      }
+    }
+    await new Promise((r) => setTimeout(r, backoff));
+  }
+}
+
+function startAccountSync() {
+  stopAccountSync();
+  if (!account || typeof EventSource === "undefined") return;
+  syncWanted = true;
+  if (syncChannel && navigator.locks?.request) {
+    const abort = new AbortController();
+    syncLeaderAbort = abort;
+    navigator.locks
+      .request("sv-sync-leader", { signal: abort.signal }, () => syncLeaderHold())
+      .catch(() => {
+        // Not the abort path (that clears syncWanted first): locks unusable,
+        // so this tab just runs its own stream.
+        if (syncWanted && account && syncLeaderAbort === abort) syncLeaderHold();
+      });
+  } else {
+    syncLeaderHold();
+  }
+}
+
+function stopAccountSync() {
+  syncWanted = false;
+  syncLeaderAbort?.abort();
+  syncLeaderAbort = null;
+  if (accountEvents) accountEvents.close();
+  accountEvents = null;
+  accountEventsDone?.();
+  accountEventsDone = null;
+  ownEventSrc = "";
+  accountEventErrors = 0;
+}
+
 window.addEventListener("pagehide", () => {
-  if (account && accountDirty && !beaconAccountState(state)) {
-    saveAccountState(state);
+  if (account && accountDirty && !beaconAccountState(state, accountRev)) {
+    saveAccountState(state, accountRev);
   }
 });
 
@@ -474,7 +709,11 @@ function renderHome() {
     if (tab !== "conjugation") location.hash = "#/conjugation";
   });
 
-  const sets = [...state.sets].sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+  const key =
+    state.setSort === "viewed"
+      ? (s) => s.viewedAt || s.updatedAt || ""
+      : (s) => s.createdAt || s.updatedAt || "";
+  const sets = [...state.sets].sort((a, b) => key(b).localeCompare(key(a)));
   fillSetList(document.getElementById("set-list-vocab"), document.getElementById("empty-vocab"), sets.filter((set) => set.kind !== "conjugation"), "vocab");
   fillSetList(document.getElementById("set-list-conj"), document.getElementById("empty-conj"), sets.filter((set) => set.kind === "conjugation"), "conjugation");
 }
@@ -1484,6 +1723,22 @@ function openSet() {
   return state.sets.find((s) => s.id === parts[1]) || null;
 }
 
+// markSetViewed stamps the opened set for the "recently viewed" home sort.
+// It runs only on real navigation (hashchange, page load) — never on the
+// route() repaints triggered by remote sync, which would ping-pong views.
+let lastViewedMark = { id: "", at: 0 };
+
+function markSetViewed() {
+  if (!stateReady) return;
+  const set = openSet();
+  if (!set) return;
+  const now = Date.now();
+  if (lastViewedMark.id === set.id && now - lastViewedMark.at < 30_000) return;
+  lastViewedMark = { id: set.id, at: now };
+  set.viewedAt = new Date(now).toISOString();
+  persist();
+}
+
 function sourceKey(value) {
   return String(value || "").trim().toLocaleLowerCase();
 }
@@ -1846,6 +2101,7 @@ function syncSettingsScope() {
   const conjugation = document.getElementById("settings-conj");
   const addWrap = document.getElementById("settings-add");
   const addBtn = document.getElementById("btn-add-word");
+  const sort = document.getElementById("settings-sort");
   const io = settingsPop.querySelector(".settings-io");
   if (direction) direction.hidden = !studying || conj;
   if (conjugation) conjugation.hidden = !conj;
@@ -1853,9 +2109,11 @@ function syncSettingsScope() {
   if (addBtn && set) {
     addBtn.textContent = set.kind === "conjugation" ? "Verb hinzufügen" : "Wort hinzufügen";
   }
+  if (sort) sort.hidden = !home;
   if (io) io.hidden = !home;
   settingsBtn.hidden = false;
   syncConjugationControls();
+  syncSetSortSetting();
 }
 
 function currentTheme() {
@@ -1880,6 +2138,13 @@ function syncThemeSetting() {
 function syncDirectionSetting() {
   const value = state.direction === "de-es" ? "de-es" : "es-de";
   for (const input of directionInputs) input.checked = input.value === value;
+}
+
+function syncSetSortSetting() {
+  const value = state.setSort === "viewed" ? "viewed" : "created";
+  for (const input of settingsPop.querySelectorAll('input[name="set-sort"]')) {
+    input.checked = input.value === value;
+  }
 }
 
 function setSettingsOpen(open) {
@@ -1924,6 +2189,13 @@ settingsPop.addEventListener("change", (e) => {
     state.direction = input.value === "de-es" ? "de-es" : "es-de";
     persist();
     refreshStudyCardSides();
+    return;
+  }
+  const sort = e.target.closest('input[name="set-sort"]');
+  if (sort) {
+    state.setSort = sort.value === "viewed" ? "viewed" : "created";
+    persist();
+    route();
     return;
   }
   if (e.target.id === "conj-mode") {
@@ -2185,8 +2457,7 @@ function setAccountOpen(open) {
   } else if (pendingVerifyEmail) {
     showVerifyPanel();
   } else {
-    signupCopyWrap.hidden = !stateReady || !(state.sets || []).length;
-    showAccountPanel("signup");
+    showAccountPanel("login");
   }
 }
 
@@ -2200,8 +2471,9 @@ function updateAccountUI() {
 
 // enterAccount swaps the whole app state to the account's saved state. The
 // local sets stay in localStorage, untouched, and are simply disregarded.
-function enterAccount(email, accountState) {
+function enterAccount(email, accountState, rev = 0) {
   account = { email };
+  accountRev = rev;
   pendingVerifyEmail = "";
   state = normalizeState(accountState && Array.isArray(accountState.sets) ? accountState : { sets: [] });
   stateReady = true;
@@ -2209,6 +2481,7 @@ function enterAccount(email, accountState) {
   syncDirectionSetting();
   setAccountOpen(false);
   updateAccountUI();
+  startAccountSync();
   location.hash = "#/";
   route();
 }
@@ -2236,6 +2509,8 @@ async function doLogout() {
     // The session may already be gone; logging out locally is still right.
   }
   account = null;
+  accountRev = 0;
+  stopAccountSync();
   accountDirty = false;
   state = await loadState();
   stateReady = true;
@@ -2307,7 +2582,7 @@ accountFormLogin.addEventListener("submit", async (e) => {
   setAccountStatus("Anmeldung läuft…");
   try {
     const data = await login(email, password);
-    enterAccount(data.email, data.state);
+    enterAccount(data.email, data.state, data.rev);
     showSnackbar("Angemeldet");
   } catch (err) {
     if (err.needsVerify) {
@@ -2330,7 +2605,7 @@ accountFormVerify.addEventListener("submit", async (e) => {
   setAccountStatus("Code wird geprüft…");
   try {
     const data = await verifyEmail(pendingVerifyEmail, code);
-    enterAccount(data.email, data.state);
+    enterAccount(data.email, data.state, data.rev);
     showSnackbar("Konto erstellt");
   } catch (err) {
     setAccountStatus(uiMessage(err.message, "verification failed"), true);
@@ -2411,7 +2686,10 @@ function escapeHtml(s) {
     .replaceAll('"', "&quot;");
 }
 
-window.addEventListener("hashchange", route);
+window.addEventListener("hashchange", () => {
+  markSetViewed();
+  route();
+});
 
 function showInitialLoading() {
   const status = document.createElement("div");
@@ -2434,7 +2712,9 @@ async function boot() {
   if (account) {
     // Logged in: the account's saved state is used; local sets are disregarded.
     try {
-      loaded = normalizeState(await fetchAccountState());
+      const { state: remote, rev } = await fetchAccountState();
+      loaded = normalizeState(remote);
+      accountRev = rev;
     } catch {
       account = null;
       loaded = await loadState();
@@ -2446,9 +2726,11 @@ async function boot() {
   state = loaded;
   stateReady = true;
   syncThemeSetting();
-  if (!account) persist();
+  if (account) startAccountSync();
+  else persist();
   syncDirectionSetting();
   updateAccountUI();
+  markSetViewed();
   route();
 }
 

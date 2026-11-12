@@ -28,10 +28,13 @@ export async function fetchMe() {
   }
 }
 
+// fetchAccountState returns { state, rev }: the stored blob plus the
+// server's state revision, which drives sync and write conflict checks.
 export async function fetchAccountState() {
   const res = await fetch("/api/account/state");
   if (!res.ok) throw new Error("could not load account state");
-  return res.json();
+  const rev = Number(res.headers.get("X-State-Rev")) || 0;
+  return { state: await res.json(), rev };
 }
 
 export async function signup(email, password, copyLocal, state) {
@@ -54,23 +57,24 @@ export async function logout() {
   return call("/api/auth/logout", {});
 }
 
-// saveAccountState PUTs the full state blob. keepalive lets the call finish
-// during pagehide. Callers debounce; this is one shot.
-export function saveAccountState(state) {
-  return fetch("/api/account/state", {
+// saveAccountState PUTs the full state blob. baseRev makes the write
+// compare-and-swap: the server answers 409 when another device saved first.
+// No keepalive: fetch rejects keepalive bodies over 64 KiB, and states grow
+// far past that — the pagehide flush uses beaconAccountState instead.
+export function saveAccountState(state, baseRev) {
+  return fetch(`/api/account/state?baseRev=${baseRev}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(state),
-    keepalive: true,
   });
 }
 
 // beaconAccountState flushes the state via sendBeacon on pagehide; the server
 // accepts POST on the same route for this.
-export function beaconAccountState(state) {
+export function beaconAccountState(state, baseRev) {
   try {
     return navigator.sendBeacon(
-      "/api/account/state",
+      `/api/account/state?baseRev=${baseRev}`,
       new Blob([JSON.stringify(state)], { type: "application/json" }),
     );
   } catch {

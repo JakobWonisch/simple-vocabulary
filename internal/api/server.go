@@ -80,6 +80,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /api/events", s.handleEvents)
 	s.mux.HandleFunc("GET /admin", s.handleAdminPage)
 	s.mux.HandleFunc("GET /api/admin/stats", s.handleAdminStats)
+	s.mux.HandleFunc("GET /api/account/events", s.handleAccountEvents)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
 }
 

@@ -1,12 +1,15 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jakob/simple-vocabulary/internal/accounts"
 )
@@ -111,10 +114,34 @@ func TestSignupVerifyStateLoginLogout(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("put state: %d %s", rec.Code, rec.Body.String())
 	}
+	var putRes struct {
+		Rev uint64 `json:"rev"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &putRes); err != nil || putRes.Rev == 0 {
+		t.Fatalf("put response missing rev: %s", rec.Body.String())
+	}
 	rec = authRequest(t, srv, http.MethodGet, "/api/account/state", "", cookie)
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "synced") {
 		t.Fatalf("get state: %d %s", rec.Code, rec.Body.String())
 	}
+	if rec.Header().Get("X-State-Rev") != strconv.FormatUint(putRes.Rev, 10) {
+		t.Fatalf("X-State-Rev = %q, want %d", rec.Header().Get("X-State-Rev"), putRes.Rev)
+	}
+
+	// A write based on the current revision lands; a stale base is refused.
+	rec = authRequest(t, srv, http.MethodPut,
+		"/api/account/state?baseRev="+strconv.FormatUint(putRes.Rev, 10),
+		`{"version":1,"sets":[{"id":"newer"}]}`, cookie)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("put state with baseRev: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = authRequest(t, srv, http.MethodPut,
+		"/api/account/state?baseRev="+strconv.FormatUint(putRes.Rev, 10),
+		`{"version":1,"sets":[{"id":"stale"}]}`, cookie)
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("stale put: %d %s", rec.Code, rec.Body.String())
+	}
+
 	// Unauthenticated state access is refused.
 	rec = authRequest(t, srv, http.MethodGet, "/api/account/state", "", "")
 	if rec.Code != http.StatusUnauthorized {
@@ -137,7 +164,7 @@ func TestSignupVerifyStateLoginLogout(t *testing.T) {
 		t.Fatalf("login: %d %s", rec.Code, rec.Body.String())
 	}
 	cookie = sessionCookie(t, rec)
-	if !strings.Contains(rec.Body.String(), "synced") {
+	if !strings.Contains(rec.Body.String(), "newer") {
 		t.Fatalf("login response missing state: %s", rec.Body.String())
 	}
 	rec = authRequest(t, srv, http.MethodGet, "/api/auth/me", "", cookie)
@@ -164,6 +191,146 @@ func TestLoginUnverifiedResendsCode(t *testing.T) {
 	}
 	if mailer.codes["e@example.com"] == "" {
 		t.Fatal("expected a fresh code to be sent")
+	}
+}
+
+func TestAccountEvents(t *testing.T) {
+	srv, mailer := newAuthServer(t)
+	authRequest(t, srv, http.MethodPost, "/api/auth/signup", `{"email":"s@example.com","password":"password-1"}`, "")
+	code := mailer.codes["s@example.com"]
+	rec := authRequest(t, srv, http.MethodPost, "/api/auth/verify", `{"email":"s@example.com","code":"`+code+`"}`, "")
+	cookie := sessionCookie(t, rec)
+
+	// Unauthenticated streaming is refused.
+	if rec := authRequest(t, srv, http.MethodGet, "/api/account/events", "", ""); rec.Code != http.StatusUnauthorized {
+		t.Fatalf("events without session: %d", rec.Code)
+	}
+
+	httpSrv := httptest.NewServer(srv.Handler())
+	defer httpSrv.Close()
+	req, err := http.NewRequest(http.MethodGet, httpSrv.URL+"/api/account/events", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Cookie", cookie)
+	resp, err := httpSrv.Client().Do(req)
+	if err != nil {
+		t.Fatalf("events: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("events: %d", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.HasPrefix(ct, "text/event-stream") {
+		t.Fatalf("events content-type: %q", ct)
+	}
+
+	reader := bufio.NewReader(resp.Body)
+	init := readEvent(t, reader)
+	if !strings.Contains(init, "event: init") || !strings.Contains(init, `"rev":1`) || !strings.Contains(init, `"src"`) {
+		t.Fatalf("init event: %q", init)
+	}
+
+	// A state write is pushed to stream subscribers with the new revision.
+	authRequest(t, srv, http.MethodPut, "/api/account/state", `{"version":1,"sets":[]}`, cookie)
+	ev := readEvent(t, reader)
+	if !strings.Contains(ev, `"rev":2`) || !strings.Contains(ev, `"src"`) {
+		t.Fatalf("state event: %q", ev)
+	}
+}
+
+func TestAccountEventsCrossSession(t *testing.T) {
+	srv, mailer := newAuthServer(t)
+	authRequest(t, srv, http.MethodPost, "/api/auth/signup", `{"email":"x@example.com","password":"password-1"}`, "")
+	code := mailer.codes["x@example.com"]
+	authRequest(t, srv, http.MethodPost, "/api/auth/verify", `{"email":"x@example.com","code":"`+code+`"}`, "")
+
+	// Two logins give the account two sessions — the streaming one must see
+	// writes from the other with a src that differs from its own init src.
+	recA := authRequest(t, srv, http.MethodPost, "/api/auth/login", `{"email":"x@example.com","password":"password-1"}`, "")
+	cookieA := sessionCookie(t, recA)
+	recB := authRequest(t, srv, http.MethodPost, "/api/auth/login", `{"email":"x@example.com","password":"password-1"}`, "")
+	cookieB := sessionCookie(t, recB)
+
+	httpSrv := httptest.NewServer(srv.Handler())
+	defer httpSrv.Close()
+	req, err := http.NewRequest(http.MethodGet, httpSrv.URL+"/api/account/events", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Cookie", cookieB)
+	resp, err := httpSrv.Client().Do(req)
+	if err != nil {
+		t.Fatalf("events: %v", err)
+	}
+	defer resp.Body.Close()
+
+	reader := bufio.NewReader(resp.Body)
+	init := readEvent(t, reader)
+	srcB := eventSrc(t, init)
+	if srcB == "" {
+		t.Fatalf("init event missing src: %q", init)
+	}
+
+	authRequest(t, srv, http.MethodPut, "/api/account/state", `{"version":1,"sets":[]}`, cookieA)
+	ev := readEvent(t, reader)
+	srcEv := eventSrc(t, ev)
+	if srcEv == "" || srcEv == srcB {
+		t.Fatalf("expected event from the other session, got %q (own %q): %q", srcEv, srcB, ev)
+	}
+}
+
+// eventSrc extracts the src field of a data: {...} line in an SSE block.
+func eventSrc(t *testing.T, block string) string {
+	t.Helper()
+	for _, line := range strings.Split(block, "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "data:") {
+			continue
+		}
+		var data struct {
+			Src string `json:"src"`
+		}
+		if err := json.Unmarshal([]byte(strings.TrimSpace(strings.TrimPrefix(line, "data:"))), &data); err != nil {
+			t.Fatalf("bad event data %q: %v", line, err)
+		}
+		return data.Src
+	}
+	return ""
+}
+
+// readEvent reads one SSE block (lines up to the blank separator).
+func readEvent(t *testing.T, r *bufio.Reader) string {
+	t.Helper()
+	type result struct {
+		s   string
+		err error
+	}
+	done := make(chan result, 1)
+	go func() {
+		var b strings.Builder
+		for {
+			line, err := r.ReadString('\n')
+			b.WriteString(line)
+			if err != nil {
+				done <- result{b.String(), err}
+				return
+			}
+			if line == "\n" {
+				done <- result{b.String(), nil}
+				return
+			}
+		}
+	}()
+	select {
+	case res := <-done:
+		if res.err != nil {
+			t.Fatalf("read event: %v (%q)", res.err, res.s)
+		}
+		return res.s
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for event")
+		return ""
 	}
 }
 
