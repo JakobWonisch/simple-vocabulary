@@ -1725,7 +1725,7 @@ body:has(.view.home) main {
 
 @media (max-width: 520px) {
   .view.study {
-    padding-bottom: 7rem;
+    padding-bottom: calc(7.6rem + env(safe-area-inset-bottom));
   }
 
   .flashcard {
@@ -1739,7 +1739,7 @@ body:has(.view.home) main {
     right: 0;
     bottom: 0;
     margin: 0;
-    padding: 0.75rem 0.85rem calc(1.85rem + env(safe-area-inset-bottom));
+    padding: 0.75rem 0.85rem calc(2.6rem + env(safe-area-inset-bottom));
     background: linear-gradient(to top, rgba(var(--paper-rgb), 0.97), rgba(var(--paper-rgb), 0.9));
     backdrop-filter: blur(12px);
   }
