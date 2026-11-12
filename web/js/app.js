@@ -1,4 +1,5 @@
 import { loadState, saveState, exportState, importState, uid, hasStoredState, normalizeState } from "./storage.js";
+import { track } from "./analytics.js";
 import {
   fetchMe,
   fetchAccountState,
@@ -1232,6 +1233,7 @@ function renderStudy(setId) {
     set.turn = markSeen(current.card, turn);
     set.updatedAt = new Date().toISOString();
     persist();
+    track("card_studied");
     syncProgress();
   }
 
@@ -1570,6 +1572,7 @@ function renderConjugation(setId) {
     set.turn = markSeen(current.card, turn);
     set.updatedAt = new Date().toISOString();
     persist();
+    track("verb_studied");
     syncProgress();
   }
 
@@ -2067,6 +2070,7 @@ function renderShare(shareId) {
         const set = setFromShared(shared);
         state.sets.unshift(set);
         persist();
+        track("shared_set_imported");
         showSnackbar("Sammlung importiert");
         location.hash = `#/study/${set.id}`;
       };
@@ -2641,6 +2645,7 @@ function showSnackbar(message, { error = false } = {}) {
 document.getElementById("btn-export").addEventListener("click", () => {
   if (!stateReady) return;
   exportState(state);
+  track("export");
   setSettingsOpen(false);
   showSnackbar("Exportiert");
 });
@@ -2660,6 +2665,7 @@ document.getElementById("btn-import").addEventListener("change", async (e) => {
     state = imported;
     if (!state.theme) state.theme = previousTheme;
     persist();
+    track("import");
     syncThemeSetting();
     syncDirectionSetting();
     route();

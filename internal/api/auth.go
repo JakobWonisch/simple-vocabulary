@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jakob/simple-vocabulary/internal/accounts"
+	"github.com/jakob/simple-vocabulary/internal/analytics"
 )
 
 const sessionCookieName = "sv_session"
@@ -156,6 +157,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadGateway, "could not send verification email")
 		return
 	}
+	s.track(analytics.SignupStarted)
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "email": email})
 }
 
@@ -192,6 +194,7 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	s.track(analytics.AccountCreated)
 	s.startSession(w, r, acc)
 }
 
@@ -266,6 +269,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "login failed")
 		return
 	}
+	s.track(analytics.Login)
 	s.startSession(w, r, acc, token)
 }
 

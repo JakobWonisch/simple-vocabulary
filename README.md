@@ -5,7 +5,8 @@ Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`loc
 ## Features
 
 - Vocabulary sets stored locally
-- Optional accounts: sign up with email + verification code; while logged in the complete state (sets, progress, settings) lives server-side and local sets are disregarded. Signup can import the current local data; otherwise new accounts get the same initial collections as local users. Logged-out use is unchanged.
+- Optional accounts: sign up with email + verification code; while logged in the complete state (sets, progress, settings) lives server-side and local sets are disregarded. Signup can import the current local data; otherwise new accounts get the same initial collections as local users. Logged-out use is unchanged. Accounts live in SQLite (`ACCOUNTS_DIR/vocab.db`).
+- Admin usage page at `/admin` (set `ADMIN_PASSWORD`): users, active/inactive/new in the last n days, collections per user, daily visitors, page views, and action counts. Counting is anonymous and server-side, so adblockers do not affect it: only daily totals are kept; visitors are deduplicated with a hash of IP + user agent and a daily salt, and the salt and hashes are deleted once the day is over.
 - Topic → ~50 words via OpenRouter (free models supported)
 - Translations + articles (`el`/`la`, `der`/`die`/`das`) from the integrated dictionary
 - Flashcards: tap to reveal, tap again to advance
@@ -42,7 +43,8 @@ docker compose up --build
 | `OPENROUTER_MAX_ATTEMPTS` | `3` | Max models tried per generate |
 | `DICT_PATH` | `data/spa-deu.json` | Dictionary JSON |
 | `SHARED_DIR` | `data/shared` | Published shareable sets |
-| `ACCOUNTS_DIR` | `data/accounts` | Account files + session index |
+| `ACCOUNTS_DIR` | `data/accounts` | SQLite database (`vocab.db`): accounts, sessions, usage counters |
+| `ADMIN_PASSWORD` | — | Enables `/admin` (HTTP Basic auth, any user name) |
 | `BREVO_API_KEY` | — | Brevo transactional email for signup codes |
 | `BREVO_SENDER_EMAIL` | — | Verified sender address for those emails |
 | `BREVO_SENDER_NAME` | — | Optional sender display name |
@@ -111,3 +113,15 @@ Implement `ai.Provider` in `internal/ai` and wire it in `cmd/server/main.go`. Op
 - `GET /api/account/state` — full state blob of the session account (`X-State-Rev` header carries the revision)
 - `PUT|POST /api/account/state` — replace it (POST for `sendBeacon` flush); `?baseRev=N` makes the write compare-and-swap → 409 `{ "error", "rev" }` on a stale base
 - `GET /api/account/events` — SSE stream of `{ "rev", "src" }` state-change events for the session account; the `init` event carries the current rev and this session's `src` id so clients can ignore their own writes
+- `POST /api/events` `{ "counts": { "card_studied": 3 } }` — anonymous frontend action counts (allowlisted names)
+- `GET /admin?days=30` — admin usage page (Basic auth with `ADMIN_PASSWORD`)
+- `GET /api/admin/stats?days=30` — same data as JSON
+
+### Querying the database directly
+
+```bash
+sqlite3 data/accounts/vocab.db \
+  "SELECT count(*) FROM users WHERE verified = 1 AND last_seen_at >= datetime('now','-30 day')"
+```
+
+In Docker: `docker compose exec vocab sh` has no `sqlite3`; copy the file out with `docker compose cp vocab:/app/data/accounts/vocab.db .` (also copy `vocab.db-wal` if present).

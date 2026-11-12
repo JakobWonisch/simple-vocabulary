@@ -14,6 +14,7 @@ import (
 
 	"github.com/jakob/simple-vocabulary/internal/accounts"
 	"github.com/jakob/simple-vocabulary/internal/ai"
+	"github.com/jakob/simple-vocabulary/internal/analytics"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
 	"github.com/jakob/simple-vocabulary/internal/mail"
@@ -34,15 +35,18 @@ var errNotEnoughMatches = errors.New("not enough dictionary matches")
 
 // Server hosts the API and static frontend.
 type Server struct {
-	Dict        *dictionary.Dictionary
-	Conj        *conjugation.Table
-	AI          ai.Provider
-	Shared      *shared.Store
-	Accounts    *accounts.Store
-	Mail        mail.Sender
-	WebDir      string
-	InitialPath string
-	mux         *http.ServeMux
+	Dict      *dictionary.Dictionary
+	Conj      *conjugation.Table
+	AI        ai.Provider
+	Shared    *shared.Store
+	Accounts  *accounts.Store
+	Mail      mail.Sender
+	Analytics *analytics.Store
+	// AdminPassword enables /admin (HTTP Basic auth) when non-empty.
+	AdminPassword string
+	WebDir        string
+	InitialPath   string
+	mux           *http.ServeMux
 }
 
 func New(dict *dictionary.Dictionary, provider ai.Provider, webDir string) *Server {
@@ -52,7 +56,7 @@ func New(dict *dictionary.Dictionary, provider ai.Provider, webDir string) *Serv
 }
 
 func (s *Server) Handler() http.Handler {
-	return withCORS(withLogging(s.mux))
+	return withCORS(withLogging(s.withPageViews(s.mux)))
 }
 
 func (s *Server) routes() {
@@ -73,6 +77,9 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/account/state", s.handleAccountStateGet)
 	s.mux.HandleFunc("PUT /api/account/state", s.handleAccountStatePut)
 	s.mux.HandleFunc("POST /api/account/state", s.handleAccountStatePut)
+	s.mux.HandleFunc("POST /api/events", s.handleEvents)
+	s.mux.HandleFunc("GET /admin", s.handleAdminPage)
+	s.mux.HandleFunc("GET /api/admin/stats", s.handleAdminStats)
 	s.mux.HandleFunc("GET /api/account/events", s.handleAccountEvents)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
 }
@@ -312,6 +319,7 @@ func (s *Server) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.track(analytics.SetGenerated)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"topic":      body.Topic,
 		"kind":       kindOrVocab(kind),
@@ -351,6 +359,7 @@ func (s *Server) handleSharePut(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "could not store shared set")
 		return
 	}
+	s.track(analytics.SetShared)
 	writeJSON(w, http.StatusOK, set)
 }
 
@@ -370,6 +379,7 @@ func (s *Server) handleShareGet(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "could not load shared set")
 		return
 	}
+	s.track(analytics.SharedSetOpened)
 	w.Header().Set("Cache-Control", "no-store")
 	writeJSON(w, http.StatusOK, set)
 }

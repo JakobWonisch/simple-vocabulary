@@ -15,8 +15,7 @@
           pname = "simple-vocabulary";
           version = "0.1.0";
           src = pkgs.lib.cleanSource ./.;
-          # No third-party Go deps.
-          vendorHash = null;
+          vendorHash = "sha256-yUXC0obdFG9QBdSlu2omKACNtZVZ9d/AQM7HEXtjzPs=";
           subPackages = [ "cmd/server" "cmd/convertdict" "cmd/convertconj" ];
           ldflags = [ "-s" "-w" ];
           # ship dictionary + web next to the binary for nix run convenience
