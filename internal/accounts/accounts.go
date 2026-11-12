@@ -1,6 +1,6 @@
 // Package accounts persists user accounts: credentials, email verification,
-// sessions, and each account's complete application state. One JSON file per
-// account under Dir, plus a sessions index mapping token to email.
+// sessions, and each account's complete application state, in a SQLite
+// database (vocab.db) under Dir.
 package accounts
 
 import (
@@ -8,17 +8,22 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
+	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/mail"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	_ "modernc.org/sqlite"
 )
 
 const (
@@ -33,6 +38,14 @@ const (
 	MaxVerifyAttempts = 10
 	SessionTTL        = 30 * 24 * time.Hour
 	MaxStateBytes     = 8 << 20
+
+	// DBFile is the SQLite database file name inside the store directory.
+	DBFile = "vocab.db"
+	// timeLayout matches SQLite's datetime() so stored times compare directly
+	// against expressions like datetime('now','-30 day').
+	timeLayout = "2006-01-02 15:04:05"
+	// lastSeenResolution limits how often reads bump last_seen_at.
+	lastSeenResolution = time.Minute
 )
 
 var (
@@ -48,7 +61,8 @@ var (
 	ErrStateTooLarge    = errors.New("state too large")
 )
 
-// Account is one user's credentials plus the full frontend state blob.
+// Account is one user's credentials plus the full frontend state blob. The
+// JSON tags match the legacy one-file-per-account format for migration.
 type Account struct {
 	Email          string          `json:"email"`
 	PasswordHash   string          `json:"passwordHash"`
@@ -60,14 +74,42 @@ type Account struct {
 	State          json.RawMessage `json:"state,omitempty"`
 	CreatedAt      time.Time       `json:"createdAt"`
 	UpdatedAt      time.Time       `json:"updatedAt"`
+	LastSeenAt     time.Time       `json:"-"`
 }
 
-// Store keeps accounts as one JSON file per normalized email under Dir.
+// Store keeps accounts in a SQLite database under Dir. The mutex serializes
+// read-modify-write sequences; SQLite itself only sees one writer at a time.
 type Store struct {
 	Dir string
+	db  *sql.DB
 	mu  sync.Mutex
 }
 
+const schema = `
+CREATE TABLE IF NOT EXISTS users (
+	email           TEXT PRIMARY KEY,
+	password_hash   TEXT NOT NULL,
+	verified        INTEGER NOT NULL DEFAULT 0,
+	verify_code     TEXT NOT NULL DEFAULT '',
+	verify_expires  TEXT,
+	verify_attempts INTEGER NOT NULL DEFAULT 0,
+	pending_state   TEXT,
+	state           TEXT,
+	created_at      TEXT NOT NULL,
+	updated_at      TEXT NOT NULL,
+	last_seen_at    TEXT
+);
+CREATE TABLE IF NOT EXISTS sessions (
+	token_hash TEXT PRIMARY KEY,
+	email      TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE,
+	created_at TEXT NOT NULL,
+	expires    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS sessions_email ON sessions(email);
+`
+
+// NewStore opens (or creates) Dir/vocab.db and imports any legacy JSON
+// account files found in Dir.
 func NewStore(dir string) (*Store, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("accounts store directory is required")
@@ -75,8 +117,43 @@ func NewStore(dir string) (*Store, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}
-	return &Store{Dir: dir}, nil
+	db, err := OpenDB(filepath.Join(dir, DBFile))
+	if err != nil {
+		return nil, err
+	}
+	if _, err := db.Exec(schema); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("create accounts schema: %w", err)
+	}
+	s := &Store{Dir: dir, db: db}
+	if err := s.importLegacyJSON(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("import legacy accounts: %w", err)
+	}
+	return s, nil
 }
+
+// OpenDB opens a SQLite database with WAL and a busy timeout, limited to one
+// connection so writers never contend.
+func OpenDB(path string) (*sql.DB, error) {
+	dsn := "file:" + path + "?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)&_pragma=synchronous(NORMAL)"
+	db, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return db, nil
+}
+
+// DB exposes the underlying database so other stores (e.g. analytics) can
+// share the same file.
+func (s *Store) DB() *sql.DB { return s.db }
+
+func (s *Store) Close() error { return s.db.Close() }
 
 // NormalizeEmail trims, lowercases, and validates an email address.
 func NormalizeEmail(raw string) (string, error) {
@@ -176,100 +253,129 @@ func newToken() string {
 	return hex.EncodeToString(b[:])
 }
 
-// pathFor derives the account file name from the normalized email so no
-// address appears on disk and no separate email index is needed.
-func (s *Store) pathFor(email string) string {
-	sum := sha256.Sum256([]byte(email))
-	return filepath.Join(s.Dir, hex.EncodeToString(sum[:])+".json")
+func formatTime(t time.Time) string { return t.UTC().Format(timeLayout) }
+
+func parseTime(v sql.NullString) time.Time {
+	if !v.Valid || v.String == "" {
+		return time.Time{}
+	}
+	t, err := time.ParseInLocation(timeLayout, v.String, time.UTC)
+	if err != nil {
+		return time.Time{}
+	}
+	return t
 }
 
-func (s *Store) sessionsPath() string {
-	return filepath.Join(s.Dir, "sessions.json")
+func nullTime(t time.Time) any {
+	if t.IsZero() {
+		return nil
+	}
+	return formatTime(t)
 }
+
+func nullJSON(raw json.RawMessage) any {
+	if len(raw) == 0 {
+		return nil
+	}
+	return string(raw)
+}
+
+// tokenHash is what the sessions table stores, so a leaked database does not
+// leak usable session cookies.
+func tokenHash(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
+}
+
+type queryer interface {
+	QueryRow(query string, args ...any) *sql.Row
+}
+
+const accountColumns = `email, password_hash, verified, verify_code, verify_expires,
+	verify_attempts, pending_state, state, created_at, updated_at, last_seen_at`
 
 // load returns the account for email, or ErrNotFound.
 // Callers must hold s.mu.
 func (s *Store) load(email string) (*Account, error) {
-	body, err := os.ReadFile(s.pathFor(email))
+	return loadAccount(s.db, email)
+}
+
+func loadAccount(q queryer, email string) (*Account, error) {
+	var (
+		acc                                         Account
+		verified                                    int
+		verifyExpires, createdAt, updatedAt, seenAt sql.NullString
+		pending, state                              sql.NullString
+	)
+	err := q.QueryRow(`SELECT `+accountColumns+` FROM users WHERE email = ?`, email).Scan(
+		&acc.Email, &acc.PasswordHash, &verified, &acc.VerifyCode, &verifyExpires,
+		&acc.VerifyAttempts, &pending, &state, &createdAt, &updatedAt, &seenAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, ErrNotFound
-		}
 		return nil, err
 	}
-	var acc Account
-	if err := json.Unmarshal(body, &acc); err != nil {
-		return nil, err
+	acc.Verified = verified != 0
+	acc.VerifyExpires = parseTime(verifyExpires)
+	acc.CreatedAt = parseTime(createdAt)
+	acc.UpdatedAt = parseTime(updatedAt)
+	acc.LastSeenAt = parseTime(seenAt)
+	if pending.Valid {
+		acc.PendingState = json.RawMessage(pending.String)
 	}
-	if acc.Email == "" {
-		acc.Email = email
+	if state.Valid {
+		acc.State = json.RawMessage(state.String)
 	}
 	return &acc, nil
 }
 
-// write persists the account atomically. Callers must hold s.mu.
+type execer interface {
+	Exec(query string, args ...any) (sql.Result, error)
+}
+
+// write upserts the account. Callers must hold s.mu.
 func (s *Store) write(acc *Account) error {
 	acc.UpdatedAt = time.Now().UTC()
-	body, err := json.MarshalIndent(acc, "", "  ")
-	if err != nil {
-		return err
-	}
-	body = append(body, '\n')
-	path := s.pathFor(acc.Email)
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, body, 0o600); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, path); err != nil {
-		_ = os.Remove(tmp)
-		return err
-	}
-	return nil
+	return upsertAccount(s.db, acc)
 }
 
-type sessionEntry struct {
-	Email   string    `json:"email"`
-	Expires time.Time `json:"expires"`
+func upsertAccount(e execer, acc *Account) error {
+	verified := 0
+	if acc.Verified {
+		verified = 1
+	}
+	if acc.CreatedAt.IsZero() {
+		acc.CreatedAt = time.Now().UTC()
+	}
+	if acc.UpdatedAt.IsZero() {
+		acc.UpdatedAt = acc.CreatedAt
+	}
+	_, err := e.Exec(`INSERT INTO users (`+accountColumns+`)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(email) DO UPDATE SET
+			password_hash = excluded.password_hash,
+			verified = excluded.verified,
+			verify_code = excluded.verify_code,
+			verify_expires = excluded.verify_expires,
+			verify_attempts = excluded.verify_attempts,
+			pending_state = excluded.pending_state,
+			state = excluded.state,
+			updated_at = excluded.updated_at,
+			last_seen_at = excluded.last_seen_at`,
+		acc.Email, acc.PasswordHash, verified, acc.VerifyCode, nullTime(acc.VerifyExpires),
+		acc.VerifyAttempts, nullJSON(acc.PendingState), nullJSON(acc.State),
+		formatTime(acc.CreatedAt), formatTime(acc.UpdatedAt), nullTime(acc.LastSeenAt))
+	return err
 }
 
-type sessionsFile struct {
-	Sessions map[string]sessionEntry `json:"sessions"`
-}
-
-func (s *Store) loadSessions() (*sessionsFile, error) {
-	sf := &sessionsFile{Sessions: map[string]sessionEntry{}}
-	body, err := os.ReadFile(s.sessionsPath())
-	if err != nil {
-		if os.IsNotExist(err) {
-			return sf, nil
-		}
-		return nil, err
-	}
-	if err := json.Unmarshal(body, sf); err != nil {
-		return nil, err
-	}
-	if sf.Sessions == nil {
-		sf.Sessions = map[string]sessionEntry{}
-	}
-	return sf, nil
-}
-
-func (s *Store) writeSessions(sf *sessionsFile) error {
-	body, err := json.MarshalIndent(sf, "", "  ")
-	if err != nil {
-		return err
-	}
-	body = append(body, '\n')
-	path := s.sessionsPath()
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, body, 0o600); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, path); err != nil {
-		_ = os.Remove(tmp)
-		return err
-	}
-	return nil
+// touch records activity for email, at most once per lastSeenResolution.
+// Callers must hold s.mu.
+func (s *Store) touch(email string) {
+	now := time.Now().UTC()
+	_, _ = s.db.Exec(`UPDATE users SET last_seen_at = ?
+		WHERE email = ? AND (last_seen_at IS NULL OR last_seen_at < ?)`,
+		formatTime(now), email, formatTime(now.Add(-lastSeenResolution)))
 }
 
 // Signup creates or refreshes an unverified account and returns the
@@ -399,43 +505,45 @@ func (s *Store) Login(email, password string) (*Account, string, error) {
 	return acc, token, nil
 }
 
-// addSession stores a new session token. Callers must hold s.mu.
+// addSession stores a new session token and counts as activity.
+// Callers must hold s.mu.
 func (s *Store) addSession(email string) (string, error) {
-	sf, err := s.loadSessions()
-	if err != nil {
-		return "", err
-	}
 	now := time.Now().UTC()
-	for token, entry := range sf.Sessions {
-		if now.After(entry.Expires) {
-			delete(sf.Sessions, token)
-		}
+	if _, err := s.db.Exec(`DELETE FROM sessions WHERE expires < ?`, formatTime(now)); err != nil {
+		return "", err
 	}
 	token := newToken()
-	sf.Sessions[token] = sessionEntry{Email: email, Expires: now.Add(SessionTTL)}
-	if err := s.writeSessions(sf); err != nil {
+	if _, err := s.db.Exec(`INSERT INTO sessions (token_hash, email, created_at, expires) VALUES (?, ?, ?, ?)`,
+		tokenHash(token), email, formatTime(now), formatTime(now.Add(SessionTTL))); err != nil {
 		return "", err
 	}
+	s.touch(email)
 	return token, nil
 }
 
-// sessionEmail resolves a token to its account email, pruning expired entries.
-// Callers must hold s.mu.
+// sessionEmail resolves a token to its account email, pruning an expired
+// entry. Callers must hold s.mu.
 func (s *Store) sessionEmail(token string) (string, error) {
-	sf, err := s.loadSessions()
+	if token == "" {
+		return "", ErrSession
+	}
+	key := tokenHash(token)
+	var (
+		email   string
+		expires sql.NullString
+	)
+	err := s.db.QueryRow(`SELECT email, expires FROM sessions WHERE token_hash = ?`, key).Scan(&email, &expires)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", ErrSession
+	}
 	if err != nil {
 		return "", err
 	}
-	entry, ok := sf.Sessions[token]
-	if !ok {
+	if time.Now().UTC().After(parseTime(expires)) {
+		_, _ = s.db.Exec(`DELETE FROM sessions WHERE token_hash = ?`, key)
 		return "", ErrSession
 	}
-	if time.Now().UTC().After(entry.Expires) {
-		delete(sf.Sessions, token)
-		_ = s.writeSessions(sf)
-		return "", ErrSession
-	}
-	return entry.Email, nil
+	return email, nil
 }
 
 // NewSession starts a session for a verified account, e.g. right after
@@ -463,6 +571,7 @@ func (s *Store) AccountBySession(token string) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	s.touch(email)
 	return s.load(email)
 }
 
@@ -484,6 +593,7 @@ func (s *Store) PutState(token string, state json.RawMessage) error {
 		return err
 	}
 	acc.State = append(json.RawMessage(nil), state...)
+	acc.LastSeenAt = time.Now().UTC()
 	return s.write(acc)
 }
 
@@ -492,13 +602,82 @@ func (s *Store) Logout(token string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	sf, err := s.loadSessions()
+	_, err := s.db.Exec(`DELETE FROM sessions WHERE token_hash = ?`, tokenHash(token))
+	return err
+}
+
+// Stats summarizes accounts for the admin page. Active means the account was
+// seen (session use or state save) at or after since.
+type Stats struct {
+	Users       int              `json:"users"`
+	Unverified  int              `json:"unverified"`
+	Active      int              `json:"active"`
+	Inactive    int              `json:"inactive"`
+	New         int              `json:"new"`
+	Collections *CollectionStats `json:"collections"`
+}
+
+// CollectionStats describes how many sets verified users have.
+type CollectionStats struct {
+	Avg    float64 `json:"avg"`
+	Median float64 `json:"median"`
+	Min    int     `json:"min"`
+	Max    int     `json:"max"`
+}
+
+func (s *Store) Stats(since time.Time) (Stats, error) {
+	var st Stats
+	cut := formatTime(since)
+	err := s.db.QueryRow(`SELECT
+			COALESCE(SUM(verified = 1), 0),
+			COALESCE(SUM(verified = 0), 0),
+			COALESCE(SUM(verified = 1 AND last_seen_at >= ?), 0),
+			COALESCE(SUM(verified = 1 AND created_at >= ?), 0)
+		FROM users`, cut, cut).Scan(&st.Users, &st.Unverified, &st.Active, &st.New)
 	if err != nil {
-		return err
+		return st, err
 	}
-	if _, ok := sf.Sessions[token]; !ok {
+	st.Inactive = st.Users - st.Active
+
+	rows, err := s.db.Query(`SELECT COALESCE(json_array_length(state, '$.sets'), 0)
+		FROM users WHERE verified = 1 AND json_valid(state)`)
+	if err != nil {
+		return st, err
+	}
+	defer rows.Close()
+	var counts []int
+	for rows.Next() {
+		var n int
+		if err := rows.Scan(&n); err != nil {
+			return st, err
+		}
+		counts = append(counts, n)
+	}
+	if err := rows.Err(); err != nil {
+		return st, err
+	}
+	st.Collections = collectionStats(counts)
+	return st, nil
+}
+
+func collectionStats(counts []int) *CollectionStats {
+	if len(counts) == 0 {
 		return nil
 	}
-	delete(sf.Sessions, token)
-	return s.writeSessions(sf)
+	sort.Ints(counts)
+	sum := 0
+	for _, n := range counts {
+		sum += n
+	}
+	mid := len(counts) / 2
+	median := float64(counts[mid])
+	if len(counts)%2 == 0 {
+		median = float64(counts[mid-1]+counts[mid]) / 2
+	}
+	return &CollectionStats{
+		Avg:    math.Round(float64(sum)/float64(len(counts))*10) / 10,
+		Median: median,
+		Min:    counts[0],
+		Max:    counts[len(counts)-1],
+	}
 }

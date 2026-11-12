@@ -8,6 +8,7 @@ import (
 
 	"github.com/jakob/simple-vocabulary/internal/accounts"
 	"github.com/jakob/simple-vocabulary/internal/ai"
+	"github.com/jakob/simple-vocabulary/internal/analytics"
 	"github.com/jakob/simple-vocabulary/internal/api"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
@@ -55,7 +56,18 @@ func main() {
 		log.Fatalf("accounts store: %v", err)
 	}
 	mailer := mail.FromEnv()
-	log.Printf("accounts: %s (mail: %s)", accountsDir, mailer.Name())
+	log.Printf("accounts: %s (mail: %s)", filepath.Join(accountsDir, accounts.DBFile), mailer.Name())
+
+	usage, err := analytics.NewStore(accountStore.DB())
+	if err != nil {
+		log.Fatalf("analytics store: %v", err)
+	}
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		log.Printf("admin page disabled (set ADMIN_PASSWORD)")
+	} else {
+		log.Printf("admin page: /admin")
+	}
 
 	srv := api.New(dict, provider, webDir)
 	srv.Conj = conj
@@ -63,6 +75,8 @@ func main() {
 	srv.Shared = shareStore
 	srv.Accounts = accountStore
 	srv.Mail = mailer
+	srv.Analytics = usage
+	srv.AdminPassword = adminPassword
 	if _, err := os.Stat(initialPath); err != nil {
 		log.Printf("initial configuration not found: %s", initialPath)
 	} else {

@@ -17,6 +17,7 @@ services:
       BREVO_API_KEY: "${BREVO_API_KEY:-}"
       BREVO_SENDER_EMAIL: "${BREVO_SENDER_EMAIL:-}"
       BREVO_SENDER_NAME: "${BREVO_SENDER_NAME:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
     volumes:
       - shared-sets:/app/data/shared
       - accounts:/app/data/accounts

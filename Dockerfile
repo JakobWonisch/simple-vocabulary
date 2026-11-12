@@ -2,7 +2,8 @@
 FROM golang:1.24-alpine AS build
 WORKDIR /src
 RUN apk add --no-cache ca-certificates
-COPY go.mod ./
+COPY go.mod go.sum ./
+RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/server ./cmd/server
