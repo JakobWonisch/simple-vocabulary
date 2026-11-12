@@ -12,6 +12,7 @@ result-*
 .DS_Store
 data/shared/*
 !data/shared/.gitkeep
+data/accounts/
 
 # dictionary rebuild inputs
 es-de.sqlite3

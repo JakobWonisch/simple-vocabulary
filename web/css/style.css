@@ -750,6 +750,110 @@ body:has(.view.home) main {
   color: var(--accent);
 }
 
+.account-dialog .add-word-panel {
+  height: auto;
+  max-height: min(28rem, calc(100dvh - 2.5rem));
+  overflow: auto;
+}
+
+.account-body,
+.account-form {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+}
+
+.account-field {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.account-field span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.account-field input {
+  font: inherit;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--ink);
+}
+
+.account-field input:focus {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.account-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.account-user-line {
+  margin: 0;
+}
+
+.account-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.account-check input {
+  margin-top: 0.15rem;
+  accent-color: var(--accent);
+}
+
+.account-switch {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0.15rem 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: center;
+}
+
+.account-switch:hover {
+  text-decoration: underline;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+#account-btn {
+  position: relative;
+}
+
+#account-btn.is-logged-in::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+}
+
 .btn {
   appearance: none;
   border: 1px solid var(--line);

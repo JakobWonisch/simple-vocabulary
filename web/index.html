@@ -33,6 +33,12 @@
   <header class="top">
     <a class="brand" href="#/" data-link>Simple Vocabulary</a>
     <div class="top-actions" id="top-actions">
+      <button type="button" class="icon-btn" id="account-btn" aria-label="Konto" aria-haspopup="dialog" aria-expanded="false" aria-controls="account-dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4.5 20.5c1.3-3.9 4-6 7.5-6s6.2 2.1 7.5 6" />
+        </svg>
+      </button>
       <button type="button" class="icon-btn" id="info-btn" aria-label="Info" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-pop">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="9" />
@@ -153,6 +159,69 @@
       </label>
       <p class="add-word-status" id="add-word-status" role="status" aria-live="polite"></p>
       <ul class="add-word-results" id="add-word-results"></ul>
+    </div>
+  </div>
+
+  <div class="add-word-dialog account-dialog" id="account-dialog" hidden>
+    <div class="add-word-backdrop" data-account-close tabindex="-1"></div>
+    <div class="add-word-panel account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title">
+      <div class="add-word-head">
+        <p class="settings-title" id="account-title">Konto</p>
+        <button type="button" class="icon-btn add-word-close" id="account-close" aria-label="Schließen" data-account-close>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6l12 12" />
+            <path d="M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <div class="account-body" id="account-panel-user" hidden>
+        <p class="account-user-line">Angemeldet als <strong id="account-email"></strong></p>
+        <p class="account-note">Sammlungen und Statistiken werden in deinem Konto gespeichert und auf jedem Gerät synchronisiert.</p>
+        <button type="button" class="btn ghost" id="account-logout">Abmelden</button>
+      </div>
+      <form class="account-form" id="account-form-login" hidden>
+        <p class="account-note">Melde dich an, um deine Sammlungen und Statistiken auf allen Geräten zu nutzen.</p>
+        <label class="field account-field">
+          <span>E-Mail</span>
+          <input name="email" type="email" required autocomplete="email" placeholder="du@example.com" />
+        </label>
+        <label class="field account-field">
+          <span>Passwort</span>
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <button type="submit" class="btn primary">Anmelden</button>
+        <button type="button" class="account-switch" id="account-to-signup">Noch kein Konto? Erstellen</button>
+      </form>
+      <form class="account-form" id="account-form-signup">
+        <p class="account-note">Erstelle ein Konto, um deine Sammlungen und Statistiken auf allen Geräten zu nutzen.</p>
+        <label class="field account-field">
+          <span>E-Mail</span>
+          <input name="email" type="email" required autocomplete="email" placeholder="du@example.com" />
+        </label>
+        <label class="field account-field">
+          <span>Passwort (mindestens 8 Zeichen)</span>
+          <input name="password" type="password" required minlength="8" autocomplete="new-password" />
+        </label>
+        <label class="account-check" id="signup-copy-wrap" hidden>
+          <input type="checkbox" id="signup-copy-local" checked />
+          <span>Lokale Sammlungen und Statistiken ins Konto übernehmen</span>
+        </label>
+        <button type="submit" class="btn primary">Konto erstellen</button>
+        <button type="button" class="account-switch" id="account-to-login">Schon ein Konto? Anmelden</button>
+      </form>
+      <form class="account-form" id="account-form-verify" hidden>
+        <p class="account-note" id="verify-note"></p>
+        <label class="field account-field">
+          <span>Bestätigungscode</span>
+          <input name="code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" placeholder="6-stelliger Code" />
+        </label>
+        <button type="submit" class="btn primary">Bestätigen</button>
+        <div class="account-row">
+          <button type="button" class="account-switch" id="account-resend">Code erneut senden</button>
+          <button type="button" class="account-switch" id="account-verify-back">Zurück</button>
+        </div>
+      </form>
+      <p class="add-word-status" id="account-status" role="status" aria-live="polite"></p>
     </div>
   </div>
 

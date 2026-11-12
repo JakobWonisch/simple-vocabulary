@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jakob/simple-vocabulary/internal/accounts"
 	"github.com/jakob/simple-vocabulary/internal/ai"
 	"github.com/jakob/simple-vocabulary/internal/api"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
+	"github.com/jakob/simple-vocabulary/internal/mail"
 	"github.com/jakob/simple-vocabulary/internal/shared"
 )
 
@@ -20,6 +22,7 @@ func main() {
 	webDir := envOr("WEB_DIR", filepath.Join(root, "web"))
 	initialPath := envOr("INITIAL_PATH", filepath.Join(root, "data", "simple-vocabulary-initial.json"))
 	sharedDir := envOr("SHARED_DIR", filepath.Join(root, "data", "shared"))
+	accountsDir := envOr("ACCOUNTS_DIR", filepath.Join(root, "data", "accounts"))
 
 	dict, err := dictionary.LoadJSON(dictPath)
 	if err != nil {
@@ -47,10 +50,19 @@ func main() {
 	}
 	log.Printf("shared sets: %s", sharedDir)
 
+	accountStore, err := accounts.NewStore(accountsDir)
+	if err != nil {
+		log.Fatalf("accounts store: %v", err)
+	}
+	mailer := mail.FromEnv()
+	log.Printf("accounts: %s (mail: %s)", accountsDir, mailer.Name())
+
 	srv := api.New(dict, provider, webDir)
 	srv.Conj = conj
 	srv.InitialPath = initialPath
 	srv.Shared = shareStore
+	srv.Accounts = accountStore
+	srv.Mail = mailer
 	if _, err := os.Stat(initialPath); err != nil {
 		log.Printf("initial configuration not found: %s", initialPath)
 	} else {

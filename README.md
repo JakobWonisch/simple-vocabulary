@@ -1,10 +1,11 @@
 # Simple Vocabulary
 
-Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`localStorage`) with optional JSON export/import. A small Go server serves the UI, the FreeDict-based dictionary, and an OpenRouter-backed set generator (swappable AI provider).
+Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`localStorage`) with optional JSON export/import — or in an optional account that syncs everything. A small Go server serves the UI, the FreeDict-based dictionary, and an OpenRouter-backed set generator (swappable AI provider).
 
 ## Features
 
 - Vocabulary sets stored locally
+- Optional accounts: sign up with email + verification code; while logged in the complete state (sets, progress, settings) lives server-side and local sets are disregarded. Signup can import the current local data; otherwise new accounts get the same initial collections as local users. Logged-out use is unchanged.
 - Topic → ~50 words via OpenRouter (free models supported)
 - Translations + articles (`el`/`la`, `der`/`die`/`das`) from the integrated dictionary
 - Flashcards: tap to reveal, tap again to advance
@@ -41,9 +42,15 @@ docker compose up --build
 | `OPENROUTER_MAX_ATTEMPTS` | `3` | Max models tried per generate |
 | `DICT_PATH` | `data/spa-deu.json` | Dictionary JSON |
 | `SHARED_DIR` | `data/shared` | Published shareable sets |
+| `ACCOUNTS_DIR` | `data/accounts` | Account files + session index |
+| `BREVO_API_KEY` | — | Brevo transactional email for signup codes |
+| `BREVO_SENDER_EMAIL` | — | Verified sender address for those emails |
+| `BREVO_SENDER_NAME` | — | Optional sender display name |
 | `WEB_DIR` | `web` | Static frontend |
 
 Without an API key the app still runs for studying existing/imported sets; generation returns 503.
+Without `BREVO_API_KEY`/`BREVO_SENDER_EMAIL`, signup still works but verification
+codes are printed to the server log instead of being mailed (dev mode).
 
 ## Dictionary
 
@@ -95,3 +102,11 @@ Implement `ai.Provider` in `internal/ai` and wire it in `cmd/server/main.go`. Op
 - `POST /api/sets/generate` `{ "topic": "…", "count": 50 }`
 - `POST /api/sets/share` — publish a set (content only) under its UUID
 - `GET /api/sets/share/{id}` — fetch a published set
+- `POST /api/auth/signup` `{ "email", "password", "copyLocal", "state" }` — creates pending account, mails a code
+- `POST /api/auth/verify` `{ "email", "code" }` — activates account, sets session cookie
+- `POST /api/auth/resend` `{ "email" }` — new code for a pending account
+- `POST /api/auth/login` `{ "email", "password" }` — session cookie + account state
+- `POST /api/auth/logout`
+- `GET /api/auth/me` — `{ "email" }` or 401
+- `GET /api/account/state` — full state blob of the session account
+- `PUT|POST /api/account/state` — replace it (POST for `sendBeacon` flush)

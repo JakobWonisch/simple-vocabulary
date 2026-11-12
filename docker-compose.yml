@@ -13,9 +13,15 @@ services:
       OPENROUTER_SITE_NAME: "${OPENROUTER_SITE_NAME:-simple-vocabulary}"
       OPENROUTER_SITE_URL: "${OPENROUTER_SITE_URL:-}"
       SHARED_DIR: /app/data/shared
+      ACCOUNTS_DIR: /app/data/accounts
+      BREVO_API_KEY: "${BREVO_API_KEY:-}"
+      BREVO_SENDER_EMAIL: "${BREVO_SENDER_EMAIL:-}"
+      BREVO_SENDER_NAME: "${BREVO_SENDER_NAME:-}"
     volumes:
       - shared-sets:/app/data/shared
+      - accounts:/app/data/accounts
     restart: unless-stopped
 
 volumes:
   shared-sets:
+  accounts:

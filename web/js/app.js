@@ -1,4 +1,15 @@
-import { loadState, saveState, exportState, importState, uid, hasStoredState } from "./storage.js";
+import { loadState, saveState, exportState, importState, uid, hasStoredState, normalizeState } from "./storage.js";
+import {
+  fetchMe,
+  fetchAccountState,
+  signup,
+  verifyEmail,
+  resendCode,
+  login,
+  logout,
+  saveAccountState,
+  beaconAccountState,
+} from "./auth.js";
 import { pickCard, markSeen, timesSeen, formatWithArticle } from "./memory.js";
 import { MASTERY_LEVEL, formatDuration, formatPercent, masteryRatio, nextStatsSort, recordSample, sortStatsRows, trimmedMean } from "./stats.js";
 
@@ -17,6 +28,17 @@ const addWordStatus = document.getElementById("add-word-status");
 const addWordTitle = document.getElementById("add-word-title");
 const addWordLabel = document.getElementById("add-word-label");
 const btnAddWord = document.getElementById("btn-add-word");
+const accountBtn = document.getElementById("account-btn");
+const accountDialog = document.getElementById("account-dialog");
+const accountStatus = document.getElementById("account-status");
+const accountFormLogin = document.getElementById("account-form-login");
+const accountFormSignup = document.getElementById("account-form-signup");
+const accountFormVerify = document.getElementById("account-form-verify");
+const accountPanelUser = document.getElementById("account-panel-user");
+const accountEmail = document.getElementById("account-email");
+const signupCopyWrap = document.getElementById("signup-copy-wrap");
+const signupCopyLocal = document.getElementById("signup-copy-local");
+const verifyNote = document.getElementById("verify-note");
 
 const knownErrors = {
   "Generation failed": "Erzeugung fehlgeschlagen",
@@ -46,6 +68,28 @@ const knownErrors = {
   "could not store shared set": "Sammlung konnte nicht veröffentlicht werden",
   "could not load shared set": "Geteilte Sammlung konnte nicht geladen werden",
   "invalid shared set": "Ungültige geteilte Sammlung",
+  "accounts are not configured": "Konten sind auf dem Server nicht eingerichtet",
+  "invalid email": "Ungültige E-Mail-Adresse",
+  "password must be at least 8 characters": "Das Passwort braucht mindestens 8 Zeichen",
+  "password too long": "Das Passwort ist zu lang",
+  "invalid state": "Ungültige Daten",
+  "email already registered": "Zu dieser E-Mail gibt es schon ein Konto",
+  "account not found — please sign up again": "Konto nicht gefunden — bitte neu registrieren",
+  "wrong email or password": "E-Mail oder Passwort ist falsch",
+  "email not verified": "E-Mail noch nicht bestätigt — wir haben dir einen neuen Code geschickt",
+  "invalid verification code": "Der Code ist ungültig",
+  "verification code expired": "Der Code ist abgelaufen — fordere einen neuen an",
+  "too many code attempts": "Zu viele Versuche — fordere einen neuen Code an",
+  "email already verified — please log in": "E-Mail ist bereits bestätigt — melde dich an",
+  "could not send verification email": "Bestätigungs-E-Mail konnte nicht gesendet werden",
+  "not logged in": "Nicht angemeldet",
+  "login failed": "Anmeldung fehlgeschlagen",
+  "could not create account": "Konto konnte nicht erstellt werden",
+  "could not resend code": "Code konnte nicht erneut gesendet werden",
+  "verification failed": "Bestätigung fehlgeschlagen",
+  "could not save state": "Stand konnte nicht gespeichert werden",
+  "could not start session": "Sitzung konnte nicht gestartet werden",
+  "could not load account state": "Kontodaten konnten nicht geladen werden",
 };
 
 function meaningList(card) {
@@ -132,6 +176,10 @@ let state = {
   sets: [],
 };
 let stateReady = false;
+let account = null; // { email } while logged in
+let accountDirty = false;
+let accountSaveTimer = 0;
+let accountSaveInFlight = null; // Promise of the running PUT, if any
 let unbindStudyKeys = () => {};
 let refreshConjugation = () => {};
 let resetConjugationOrder = () => {};
@@ -177,8 +225,66 @@ const MODE_LABEL = {
 
 function persist() {
   if (!stateReady) return;
+  if (account) {
+    // Logged in: local sets stay untouched; state lives in the account.
+    // Throttled, not debounced: rapid changes keep flushing every ~500 ms
+    // instead of pushing the write back forever.
+    accountDirty = true;
+    if (!accountSaveTimer) {
+      accountSaveTimer = setTimeout(() => {
+        accountSaveTimer = 0;
+        flushAccountSave();
+      }, 500);
+    }
+    return;
+  }
   saveState(state);
 }
+
+// One PUT in flight at a time so an older snapshot can never land after a
+// newer one. Changes made while a PUT runs mark the state dirty again and a
+// trailing flush follows right after.
+function flushAccountSave() {
+  if (!account || !accountDirty) return Promise.resolve();
+  if (accountSaveInFlight) return accountSaveInFlight;
+  accountDirty = false;
+  accountSaveInFlight = (async () => {
+    try {
+      const res = await saveAccountState(state);
+      if (res.status === 401) {
+        // Session expired: keep the data by falling back to local storage.
+        account = null;
+        saveState(state);
+        updateAccountUI();
+        return;
+      }
+      if (!res.ok) accountDirty = true;
+    } catch {
+      accountDirty = true;
+    } finally {
+      accountSaveInFlight = null;
+    }
+    if (account && accountDirty) {
+      accountSaveTimer = setTimeout(() => {
+        accountSaveTimer = 0;
+        flushAccountSave();
+      }, 300);
+    }
+  })();
+  return accountSaveInFlight;
+}
+
+window.addEventListener("pagehide", () => {
+  if (account && accountDirty && !beaconAccountState(state)) {
+    saveAccountState(state);
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && account && accountDirty) {
+    flushAccountSave();
+  }
+});
 
 function parseRoute() {
   const raw = location.hash.replace(/^#/, "") || "/";
@@ -1010,7 +1116,7 @@ function renderStudy(setId) {
     if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || e.target?.isContentEditable) return;
-    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden) return;
+    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden || !accountDialog.hidden) return;
     if (e.key === "Escape" && !dictPop.hidden) {
       e.preventDefault();
       setDictOpen(false);
@@ -1279,7 +1385,7 @@ function renderConjugation(setId) {
     if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = e.target?.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) return;
-    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden) return;
+    if (!current || !settingsPop.hidden || !infoPop.hidden || !addWordDialog.hidden || !accountDialog.hidden) return;
     if (modifierKeys.has(e.key)) return;
     e.preventDefault();
     if (!allRevealed) revealNext();
@@ -1852,6 +1958,10 @@ document.addEventListener("keydown", (e) => {
     setAddWordOpen(false);
     return;
   }
+  if (!accountDialog.hidden) {
+    setAccountOpen(false);
+    return;
+  }
   if (!settingsPop.hidden) setSettingsOpen(false);
   if (!infoPop.hidden) setInfoOpen(false);
   if (openMenuButton) {
@@ -2035,6 +2145,211 @@ addWordInput.addEventListener("keydown", (e) => {
   }
 });
 
+let pendingVerifyEmail = "";
+
+function setAccountStatus(text, error = false) {
+  accountStatus.textContent = text;
+  accountStatus.classList.toggle("error", error);
+}
+
+function showAccountPanel(panel) {
+  accountFormLogin.hidden = panel !== "login";
+  accountFormSignup.hidden = panel !== "signup";
+  accountFormVerify.hidden = panel !== "verify";
+  accountPanelUser.hidden = panel !== "user";
+}
+
+function showVerifyPanel() {
+  verifyNote.textContent = `Wir haben einen 6-stelligen Code an ${pendingVerifyEmail} geschickt. Er ist 30 Minuten gültig.`;
+  accountFormVerify.elements.code.value = "";
+  showAccountPanel("verify");
+  requestAnimationFrame(() => accountFormVerify.elements.code.focus());
+}
+
+function setAccountOpen(open) {
+  accountDialog.hidden = !open;
+  accountBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  if (!open) {
+    setAccountStatus("");
+    return;
+  }
+  setSettingsOpen(false);
+  setInfoOpen(false);
+  if (account) {
+    accountEmail.textContent = account.email;
+    showAccountPanel("user");
+  } else if (pendingVerifyEmail) {
+    showVerifyPanel();
+  } else {
+    signupCopyWrap.hidden = !stateReady || !(state.sets || []).length;
+    showAccountPanel("signup");
+  }
+}
+
+function updateAccountUI() {
+  accountBtn.classList.toggle("is-logged-in", !!account);
+  accountBtn.setAttribute(
+    "aria-label",
+    account ? `Konto — angemeldet als ${account.email}` : "Konto",
+  );
+}
+
+// enterAccount swaps the whole app state to the account's saved state. The
+// local sets stay in localStorage, untouched, and are simply disregarded.
+function enterAccount(email, accountState) {
+  account = { email };
+  pendingVerifyEmail = "";
+  state = normalizeState(accountState && Array.isArray(accountState.sets) ? accountState : { sets: [] });
+  stateReady = true;
+  syncThemeSetting();
+  syncDirectionSetting();
+  setAccountOpen(false);
+  updateAccountUI();
+  location.hash = "#/";
+  route();
+}
+
+async function doLogout() {
+  clearTimeout(accountSaveTimer);
+  accountSaveTimer = 0;
+  // Drain pending writes: each dirty pass flushes once; a trailing flush
+  // queued mid-flight is awaited via accountSaveInFlight below. Bounded so a
+  // dead connection cannot hang logout.
+  for (let i = 0; i < 3 && account && accountDirty; i++) {
+    await flushAccountSave();
+  }
+  if (accountSaveInFlight) await accountSaveInFlight;
+  if (
+    account &&
+    accountDirty &&
+    !confirm("Änderungen konnten nicht synchronisiert werden. Trotzdem abmelden?")
+  ) {
+    return;
+  }
+  try {
+    await logout();
+  } catch {
+    // The session may already be gone; logging out locally is still right.
+  }
+  account = null;
+  accountDirty = false;
+  state = await loadState();
+  stateReady = true;
+  syncThemeSetting();
+  syncDirectionSetting();
+  setAccountOpen(false);
+  updateAccountUI();
+  location.hash = "#/";
+  route();
+  showSnackbar("Abgemeldet");
+}
+
+accountBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setAccountOpen(accountDialog.hidden);
+});
+
+accountDialog.addEventListener("click", (e) => {
+  if (e.target.closest("[data-account-close]")) {
+    setAccountOpen(false);
+    return;
+  }
+  e.stopPropagation();
+});
+
+document.getElementById("account-to-signup").addEventListener("click", () => {
+  signupCopyWrap.hidden = !stateReady || !(state.sets || []).length;
+  setAccountStatus("");
+  showAccountPanel("signup");
+});
+
+document.getElementById("account-to-login").addEventListener("click", () => {
+  setAccountStatus("");
+  showAccountPanel("login");
+});
+
+document.getElementById("account-verify-back").addEventListener("click", () => {
+  pendingVerifyEmail = "";
+  setAccountStatus("");
+  showAccountPanel("signup");
+});
+
+accountFormSignup.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = accountFormSignup.elements.email.value.trim();
+  const password = accountFormSignup.elements.password.value;
+  const copyLocal = !signupCopyWrap.hidden && signupCopyLocal.checked;
+  const submitBtn = accountFormSignup.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  setAccountStatus("Konto wird erstellt…");
+  try {
+    const data = await signup(email, password, copyLocal, copyLocal ? state : null);
+    pendingVerifyEmail = data.email || email.toLowerCase();
+    showVerifyPanel();
+    setAccountStatus("");
+  } catch (err) {
+    setAccountStatus(uiMessage(err.message, "Something went wrong"), true);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+accountFormLogin.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = accountFormLogin.elements.email.value.trim();
+  const password = accountFormLogin.elements.password.value;
+  const submitBtn = accountFormLogin.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  setAccountStatus("Anmeldung läuft…");
+  try {
+    const data = await login(email, password);
+    enterAccount(data.email, data.state);
+    showSnackbar("Angemeldet");
+  } catch (err) {
+    if (err.needsVerify) {
+      pendingVerifyEmail = email.toLowerCase();
+      showVerifyPanel();
+      setAccountStatus(uiMessage(err.message, "email not verified"));
+    } else {
+      setAccountStatus(uiMessage(err.message, "Something went wrong"), true);
+    }
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+accountFormVerify.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const code = accountFormVerify.elements.code.value.trim();
+  const submitBtn = accountFormVerify.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  setAccountStatus("Code wird geprüft…");
+  try {
+    const data = await verifyEmail(pendingVerifyEmail, code);
+    enterAccount(data.email, data.state);
+    showSnackbar("Konto erstellt");
+  } catch (err) {
+    setAccountStatus(uiMessage(err.message, "verification failed"), true);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+document.getElementById("account-resend").addEventListener("click", async () => {
+  if (!pendingVerifyEmail) return;
+  setAccountStatus("Neuer Code wird gesendet…");
+  try {
+    await resendCode(pendingVerifyEmail);
+    setAccountStatus("Neuer Code gesendet");
+  } catch (err) {
+    setAccountStatus(uiMessage(err.message, "could not resend code"), true);
+  }
+});
+
+document.getElementById("account-logout").addEventListener("click", () => {
+  doLogout();
+});
+
 const snackbar = document.getElementById("snackbar");
 let snackbarTimer = 0;
 
@@ -2062,7 +2377,7 @@ document.getElementById("btn-import").addEventListener("change", async (e) => {
   }
   try {
     const imported = await importState(file);
-    if (state.sets.length && !confirm("Alle lokalen Sammlungen durch die importierte Datei ersetzen?")) {
+    if (state.sets.length && !confirm("Alle Sammlungen durch die importierte Datei ersetzen?")) {
       e.target.value = "";
       return;
     }
@@ -2107,14 +2422,29 @@ function showInitialLoading() {
   app.setAttribute("aria-busy", "true");
 }
 
-if (!hasStoredState()) showInitialLoading();
-
-loadState().then((loaded) => {
+async function boot() {
+  let loaded;
+  account = await fetchMe();
+  if (account) {
+    // Logged in: the account's saved state is used; local sets are disregarded.
+    try {
+      loaded = normalizeState(await fetchAccountState());
+    } catch {
+      account = null;
+      loaded = await loadState();
+    }
+  } else {
+    loaded = await loadState();
+  }
   app.removeAttribute("aria-busy");
   state = loaded;
   stateReady = true;
   syncThemeSetting();
-  persist();
+  if (!account) persist();
   syncDirectionSetting();
+  updateAccountUI();
   route();
-});
+}
+
+if (!hasStoredState()) showInitialLoading();
+boot();

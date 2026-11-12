@@ -12,9 +12,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jakob/simple-vocabulary/internal/accounts"
 	"github.com/jakob/simple-vocabulary/internal/ai"
 	"github.com/jakob/simple-vocabulary/internal/conjugation"
 	"github.com/jakob/simple-vocabulary/internal/dictionary"
+	"github.com/jakob/simple-vocabulary/internal/mail"
 	"github.com/jakob/simple-vocabulary/internal/shared"
 )
 
@@ -36,6 +38,8 @@ type Server struct {
 	Conj        *conjugation.Table
 	AI          ai.Provider
 	Shared      *shared.Store
+	Accounts    *accounts.Store
+	Mail        mail.Sender
 	WebDir      string
 	InitialPath string
 	mux         *http.ServeMux
@@ -60,6 +64,15 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /api/sets/generate", s.handleGenerate)
 	s.mux.HandleFunc("POST /api/sets/share", s.handleSharePut)
 	s.mux.HandleFunc("GET /api/sets/share/{id}", s.handleShareGet)
+	s.mux.HandleFunc("POST /api/auth/signup", s.handleSignup)
+	s.mux.HandleFunc("POST /api/auth/verify", s.handleVerify)
+	s.mux.HandleFunc("POST /api/auth/resend", s.handleResend)
+	s.mux.HandleFunc("POST /api/auth/login", s.handleLogin)
+	s.mux.HandleFunc("POST /api/auth/logout", s.handleLogout)
+	s.mux.HandleFunc("GET /api/auth/me", s.handleMe)
+	s.mux.HandleFunc("GET /api/account/state", s.handleAccountStateGet)
+	s.mux.HandleFunc("PUT /api/account/state", s.handleAccountStatePut)
+	s.mux.HandleFunc("POST /api/account/state", s.handleAccountStatePut)
 	s.mux.Handle("GET /", http.FileServer(http.Dir(s.WebDir)))
 }
 

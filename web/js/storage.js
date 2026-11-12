@@ -37,7 +37,7 @@ function normalizeGenerate(raw) {
   return base;
 }
 
-function normalizeState(parsed) {
+export function normalizeState(parsed) {
   return {
     ...defaultState(),
     ...parsed,
