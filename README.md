@@ -2,6 +2,23 @@
 
 Lightweight Spanish↔German vocabulary trainer. Data stays in the browser (`localStorage`) with optional JSON export/import — or in an optional account that syncs everything. A small Go server serves the UI, the FreeDict-based dictionary, and an OpenRouter-backed set generator (swappable AI provider).
 
+## Screenshots
+
+Mobile UI, dark and light themes: vocabulary sets are studied as tap-to-reveal flashcards, and verbs as per-person conjugation cards.
+
+<table>
+  <tr>
+    <td align="center"><strong>Vocabulary collections</strong><br><img src="img/collections-dark.png" width="260" alt="Vocabulary collections with per-set progress"></td>
+    <td align="center"><strong>Flashcards</strong><br><img src="img/flashcard-dark.png" width="260" alt="Flashcard showing el ratón — tap to reveal the translation"></td>
+    <td align="center"><strong>Conjugation trainer</strong><br><img src="img/conjugation-dark.png" width="260" alt="Conjugation cards for beber, indicativo presente"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Conjugation sets</strong><br><img src="img/conjugation-collections-light.png" width="260" alt="Conjugation collections in light theme"></td>
+    <td align="center"><strong>Settings</strong><br><img src="img/settings-light.png" width="260" alt="Settings: theme, mood, tense, card order"></td>
+    <td align="center"><strong>Account sync</strong><br><img src="img/account-light.png" width="260" alt="Sign-in dialog for optional account sync"></td>
+  </tr>
+</table>
+
 ## Features
 
 - Vocabulary sets stored locally
